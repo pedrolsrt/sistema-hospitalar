@@ -1,0 +1,7 @@
+# H2 em memória no modo PostgreSQL: o build com testes roda sem nenhum banco instalado.
+# As migrations do Flyway são as mesmas da aplicação, por isso precisam ser compatíveis com os dois bancos.
+spring:
+  datasource:
+    url: jdbc:h2:mem:hospital;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1
+    username: sa
+    password:

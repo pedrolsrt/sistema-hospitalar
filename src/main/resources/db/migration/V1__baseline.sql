@@ -1,0 +1,2 @@
+-- Baseline do schema: valida a configuração do Flyway. As tabelas do domínio vêm nas próximas migrations.
+-- As migrations rodam no PostgreSQL (aplicação) e no H2 em modo PostgreSQL (testes); usar apenas SQL aceito pelos dois.
