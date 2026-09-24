@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Histórico médico | Sistema Hospitalar</title>
+	<link rel="stylesheet" href="css/estilo.css">
+	<script src="js/prototipo.js" defer></script>
+</head>
+<body>
+	<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+	<div class="layout">
+		<div class="lateral">
+			<p class="marca">
+				<svg class="marca-icone" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="8"/><path d="M13 7h6v6h6v6h-6v6h-6v-6H7v-6h6z"/></svg>
+				<span>Sistema Hospitalar <small>Gestão de atendimentos</small></span>
+			</p>
+			<nav aria-label="Menu principal">
+				<ul class="menu">
+					<li><a href="index.html"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Painel</a></li>
+					<li><a href="pacientes.html"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="9" cy="7" r="4"/><path d="M2 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>Pacientes</a></li>
+					<li><a href="profissionais.html"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 3v5a5 5 0 0 0 10 0V3"/><path d="M10 13v3a5 5 0 0 0 10 0v-3"/><circle cx="20" cy="11" r="2"/></svg>Profissionais</a></li>
+					<li><a href="consultas.html"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>Consultas</a></li>
+					<li><a href="internacoes.html"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>Internações</a></li>
+					<li><a href="quartos.html"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 21V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v17"/><path d="M3 21h18"/><path d="M15 12h.01"/></svg>Quartos</a></li>
+					<li><a href="historico.html" aria-current="page"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>Histórico médico</a></li>
+				</ul>
+			</nav>
+		</div>
+
+		<header class="topo">
+			<nav class="trilha" aria-label="Caminho da página">
+				<ol>
+					<li><a href="index.html">Início</a></li>
+					<li><span aria-current="page">Histórico médico</span></li>
+				</ol>
+			</nav>
+			<div class="topo-info">
+				<time datetime="2026-09-24">quinta-feira, 24 de setembro de 2026</time>
+				<span class="usuario"><span class="avatar" aria-hidden="true">RE</span>Recepção</span>
+			</div>
+		</header>
+
+		<main id="conteudo" tabindex="-1">
+			<div class="cabecalho-pagina">
+				<div>
+					<h1>Histórico médico</h1>
+					<p>Consultas e internações do paciente em ordem cronológica, incluindo pacientes inativos.</p>
+				</div>
+			</div>
+
+			<section class="painel" aria-labelledby="titulo-busca">
+				<h2 id="titulo-busca">Buscar paciente</h2>
+				<form class="filtros" role="search">
+					<div class="campo">
+						<label for="busca-paciente">Nome ou CPF</label>
+						<input type="search" id="busca-paciente" name="busca" list="lista-pacientes" value="Ana Beatriz Rocha" required>
+						<datalist id="lista-pacientes">
+							<option value="Ana Beatriz Rocha"></option>
+							<option value="Carlos Eduardo Menezes"></option>
+							<option value="Fernanda Lima Duarte"></option>
+							<option value="João Pedro Alves"></option>
+							<option value="Lucas Oliveira Santos"></option>
+							<option value="Mariana Costa Ferreira"></option>
+							<option value="Patrícia Gomes Ribeiro"></option>
+							<option value="Roberto Nunes Silva"></option>
+						</datalist>
+					</div>
+					<div>
+						<button type="submit" class="botao">Buscar</button>
+					</div>
+				</form>
+			</section>
+
+			<section class="painel" aria-labelledby="titulo-paciente">
+				<h2 id="titulo-paciente">Ana Beatriz Rocha</h2>
+				<dl class="dados-paciente">
+					<div>
+						<dt>CPF</dt>
+						<dd>123.456.789-09</dd>
+					</div>
+					<div>
+						<dt>Data de nascimento</dt>
+						<dd>14/05/1985 (41 anos)</dd>
+					</div>
+					<div>
+						<dt>Telefone</dt>
+						<dd>(31) 98765-4321</dd>
+					</div>
+					<div>
+						<dt>Situação</dt>
+						<dd><span class="etiqueta etiqueta-ativo">Ativo</span></dd>
+					</div>
+				</dl>
+			</section>
+
+			<section class="painel" aria-labelledby="titulo-linha">
+				<h2 id="titulo-linha">Atendimentos</h2>
+				<p class="dica">6 consultas e 1 internação, da mais antiga para a mais recente.</p>
+				<ol class="linha-tempo">
+					<li>
+						<article class="evento" aria-labelledby="evento-1">
+							<div class="evento-cabecalho">
+								<h3 id="evento-1">Consulta: check-up anual</h3>
+								<span class="etiqueta etiqueta-realizada">Realizada</span>
+							</div>
+							<dl>
+								<dt>Data</dt>
+								<dd><time datetime="2026-01-15T09:30">15/01/2026, 09:30</time></dd>
+								<dt>Profissional</dt>
+								<dd>Ricardo Souza (Clínica Médica)</dd>
+								<dt>Observações</dt>
+								<dd>Exames laboratoriais dentro da normalidade. Orientada a manter atividade física regular.</dd>
+							</dl>
+						</article>
+					</li>
+					<li>
+						<article class="evento" aria-labelledby="evento-2">
+							<div class="evento-cabecalho">
+								<h3 id="evento-2">Consulta: palpitações</h3>
+								<span class="etiqueta etiqueta-realizada">Realizada</span>
+							</div>
+							<dl>
+								<dt>Data</dt>
+								<dd><time datetime="2026-03-08T14:00">08/03/2026, 14:00</time></dd>
+								<dt>Profissional</dt>
+								<dd>Helena Martins (Cardiologia)</dd>
+								<dt>Observações</dt>
+								<dd>Eletrocardiograma com arritmia. Encaminhada para internação para monitoramento.</dd>
+							</dl>
+						</article>
+					</li>
+					<li class="evento-internacao">
+						<article class="evento" aria-labelledby="evento-3">
+							<div class="evento-cabecalho">
+								<h3 id="evento-3">Internação no quarto 103</h3>
+								<span class="etiqueta etiqueta-encerrada">Alta registrada</span>
+							</div>
+							<dl>
+								<dt>Período</dt>
+								<dd><time datetime="2026-03-10">10/03/2026</time> a <time datetime="2026-03-14">14/03/2026</time> (alta prevista para 13/03/2026)</dd>
+								<dt>Responsável</dt>
+								<dd>Helena Martins (Cardiologia)</dd>
+								<dt>Observações</dt>
+								<dd>Holter de 24 horas e ajuste de medicação. Alta adiada em um dia para concluir exames.</dd>
+							</dl>
+						</article>
+					</li>
+					<li>
+						<article class="evento" aria-labelledby="evento-4">
+							<div class="evento-cabecalho">
+								<h3 id="evento-4">Consulta: retorno pós-internação</h3>
+								<span class="etiqueta etiqueta-realizada">Realizada</span>
+							</div>
+							<dl>
+								<dt>Data</dt>
+								<dd><time datetime="2026-06-02T10:00">02/06/2026, 10:00</time></dd>
+								<dt>Profissional</dt>
+								<dd>Helena Martins (Cardiologia)</dd>
+								<dt>Observações</dt>
+								<dd>Ritmo cardíaco estável com a medicação atual. Retorno em três meses.</dd>
+							</dl>
+						</article>
+					</li>
+					<li>
+						<article class="evento" aria-labelledby="evento-5">
+							<div class="evento-cabecalho">
+								<h3 id="evento-5">Consulta: dor de cabeça frequente</h3>
+								<span class="etiqueta etiqueta-cancelada">Cancelada</span>
+							</div>
+							<dl>
+								<dt>Data</dt>
+								<dd><time datetime="2026-08-20T16:00">20/08/2026, 16:00</time></dd>
+								<dt>Profissional</dt>
+								<dd>Marcos Vieira (Neurologia)</dd>
+								<dt>Observações</dt>
+								<dd>Cancelada a pedido da paciente.</dd>
+							</dl>
+						</article>
+					</li>
+					<li>
+						<article class="evento" aria-labelledby="evento-6">
+							<div class="evento-cabecalho">
+								<h3 id="evento-6">Consulta: retorno cardiológico</h3>
+								<span class="etiqueta etiqueta-realizada">Realizada</span>
+							</div>
+							<dl>
+								<dt>Data</dt>
+								<dd><time datetime="2026-09-24T08:00">24/09/2026, 08:00</time></dd>
+								<dt>Profissional</dt>
+								<dd>Helena Martins (Cardiologia)</dd>
+								<dt>Observações</dt>
+								<dd>Sem novos episódios de palpitação. Mantida a medicação.</dd>
+							</dl>
+						</article>
+					</li>
+					<li>
+						<article class="evento" aria-labelledby="evento-7">
+							<div class="evento-cabecalho">
+								<h3 id="evento-7">Consulta: exames de rotina</h3>
+								<span class="etiqueta etiqueta-agendada">Agendada</span>
+							</div>
+							<dl>
+								<dt>Data</dt>
+								<dd><time datetime="2026-10-15T08:30">15/10/2026, 08:30</time></dd>
+								<dt>Profissional</dt>
+								<dd>Ricardo Souza (Clínica Médica)</dd>
+								<dt>Observações</dt>
+								<dd>Nenhuma observação registrada.</dd>
+							</dl>
+						</article>
+					</li>
+				</ol>
+			</section>
+		</main>
+
+		<footer class="rodape">Sistema de Informação Hospitalar · Protótipo da Sprint 1</footer>
+	</div>
+	<div id="aviso-prototipo" class="aviso" role="status" aria-live="polite"></div>
+</body>
+</html>

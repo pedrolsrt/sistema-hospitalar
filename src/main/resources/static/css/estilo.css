@@ -1,0 +1,937 @@
+/* Estilo compartilhado por todas as telas do Sistema Hospitalar. */
+
+/* ==========================================================================
+   Variáveis
+   ========================================================================== */
+
+:root {
+	/* Cores */
+	--cor-primaria: #1d5e8c;
+	--cor-primaria-escura: #154a6f;
+	--cor-primaria-clara: #e8f1f8;
+	--cor-lateral: #163a56;
+	--cor-lateral-texto: #d5e3ee;
+	--cor-lateral-destaque: #8cc4ea;
+	--cor-fundo: #f3f5f7;
+	--cor-superficie: #ffffff;
+	--cor-texto: #1f2933;
+	--cor-texto-suave: #4f5d6b;
+	--cor-texto-discreto: #8a96a3;
+	--cor-borda: #dde3e9;
+	--cor-borda-campo: #8a97a4;
+	--cor-linha-destaque: #f5f8fb;
+	--cor-foco: #2b7bb9;
+
+	--sucesso-fundo: #e3f4e8;
+	--sucesso-texto: #1b5e32;
+	--info-fundo: #e1ecf7;
+	--info-texto: #1d4f7a;
+	--alerta-fundo: #fbefd9;
+	--alerta-texto: #7a4a06;
+	--perigo-fundo: #fbe4e4;
+	--perigo-texto: #8f1d1d;
+	--neutro-fundo: #eceff2;
+	--neutro-texto: #44505c;
+
+	/* Escala de espaçamento: todo margin, padding e gap usa um destes valores. */
+	--e-1: 0.25rem;
+	--e-2: 0.5rem;
+	--e-3: 0.75rem;
+	--e-4: 1rem;
+	--e-5: 1.5rem;
+	--e-6: 2rem;
+	--e-7: 3rem;
+
+	/* Medidas */
+	--raio: 6px;
+	--sombra: 0 1px 2px rgba(15, 30, 45, 0.06);
+	--largura-lateral: 15rem;
+	--largura-conteudo: 72rem;
+	--altura-controle: 2.5rem;
+	--margem-conteudo: max(var(--e-6), calc((100% - var(--largura-conteudo)) / 2));
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	font-size: 1rem;
+	line-height: 1.5;
+	color: var(--cor-texto);
+	background: var(--cor-fundo);
+}
+
+h1,
+h2,
+h3 {
+	margin: 0 0 var(--e-2);
+	line-height: 1.25;
+}
+
+h1 {
+	font-size: 1.6rem;
+}
+
+h2 {
+	font-size: 1.15rem;
+}
+
+h3 {
+	font-size: 1rem;
+}
+
+p {
+	margin: 0 0 var(--e-3);
+}
+
+a {
+	color: var(--cor-primaria);
+}
+
+/* Datas, horários, CPFs e telefones alinham melhor com algarismos de largura fixa. */
+table,
+dl,
+time {
+	font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+	outline: 3px solid var(--cor-foco);
+	outline-offset: 2px;
+}
+
+[id] {
+	scroll-margin-top: var(--e-4);
+}
+
+.visualmente-oculto {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+.dica {
+	font-size: 0.875rem;
+	color: var(--cor-texto-suave);
+}
+
+.icone {
+	flex-shrink: 0;
+	width: 1.25rem;
+	height: 1.25rem;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 1.75;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+/* Link de atalho: aparece apenas ao receber foco pelo teclado. */
+.pular {
+	position: absolute;
+	top: calc(-1 * var(--e-7));
+	left: var(--e-4);
+	z-index: 10;
+	padding: var(--e-2) var(--e-4);
+	border-radius: var(--raio);
+	background: var(--cor-superficie);
+	color: var(--cor-primaria-escura);
+	font-weight: 600;
+}
+
+.pular:focus {
+	top: var(--e-4);
+}
+
+/* ==========================================================================
+   Estrutura da página
+   ========================================================================== */
+
+.layout {
+	display: grid;
+	grid-template-columns: var(--largura-lateral) minmax(0, 1fr);
+	grid-template-rows: auto 1fr auto;
+	min-height: 100vh;
+}
+
+main {
+	padding: var(--e-6) var(--margem-conteudo);
+}
+
+main:focus {
+	outline: none;
+}
+
+/* ==========================================================================
+   Menu lateral
+   ========================================================================== */
+
+.lateral {
+	grid-row: 1 / -1;
+	position: sticky;
+	top: 0;
+	align-self: start;
+	height: 100vh;
+	overflow-y: auto;
+	padding: var(--e-5) 0;
+	background: var(--cor-lateral);
+	color: var(--cor-lateral-texto);
+}
+
+.marca {
+	display: flex;
+	align-items: center;
+	gap: var(--e-3);
+	margin: 0 var(--e-5) var(--e-6);
+	font-weight: 700;
+	color: #ffffff;
+	line-height: 1.2;
+}
+
+.marca small {
+	display: block;
+	font-size: 0.75rem;
+	font-weight: 400;
+	color: var(--cor-lateral-texto);
+}
+
+.marca-icone {
+	flex-shrink: 0;
+	width: 2rem;
+	height: 2rem;
+}
+
+.marca-icone rect {
+	fill: #ffffff;
+}
+
+.marca-icone path {
+	fill: var(--cor-primaria);
+}
+
+.menu {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.menu a {
+	display: flex;
+	align-items: center;
+	gap: var(--e-3);
+	padding: var(--e-3) var(--e-5);
+	border-left: 4px solid transparent;
+	color: var(--cor-lateral-texto);
+	text-decoration: none;
+}
+
+.menu a:hover {
+	background: rgba(255, 255, 255, 0.08);
+	color: #ffffff;
+}
+
+.menu a[aria-current="page"] {
+	border-left-color: var(--cor-lateral-destaque);
+	background: rgba(255, 255, 255, 0.14);
+	color: #ffffff;
+	font-weight: 600;
+}
+
+.lateral :focus-visible {
+	outline-color: #ffffff;
+	outline-offset: -3px;
+}
+
+/* ==========================================================================
+   Barra superior
+   ========================================================================== */
+
+.topo {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--e-2) var(--e-5);
+	padding: var(--e-3) var(--margem-conteudo);
+	border-bottom: 1px solid var(--cor-borda);
+	background: var(--cor-superficie);
+	font-size: 0.875rem;
+}
+
+.trilha ol {
+	display: flex;
+	flex-wrap: wrap;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.trilha li + li::before {
+	content: "/";
+	margin: 0 var(--e-2);
+	color: var(--cor-texto-discreto);
+}
+
+.trilha a {
+	color: var(--cor-texto-suave);
+	text-decoration: none;
+}
+
+.trilha a:hover {
+	color: var(--cor-primaria);
+	text-decoration: underline;
+}
+
+.trilha [aria-current="page"] {
+	color: var(--cor-texto);
+	font-weight: 600;
+}
+
+.topo-info {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--e-2) var(--e-5);
+	color: var(--cor-texto-suave);
+}
+
+.usuario {
+	display: flex;
+	align-items: center;
+	gap: var(--e-2);
+	color: var(--cor-texto);
+	font-weight: 600;
+}
+
+.avatar {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2rem;
+	height: 2rem;
+	border-radius: 50%;
+	background: var(--cor-primaria-clara);
+	color: var(--cor-primaria-escura);
+	font-size: 0.75rem;
+	font-weight: 700;
+}
+
+/* ==========================================================================
+   Cabeçalho da página
+   ========================================================================== */
+
+.cabecalho-pagina {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: var(--e-4);
+	margin-bottom: var(--e-5);
+}
+
+.cabecalho-pagina p {
+	margin: 0;
+	color: var(--cor-texto-suave);
+}
+
+/* ==========================================================================
+   Painéis
+   ========================================================================== */
+
+.painel,
+.indicador {
+	padding: var(--e-5);
+	border: 1px solid var(--cor-borda);
+	border-radius: var(--raio);
+	background: var(--cor-superficie);
+	box-shadow: var(--sombra);
+}
+
+.painel {
+	margin-bottom: var(--e-5);
+}
+
+.painel > h2 {
+	margin-bottom: var(--e-4);
+}
+
+/* ==========================================================================
+   Painel inicial
+   ========================================================================== */
+
+.indicadores {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: var(--e-4);
+	margin-bottom: var(--e-5);
+}
+
+.indicador {
+	display: flex;
+	flex-direction: column;
+}
+
+.indicador h2 {
+	margin: 0;
+	font-size: 1rem;
+}
+
+/* O rótulo vem antes no HTML para leitores de tela, mas o número aparece primeiro na tela. */
+.indicador-valor {
+	order: -1;
+	margin: 0;
+	font-size: 2.5rem;
+	font-weight: 700;
+	line-height: 1.1;
+	color: var(--cor-primaria-escura);
+	font-variant-numeric: tabular-nums;
+}
+
+.indicador .dica {
+	margin: var(--e-1) 0 var(--e-4);
+}
+
+.indicador-link {
+	margin-top: auto;
+	font-size: 0.875rem;
+	font-weight: 600;
+}
+
+.atalhos {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: var(--e-3);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.atalhos a {
+	display: block;
+	height: 100%;
+	padding: var(--e-4);
+	border: 1px solid var(--cor-borda);
+	border-radius: var(--raio);
+	color: var(--cor-texto);
+	text-decoration: none;
+}
+
+.atalhos a:hover {
+	border-color: var(--cor-primaria);
+	background: var(--cor-primaria-clara);
+}
+
+.atalhos strong {
+	display: block;
+	color: var(--cor-primaria-escura);
+}
+
+.atalhos span {
+	font-size: 0.875rem;
+	color: var(--cor-texto-suave);
+}
+
+/* ==========================================================================
+   Tabelas
+   ========================================================================== */
+
+/* Datas, documentos, telefones e ações nunca quebram linha. Só as colunas de texto
+   quebram, com largura mínima; quando nem assim cabe, a tabela rola na horizontal. */
+.tabela-rolagem {
+	overflow-x: auto;
+}
+
+.tabela-rolagem td {
+	white-space: nowrap;
+}
+
+.tabela-rolagem td.quebra {
+	min-width: 8rem;
+	white-space: normal;
+}
+
+.tabela-rolagem td.texto-longo {
+	min-width: 16rem;
+	white-space: normal;
+}
+
+table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.9375rem;
+}
+
+caption {
+	padding-bottom: var(--e-2);
+	text-align: left;
+	font-weight: 600;
+}
+
+th,
+td {
+	padding: var(--e-3);
+	border-bottom: 1px solid var(--cor-borda);
+	text-align: left;
+	vertical-align: middle;
+}
+
+thead th {
+	border-bottom-color: var(--cor-borda-campo);
+	font-size: 0.8125rem;
+	font-weight: 600;
+	color: var(--cor-texto-suave);
+	white-space: nowrap;
+}
+
+tbody tr:hover {
+	background: var(--cor-linha-destaque);
+}
+
+tbody tr:last-child td {
+	border-bottom: 0;
+}
+
+tr.inativo td {
+	color: var(--cor-texto-suave);
+}
+
+.acoes {
+	display: flex;
+		gap: var(--e-2);
+}
+
+.sem-acao {
+	color: var(--cor-texto-discreto);
+}
+
+/* ==========================================================================
+   Etiquetas de status
+   ========================================================================== */
+
+.etiqueta {
+	display: inline-block;
+	padding: 0 var(--e-2);
+	border-radius: 999px;
+	font-size: 0.8125rem;
+	font-weight: 600;
+	line-height: 1.6;
+	white-space: nowrap;
+}
+
+.etiqueta-agendada {
+	background: var(--info-fundo);
+	color: var(--info-texto);
+}
+
+.etiqueta-realizada,
+.etiqueta-disponivel,
+.etiqueta-ativo {
+	background: var(--sucesso-fundo);
+	color: var(--sucesso-texto);
+}
+
+.etiqueta-cancelada {
+	background: var(--perigo-fundo);
+	color: var(--perigo-texto);
+}
+
+.etiqueta-ocupado {
+	background: var(--alerta-fundo);
+	color: var(--alerta-texto);
+}
+
+.etiqueta-inativo,
+.etiqueta-encerrada {
+	background: var(--neutro-fundo);
+	color: var(--neutro-texto);
+}
+
+/* ==========================================================================
+   Formulários
+   ========================================================================== */
+
+.grade-form {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: var(--e-4) var(--e-5);
+}
+
+.campo {
+	display: flex;
+	flex-direction: column;
+	gap: var(--e-1);
+}
+
+.campo-largo {
+	grid-column: 1 / -1;
+}
+
+label {
+	font-size: 0.875rem;
+	font-weight: 600;
+}
+
+.obrigatorio {
+	color: var(--cor-primaria);
+	font-weight: 700;
+}
+
+input,
+select,
+textarea {
+	width: 100%;
+	padding: var(--e-2) var(--e-3);
+	border: 1px solid var(--cor-borda-campo);
+	border-radius: var(--raio);
+	background: var(--cor-superficie);
+	color: var(--cor-texto);
+	font: inherit;
+}
+
+input,
+select {
+	height: var(--altura-controle);
+}
+
+textarea {
+	min-height: 6rem;
+	resize: vertical;
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+	border-color: var(--cor-foco);
+	outline-offset: 0;
+}
+
+fieldset {
+	margin: var(--e-5) 0 0;
+	padding: var(--e-4) var(--e-5) var(--e-5);
+	border: 1px solid var(--cor-borda);
+	border-radius: var(--raio);
+}
+
+legend {
+	padding: 0 var(--e-2);
+	font-weight: 600;
+}
+
+.acoes-form {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: var(--e-3);
+	margin-top: var(--e-5);
+	padding-top: var(--e-4);
+	border-top: 1px solid var(--cor-borda);
+}
+
+/* Campos e botão na mesma linha, alinhados pela base. */
+.filtros {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: var(--e-4);
+}
+
+.filtros .campo {
+	flex: 1 1 14rem;
+}
+
+/* ==========================================================================
+   Botões
+   ========================================================================== */
+
+.botao {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--e-2);
+	height: var(--altura-controle);
+	padding: 0 var(--e-4);
+	border: 1px solid var(--cor-primaria);
+	border-radius: var(--raio);
+	background: var(--cor-primaria);
+	color: #ffffff;
+	font: inherit;
+	font-size: 0.9375rem;
+	font-weight: 600;
+	text-decoration: none;
+	white-space: nowrap;
+	cursor: pointer;
+}
+
+.botao:hover {
+	border-color: var(--cor-primaria-escura);
+	background: var(--cor-primaria-escura);
+}
+
+.botao-secundario {
+	border-color: var(--cor-borda-campo);
+	background: var(--cor-superficie);
+	color: var(--cor-primaria-escura);
+}
+
+.botao-secundario:hover {
+	border-color: var(--cor-primaria);
+	background: var(--cor-primaria-clara);
+}
+
+.botao-perigo {
+	border-color: #c98a8a;
+	background: var(--cor-superficie);
+	color: var(--perigo-texto);
+}
+
+.botao-perigo:hover {
+	border-color: var(--perigo-texto);
+	background: var(--perigo-fundo);
+}
+
+.botao-pequeno {
+	height: 2rem;
+	padding: 0 var(--e-3);
+	font-size: 0.8125rem;
+}
+
+/* ==========================================================================
+   Histórico médico
+   ========================================================================== */
+
+.dados-paciente {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: var(--e-3) var(--e-5);
+	margin: 0;
+}
+
+.dados-paciente dt {
+	font-size: 0.8125rem;
+	color: var(--cor-texto-suave);
+}
+
+.dados-paciente dd {
+	margin: 0;
+	font-weight: 600;
+}
+
+.linha-tempo {
+	margin: 0;
+	padding: 0 0 0 var(--e-5);
+	border-left: 2px solid var(--cor-borda);
+	list-style: none;
+}
+
+.linha-tempo > li {
+	position: relative;
+	margin-bottom: var(--e-4);
+}
+
+.linha-tempo > li::before {
+	content: "";
+	position: absolute;
+	top: var(--e-5);
+	left: calc(-1 * var(--e-5) - 7px);
+	width: 12px;
+	height: 12px;
+	border: 3px solid var(--cor-primaria);
+	border-radius: 50%;
+	background: var(--cor-superficie);
+}
+
+.linha-tempo > li.evento-internacao::before {
+	border-color: var(--alerta-texto);
+}
+
+.evento {
+	padding: var(--e-4) var(--e-5);
+	border: 1px solid var(--cor-borda);
+	border-radius: var(--raio);
+}
+
+.evento-cabecalho {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--e-2);
+	margin-bottom: var(--e-3);
+}
+
+.evento-cabecalho h3 {
+	margin: 0;
+}
+
+.evento dl {
+	display: grid;
+	grid-template-columns: max-content 1fr;
+	gap: var(--e-1) var(--e-4);
+	margin: 0;
+	font-size: 0.9375rem;
+}
+
+.evento dt {
+	color: var(--cor-texto-suave);
+}
+
+.evento dd {
+	margin: 0;
+}
+
+/* ==========================================================================
+   Rodapé
+   ========================================================================== */
+
+.rodape {
+	padding: var(--e-4) var(--margem-conteudo);
+	border-top: 1px solid var(--cor-borda);
+	color: var(--cor-texto-suave);
+	font-size: 0.8125rem;
+}
+
+/* ==========================================================================
+   Aviso de protótipo
+   ========================================================================== */
+
+/* Fica sempre no DOM para que leitores de tela anunciem a mudança do texto. */
+.aviso {
+	position: fixed;
+	right: var(--e-5);
+	bottom: var(--e-5);
+	max-width: 22rem;
+	padding: var(--e-3) var(--e-4);
+	border-left: 4px solid var(--cor-lateral-destaque);
+	border-radius: var(--raio);
+	background: var(--cor-lateral);
+	color: #ffffff;
+	box-shadow: 0 4px 12px rgba(15, 30, 45, 0.25);
+	visibility: hidden;
+	opacity: 0;
+	transition: opacity 0.2s ease;
+}
+
+.aviso.visivel {
+	visibility: visible;
+	opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.aviso {
+		transition: none;
+	}
+}
+
+/* ==========================================================================
+   Telas médias
+   ========================================================================== */
+
+@media (max-width: 1100px) {
+	.grade-form,
+	.atalhos,
+	.dados-paciente {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+/* ==========================================================================
+   Celular: o menu lateral vira uma barra no topo
+   ========================================================================== */
+
+@media (max-width: 800px) {
+	:root {
+		--margem-conteudo: var(--e-4);
+	}
+
+	.layout {
+		grid-template-columns: minmax(0, 1fr);
+		grid-template-rows: auto;
+	}
+
+	.lateral {
+		grid-row: auto;
+		position: static;
+		height: auto;
+		padding: var(--e-4) 0 var(--e-2);
+	}
+
+	.marca {
+		margin: 0 var(--e-4) var(--e-3);
+	}
+
+	.menu {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--e-1);
+		padding: 0 var(--e-3);
+	}
+
+	.menu a {
+		padding: var(--e-2) var(--e-3);
+		border-left: 0;
+		border-bottom: 3px solid transparent;
+		border-radius: var(--raio) var(--raio) 0 0;
+	}
+
+	.menu a[aria-current="page"] {
+		border-bottom-color: var(--cor-lateral-destaque);
+	}
+
+	main {
+		padding-top: var(--e-5);
+		padding-bottom: var(--e-5);
+	}
+
+	h1 {
+		font-size: 1.35rem;
+	}
+
+	.painel {
+		padding: var(--e-4);
+	}
+
+	.indicadores,
+	.atalhos,
+	.grade-form {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+
+	fieldset {
+		padding: var(--e-3) var(--e-4) var(--e-4);
+	}
+
+	.acoes-form .botao {
+		flex: 1 1 auto;
+	}
+
+	.evento dl {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.evento dd {
+		margin-bottom: var(--e-2);
+	}
+
+	.aviso {
+		right: var(--e-4);
+		bottom: var(--e-4);
+		left: var(--e-4);
+		max-width: none;
+	}
+}

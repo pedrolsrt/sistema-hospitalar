@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Profissionais | Sistema Hospitalar</title>
+	<link rel="stylesheet" href="css/estilo.css">
+	<script src="js/prototipo.js" defer></script>
+</head>
+<body>
+	<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+	<div class="layout">
+		<div class="lateral">
+			<p class="marca">
+				<svg class="marca-icone" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="8"/><path d="M13 7h6v6h6v6h-6v6h-6v-6H7v-6h6z"/></svg>
+				<span>Sistema Hospitalar <small>Gestão de atendimentos</small></span>
+			</p>
+			<nav aria-label="Menu principal">
+				<ul class="menu">
+					<li><a href="index.html"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Painel</a></li>
+					<li><a href="pacientes.html"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="9" cy="7" r="4"/><path d="M2 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>Pacientes</a></li>
+					<li><a href="profissionais.html" aria-current="page"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 3v5a5 5 0 0 0 10 0V3"/><path d="M10 13v3a5 5 0 0 0 10 0v-3"/><circle cx="20" cy="11" r="2"/></svg>Profissionais</a></li>
+					<li><a href="consultas.html"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>Consultas</a></li>
+					<li><a href="internacoes.html"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>Internações</a></li>
+					<li><a href="quartos.html"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 21V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v17"/><path d="M3 21h18"/><path d="M15 12h.01"/></svg>Quartos</a></li>
+					<li><a href="historico.html"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>Histórico médico</a></li>
+				</ul>
+			</nav>
+		</div>
+
+		<header class="topo">
+			<nav class="trilha" aria-label="Caminho da página">
+				<ol>
+					<li><a href="index.html">Início</a></li>
+					<li><span aria-current="page">Profissionais</span></li>
+				</ol>
+			</nav>
+			<div class="topo-info">
+				<time datetime="2026-09-24">quinta-feira, 24 de setembro de 2026</time>
+				<span class="usuario"><span class="avatar" aria-hidden="true">RE</span>Recepção</span>
+			</div>
+		</header>
+
+		<main id="conteudo" tabindex="-1">
+			<div class="cabecalho-pagina">
+				<div>
+					<h1>Profissionais de saúde</h1>
+					<p>Profissionais inativados não podem receber novas consultas, mas seus atendimentos continuam no histórico.</p>
+				</div>
+				<a class="botao" href="#cadastro"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v14"/><path d="M5 12h14"/></svg>Novo profissional</a>
+			</div>
+
+			<section class="painel" aria-labelledby="titulo-lista">
+				<h2 id="titulo-lista">Profissionais cadastrados</h2>
+				<div class="tabela-rolagem">
+					<table>
+						<caption class="visualmente-oculto">Lista de profissionais de saúde</caption>
+						<thead>
+							<tr>
+								<th scope="col">Nome</th>
+								<th scope="col">Registro profissional</th>
+								<th scope="col">Especialidade</th>
+								<th scope="col">Contato</th>
+								<th scope="col">Situação</th>
+								<th scope="col">Ações</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td class="quebra">Helena Martins</td>
+								<td>CRM-MG 45123</td>
+								<td class="quebra">Cardiologia</td>
+								<td class="quebra">(31) 3409-1101<br><span class="dica">helena.martins@<wbr>hospital.exemplo.com.br</span></td>
+								<td><span class="etiqueta etiqueta-ativo">Ativo</span></td>
+								<td>
+									<div class="acoes">
+										<button type="button" class="botao botao-secundario botao-pequeno" data-prototipo aria-label="Editar Helena Martins">Editar</button>
+										<button type="button" class="botao botao-perigo botao-pequeno" data-prototipo aria-label="Inativar Helena Martins">Inativar</button>
+									</div>
+								</td>
+							</tr>
+							<tr>
+								<td class="quebra">Ricardo Souza</td>
+								<td>CRM-MG 38907</td>
+								<td class="quebra">Clínica Médica</td>
+								<td class="quebra">(31) 3409-1102<br><span class="dica">ricardo.souza@<wbr>hospital.exemplo.com.br</span></td>
+								<td><span class="etiqueta etiqueta-ativo">Ativo</span></td>
+								<td>
+									<div class="acoes">
+										<button type="button" class="botao botao-secundario botao-pequeno" data-prototipo aria-label="Editar Ricardo Souza">Editar</button>
+										<button type="button" class="botao botao-perigo botao-pequeno" data-prototipo aria-label="Inativar Ricardo Souza">Inativar</button>
+									</div>
+								</td>
+							</tr>
+							<tr>
+								<td class="quebra">Paula Andrade</td>
+								<td>CRM-MG 52340</td>
+								<td class="quebra">Ortopedia</td>
+								<td class="quebra">(31) 3409-1103<br><span class="dica">paula.andrade@<wbr>hospital.exemplo.com.br</span></td>
+								<td><span class="etiqueta etiqueta-ativo">Ativo</span></td>
+								<td>
+									<div class="acoes">
+										<button type="button" class="botao botao-secundario botao-pequeno" data-prototipo aria-label="Editar Paula Andrade">Editar</button>
+										<button type="button" class="botao botao-perigo botao-pequeno" data-prototipo aria-label="Inativar Paula Andrade">Inativar</button>
+									</div>
+								</td>
+							</tr>
+							<tr>
+								<td class="quebra">Marcos Vieira</td>
+								<td>CRM-MG 41876</td>
+								<td class="quebra">Neurologia</td>
+								<td class="quebra">(31) 3409-1104<br><span class="dica">marcos.vieira@<wbr>hospital.exemplo.com.br</span></td>
+								<td><span class="etiqueta etiqueta-ativo">Ativo</span></td>
+								<td>
+									<div class="acoes">
+										<button type="button" class="botao botao-secundario botao-pequeno" data-prototipo aria-label="Editar Marcos Vieira">Editar</button>
+										<button type="button" class="botao botao-perigo botao-pequeno" data-prototipo aria-label="Inativar Marcos Vieira">Inativar</button>
+									</div>
+								</td>
+							</tr>
+							<tr>
+								<td class="quebra">Juliana Castro</td>
+								<td>COREN-MG 234567</td>
+								<td class="quebra">Enfermagem</td>
+								<td class="quebra">(31) 3409-1105<br><span class="dica">juliana.castro@<wbr>hospital.exemplo.com.br</span></td>
+								<td><span class="etiqueta etiqueta-ativo">Ativo</span></td>
+								<td>
+									<div class="acoes">
+										<button type="button" class="botao botao-secundario botao-pequeno" data-prototipo aria-label="Editar Juliana Castro">Editar</button>
+										<button type="button" class="botao botao-perigo botao-pequeno" data-prototipo aria-label="Inativar Juliana Castro">Inativar</button>
+									</div>
+								</td>
+							</tr>
+							<tr class="inativo">
+								<td class="quebra">Antônio Reis</td>
+								<td>CRM-MG 29554</td>
+								<td class="quebra">Dermatologia</td>
+								<td class="quebra">(31) 3409-1106<br><span class="dica">antonio.reis@<wbr>hospital.exemplo.com.br</span></td>
+								<td><span class="etiqueta etiqueta-inativo">Inativo</span></td>
+								<td>
+									<div class="acoes">
+										<button type="button" class="botao botao-secundario botao-pequeno" data-prototipo aria-label="Editar Antônio Reis">Editar</button>
+									</div>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</section>
+
+			<section class="painel" id="cadastro" aria-labelledby="titulo-cadastro">
+				<h2 id="titulo-cadastro">Cadastrar profissional</h2>
+				<p class="dica">Campos marcados com <span class="obrigatorio" aria-hidden="true">*</span> são obrigatórios.</p>
+				<form>
+					<div class="grade-form">
+						<div class="campo campo-largo">
+							<label for="nome">Nome completo <span class="obrigatorio" aria-hidden="true">*</span></label>
+							<input type="text" id="nome" name="nome" autocomplete="name" required maxlength="150">
+						</div>
+						<div class="campo">
+							<label for="registro">Registro profissional <span class="obrigatorio" aria-hidden="true">*</span></label>
+							<input type="text" id="registro" name="registroProfissional" placeholder="CRM-MG 00000" aria-describedby="ajuda-registro" required>
+							<small id="ajuda-registro" class="dica">CRM, COREN ou outro conselho, com a UF.</small>
+						</div>
+						<div class="campo">
+							<label for="especialidade">Especialidade <span class="obrigatorio" aria-hidden="true">*</span></label>
+							<input type="text" id="especialidade" name="especialidade" list="especialidades" required>
+							<datalist id="especialidades">
+								<option value="Cardiologia"></option>
+								<option value="Clínica Médica"></option>
+								<option value="Dermatologia"></option>
+								<option value="Enfermagem"></option>
+								<option value="Neurologia"></option>
+								<option value="Ortopedia"></option>
+								<option value="Pediatria"></option>
+							</datalist>
+						</div>
+						<div class="campo">
+							<label for="telefone">Telefone</label>
+							<input type="tel" id="telefone" name="telefone" autocomplete="tel" placeholder="(31) 0000-0000">
+						</div>
+						<div class="campo">
+							<label for="email">E-mail</label>
+							<input type="email" id="email" name="email" autocomplete="email">
+						</div>
+					</div>
+					<div class="acoes-form">
+						<button type="reset" class="botao botao-secundario">Limpar</button>
+						<button type="submit" class="botao">Salvar profissional</button>
+					</div>
+				</form>
+			</section>
+		</main>
+
+		<footer class="rodape">Sistema de Informação Hospitalar · Protótipo da Sprint 1</footer>
+	</div>
+	<div id="aviso-prototipo" class="aviso" role="status" aria-live="polite"></div>
+</body>
+</html>
