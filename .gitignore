@@ -41,7 +41,3 @@ Thumbs.db
 
 # Variáveis de ambiente locais
 .env
-
-# Claude Code
-.claude/
-CLAUDE.md

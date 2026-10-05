@@ -453,6 +453,7 @@ main:focus {
 /* Datas, documentos, telefones e ações nunca quebram linha. Só as colunas de texto
    quebram, com largura mínima; quando nem assim cabe, a tabela rola na horizontal. */
 .tabela-rolagem {
+	position: relative;
 	overflow-x: auto;
 }
 
@@ -729,6 +730,10 @@ legend {
 .dados-paciente dd {
 	margin: 0;
 	font-weight: 600;
+}
+
+.dados-paciente .dado-largo {
+	grid-column: span 2;
 }
 
 .linha-tempo {

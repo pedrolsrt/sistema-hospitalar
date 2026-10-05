@@ -1,10 +1,43 @@
 # Sistema de Informação Hospitalar
 
-API REST para gestão hospitalar: pacientes, profissionais de saúde, consultas, internações,
-quartos e histórico médico. Trabalho prático da disciplina de Programação Modular (PUC Minas).
+Sistema web para gestão hospitalar: pacientes, profissionais de saúde, consultas, internações,
+quartos e histórico médico. O back-end é uma API REST e o front-end é composto por páginas
+estáticas servidas pela própria aplicação. Trabalho prático da disciplina de Programação
+Modular (PUC Minas).
+
+## Sprint 1
+
+Entregas da Sprint 1: protótipo navegável do front-end (telas sem funcionalidade), diagrama de
+classes e cartões CRC.
+
+### Telas do protótipo
+
+As telas ficam em `src/main/resources/static/`. Os formulários e botões de ação ainda não
+enviam dados; ao usá-los, o protótipo mostra um aviso.
+
+| Tela | Arquivo | Conteúdo |
+|------|---------|----------|
+| Painel | `index.html` | Resumo do dia, próximas consultas e atalhos |
+| Pacientes | `pacientes.html` | Listagem e cadastro de pacientes |
+| Profissionais | `profissionais.html` | Listagem e cadastro de profissionais de saúde |
+| Consultas | `consultas.html` | Agenda por profissional e data, agendamento de consultas |
+| Internações | `internacoes.html` | Internações em andamento, nova internação e registro de alta |
+| Quartos | `quartos.html` | Ocupação, situação e cadastro de quartos |
+| Histórico médico | `historico.html` | Consultas e internações de um paciente em ordem cronológica |
+
+Com a aplicação rodando, o protótipo abre em `http://localhost:8080`. Também é possível abrir
+os arquivos HTML diretamente no navegador, sem subir a aplicação.
+
+### Documentação de modelagem
+
+- [Diagrama de classes](docs/diagrama-de-classes.png)
+- [Cartões CRC](docs/cartoes-crc.pdf)
+
+![Diagrama de classes](docs/diagrama-de-classes.png)
 
 ## Stack
 
+- HTML, CSS e JavaScript no front-end, sem frameworks
 - Java 21 e Spring Boot 4 (Web MVC, Data JPA, Validation)
 - PostgreSQL 17 instalado localmente
 - Flyway para migrations (schema validado pelo Hibernate com `ddl-auto=validate`)
