@@ -14,4 +14,9 @@ public class ClinicoGeral extends ProfissionalSaude {
 		super(nome, registroProfissional);
 	}
 
+	@Override
+	public CategoriaProfissional getCategoria() {
+		return CategoriaProfissional.CLINICO_GERAL;
+	}
+
 }

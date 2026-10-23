@@ -28,6 +28,16 @@ public class Cirurgiao extends ProfissionalSaude {
 	}
 
 	@Override
+	public CategoriaProfissional getCategoria() {
+		return CategoriaProfissional.CIRURGIAO;
+	}
+
+	@Override
+	public AreaAtuacao getArea() {
+		return areaCirurgica;
+	}
+
+	@Override
 	public boolean atendeArea(AreaAtuacao area) {
 		return areaCirurgica == area;
 	}

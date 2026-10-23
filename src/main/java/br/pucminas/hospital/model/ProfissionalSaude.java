@@ -31,6 +31,15 @@ public abstract class ProfissionalSaude extends Pessoa {
 		this.registroProfissional = registroProfissional;
 	}
 
+	public abstract CategoriaProfissional getCategoria();
+
+	/**
+	 * Área em que o profissional atua (de atuação ou cirúrgica), ou null se a categoria não tem área.
+	 */
+	public AreaAtuacao getArea() {
+		return null;
+	}
+
 	/**
 	 * Indica se o profissional atua na área informada. Por padrão, nenhuma.
 	 */

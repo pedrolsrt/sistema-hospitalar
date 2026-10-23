@@ -143,19 +143,33 @@ class QuartoTest {
 	}
 
 	@Test
-	void alteraTipoQuandoComportaACapacidade() {
-		Quarto quarto = new Quarto("101", 1, TipoQuarto.ENFERMARIA, 1);
+	void alteraTipoECapacidadeJuntos() {
+		Quarto quarto = new Quarto("101", 1, TipoQuarto.APARTAMENTO, 2);
 
-		quarto.setTipo(TipoQuarto.UTI);
+		quarto.alterarTipoECapacidade(TipoQuarto.ENFERMARIA, 5);
 
-		assertThat(quarto.getTipo()).isEqualTo(TipoQuarto.UTI);
+		assertThat(quarto.getTipo()).isEqualTo(TipoQuarto.ENFERMARIA);
+		assertThat(quarto.getCapacidadeMaxima()).isEqualTo(5);
 	}
 
 	@Test
-	void naoAlteraTipoQueNaoComportaACapacidade() {
+	void naoAlteraParaCapacidadeAcimaDoLimiteDoNovoTipo() {
 		Quarto quarto = new Quarto("101", 1, TipoQuarto.ENFERMARIA, 4);
 
-		assertThatThrownBy(() -> quarto.setTipo(TipoQuarto.APARTAMENTO)).isInstanceOf(RegraNegocioException.class);
+		assertThatThrownBy(() -> quarto.alterarTipoECapacidade(TipoQuarto.APARTAMENTO, 4))
+				.isInstanceOf(RegraNegocioException.class);
+		assertThat(quarto.getTipo()).isEqualTo(TipoQuarto.ENFERMARIA);
+		assertThat(quarto.getCapacidadeMaxima()).isEqualTo(4);
+	}
+
+	@Test
+	void naoAlteraParaCapacidadeAbaixoDaOcupacao() {
+		Quarto quarto = new Quarto("101", 1, TipoQuarto.ENFERMARIA, 4);
+		quarto.ocupar();
+		quarto.ocupar();
+
+		assertThatThrownBy(() -> quarto.alterarTipoECapacidade(TipoQuarto.UTI, 1))
+				.isInstanceOf(RegraNegocioException.class);
 		assertThat(quarto.getTipo()).isEqualTo(TipoQuarto.ENFERMARIA);
 	}
 

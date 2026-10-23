@@ -135,4 +135,23 @@ class ProfissionalSaudeTest {
 		assertThat(area.getDescricao()).isNotBlank();
 	}
 
+	@ParameterizedTest
+	@EnumSource(CategoriaProfissional.class)
+	void fabricaCriaProfissionalDaCategoria(CategoriaProfissional categoria) {
+		ProfissionalSaude profissional = categoria.criar("Dra. Ana Lima", "CRM-MG 11111", AreaAtuacao.PEDIATRIA);
+
+		assertThat(profissional.getCategoria()).isEqualTo(categoria);
+		assertThat(profissional.getNome()).isEqualTo("Dra. Ana Lima");
+		assertThat(profissional.getRegistroProfissional()).isEqualTo("CRM-MG 11111");
+		assertThat(profissional.getArea()).isEqualTo(categoria.exigeArea() ? AreaAtuacao.PEDIATRIA : null);
+	}
+
+	@Test
+	void fabricaRepassaAFaltaDeAreaParaAValidacaoDoDominio() {
+		assertThatThrownBy(() -> CategoriaProfissional.MEDICO_ESPECIALISTA.criar("Dr. João", "CRM-MG 2", null))
+				.isInstanceOf(RegraNegocioException.class);
+		assertThatThrownBy(() -> CategoriaProfissional.CIRURGIAO.criar("Dra. Carla", "CRM-MG 3", null))
+				.isInstanceOf(RegraNegocioException.class);
+	}
+
 }

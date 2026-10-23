@@ -135,11 +135,18 @@ public class Quarto {
 	}
 
 	/**
-	 * Altera o tipo, que precisa comportar a capacidade atual do quarto.
+	 * Altera tipo e capacidade juntos, porque cada um limita o outro: alterá-los em separado poderia
+	 * passar por uma combinação intermediária inválida (por exemplo, de apartamento com 2 leitos para
+	 * enfermaria com 5).
+	 *
+	 * @throws RegraNegocioException se a capacidade não for positiva, ultrapassar o limite do tipo ou
+	 *         ficar abaixo da ocupação atual
 	 */
-	public void setTipo(TipoQuarto tipo) {
+	public void alterarTipoECapacidade(TipoQuarto tipo, int capacidadeMaxima) {
 		validarTipo(tipo, capacidadeMaxima);
+		validarCapacidade(capacidadeMaxima, ocupacaoAtual);
 		this.tipo = tipo;
+		this.capacidadeMaxima = capacidadeMaxima;
 	}
 
 	public int getCapacidadeMaxima() {

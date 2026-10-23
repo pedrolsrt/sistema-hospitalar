@@ -28,6 +28,16 @@ public class MedicoEspecialista extends ProfissionalSaude {
 	}
 
 	@Override
+	public CategoriaProfissional getCategoria() {
+		return CategoriaProfissional.MEDICO_ESPECIALISTA;
+	}
+
+	@Override
+	public AreaAtuacao getArea() {
+		return areaAtuacao;
+	}
+
+	@Override
 	public boolean atendeArea(AreaAtuacao area) {
 		return areaAtuacao == area;
 	}

@@ -80,4 +80,11 @@ class InternacaoRepositoryTest {
 		assertThat(repository.existsByQuartoIdAndDataEfetivaAltaIsNull(apartamentoVazio.getId())).isFalse();
 	}
 
+	@Test
+	void verificaQuartoComQualquerInternacao() {
+		assertThat(repository.existsByQuartoId(enfermaria.getId())).isTrue();
+		assertThat(repository.existsByQuartoId(apartamentoComAlta.getId())).isTrue();
+		assertThat(repository.existsByQuartoId(apartamentoVazio.getId())).isFalse();
+	}
+
 }

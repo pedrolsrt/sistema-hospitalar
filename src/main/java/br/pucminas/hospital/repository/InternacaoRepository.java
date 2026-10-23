@@ -14,4 +14,6 @@ public interface InternacaoRepository extends JpaRepository<Internacao, Long> {
 
 	boolean existsByQuartoIdAndDataEfetivaAltaIsNull(Long quartoId);
 
+	boolean existsByQuartoId(Long quartoId);
+
 }
