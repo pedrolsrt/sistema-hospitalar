@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Entity
@@ -87,6 +88,11 @@ public class Internacao extends Atendimento {
 			throw new DataInvalidaException("A data de alta " + tipoAlta + " (" + FORMATO_DATA.format(dataAlta)
 					+ ") não pode ser anterior à data de entrada (" + FORMATO_DATA.format(dataEntrada) + ").");
 		}
+	}
+
+	@Override
+	public LocalDateTime getDataHoraReferencia() {
+		return dataEntrada.atStartOfDay();
 	}
 
 	public Quarto getQuarto() {

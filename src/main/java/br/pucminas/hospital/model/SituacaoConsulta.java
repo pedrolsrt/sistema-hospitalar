@@ -37,6 +37,19 @@ public enum SituacaoConsulta implements SituacaoAtendimento<SituacaoConsulta> {
 		};
 	}
 
+	/**
+	 * Situações que ocupam o horário do profissional e do paciente.
+	 */
+	public static Set<SituacaoConsulta> ativas() {
+		EnumSet<SituacaoConsulta> ativas = EnumSet.noneOf(SituacaoConsulta.class);
+		for (SituacaoConsulta situacao : values()) {
+			if (situacao.isAtiva()) {
+				ativas.add(situacao);
+			}
+		}
+		return ativas;
+	}
+
 	public boolean isAtiva() {
 		return ativa;
 	}

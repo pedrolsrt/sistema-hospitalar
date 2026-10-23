@@ -93,6 +93,11 @@ public class AtendimentoEmergencia extends Atendimento {
 		}
 	}
 
+	@Override
+	public LocalDateTime getDataHoraReferencia() {
+		return dataHoraChegada;
+	}
+
 	public PrioridadeEmergencia getPrioridade() {
 		return prioridade;
 	}

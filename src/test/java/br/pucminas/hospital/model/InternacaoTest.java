@@ -22,7 +22,7 @@ class InternacaoTest {
 
 	@Test
 	void novaInternacaoEstaAtivaEOcupaVagaDoQuarto() {
-		Quarto quarto = new Quarto("201", 2, 2);
+		Quarto quarto = new Quarto("201", 2, TipoQuarto.ENFERMARIA, 2);
 
 		Internacao internacao = internar(quarto);
 
@@ -33,7 +33,7 @@ class InternacaoTest {
 
 	@Test
 	void naoInternaEmQuartoSemVaga() {
-		Quarto quarto = new Quarto("201", 2, 1);
+		Quarto quarto = new Quarto("201", 2, TipoQuarto.ENFERMARIA, 1);
 		quarto.ocupar();
 
 		assertThatThrownBy(() -> internar(quarto)).isInstanceOf(QuartoSemVagaException.class);
@@ -42,7 +42,7 @@ class InternacaoTest {
 
 	@Test
 	void naoInternaComAltaPrevistaAnteriorAEntradaENaoOcupaVaga() {
-		Quarto quarto = new Quarto("201", 2, 1);
+		Quarto quarto = new Quarto("201", 2, TipoQuarto.ENFERMARIA, 1);
 
 		assertThatThrownBy(() -> new Internacao(paciente, medico, quarto, ENTRADA, ENTRADA.minusDays(1)))
 				.isInstanceOf(DataInvalidaException.class)
@@ -52,7 +52,7 @@ class InternacaoTest {
 
 	@Test
 	void naoInternaPacienteInativoENaoOcupaVaga() {
-		Quarto quarto = new Quarto("201", 2, 1);
+		Quarto quarto = new Quarto("201", 2, TipoQuarto.ENFERMARIA, 1);
 		paciente.inativar();
 
 		assertThatThrownBy(() -> internar(quarto))
@@ -63,7 +63,7 @@ class InternacaoTest {
 
 	@Test
 	void naoInternaComProfissionalInativo() {
-		Quarto quarto = new Quarto("201", 2, 1);
+		Quarto quarto = new Quarto("201", 2, TipoQuarto.ENFERMARIA, 1);
 		medico.inativar();
 
 		assertThatThrownBy(() -> internar(quarto)).isInstanceOf(RegraNegocioException.class);
@@ -72,14 +72,14 @@ class InternacaoTest {
 
 	@Test
 	void aceitaAltaPrevistaNoMesmoDiaDaEntrada() {
-		Internacao internacao = new Internacao(paciente, medico, new Quarto("201", 2, 1), ENTRADA, ENTRADA);
+		Internacao internacao = new Internacao(paciente, medico, new Quarto("201", 2, TipoQuarto.ENFERMARIA, 1), ENTRADA, ENTRADA);
 
 		assertThat(internacao.getDataPrevistaAlta()).isEqualTo(ENTRADA);
 	}
 
 	@Test
 	void darAltaEncerraInternacaoELiberaVaga() {
-		Quarto quarto = new Quarto("201", 2, 1);
+		Quarto quarto = new Quarto("201", 2, TipoQuarto.ENFERMARIA, 1);
 		Internacao internacao = internar(quarto);
 
 		internacao.darAlta(ENTRADA.plusDays(3));
@@ -92,7 +92,7 @@ class InternacaoTest {
 
 	@Test
 	void darAltaNoDiaDaEntrada() {
-		Internacao internacao = internar(new Quarto("201", 2, 1));
+		Internacao internacao = internar(new Quarto("201", 2, TipoQuarto.ENFERMARIA, 1));
 
 		internacao.darAlta(ENTRADA);
 
@@ -101,7 +101,7 @@ class InternacaoTest {
 
 	@Test
 	void naoDaAltaComDataAnteriorAEntrada() {
-		Quarto quarto = new Quarto("201", 2, 1);
+		Quarto quarto = new Quarto("201", 2, TipoQuarto.ENFERMARIA, 1);
 		Internacao internacao = internar(quarto);
 
 		assertThatThrownBy(() -> internacao.darAlta(ENTRADA.minusDays(1)))
@@ -113,7 +113,7 @@ class InternacaoTest {
 
 	@Test
 	void naoDaAltaDuasVezes() {
-		Quarto quarto = new Quarto("201", 2, 2);
+		Quarto quarto = new Quarto("201", 2, TipoQuarto.ENFERMARIA, 2);
 		Internacao internacao = internar(quarto);
 		internacao.darAlta(ENTRADA.plusDays(2));
 
@@ -126,7 +126,7 @@ class InternacaoTest {
 
 	@Test
 	void alteraAltaPrevistaValida() {
-		Internacao internacao = internar(new Quarto("201", 2, 1));
+		Internacao internacao = internar(new Quarto("201", 2, TipoQuarto.ENFERMARIA, 1));
 
 		internacao.setDataPrevistaAlta(ENTRADA.plusDays(10));
 
@@ -135,7 +135,7 @@ class InternacaoTest {
 
 	@Test
 	void naoAlteraAltaPrevistaParaAntesDaEntrada() {
-		Internacao internacao = internar(new Quarto("201", 2, 1));
+		Internacao internacao = internar(new Quarto("201", 2, TipoQuarto.ENFERMARIA, 1));
 
 		assertThatThrownBy(() -> internacao.setDataPrevistaAlta(ENTRADA.minusDays(2)))
 				.isInstanceOf(DataInvalidaException.class);

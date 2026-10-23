@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import br.pucminas.hospital.exception.RegraNegocioException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -20,6 +21,11 @@ class AtendimentoTest {
 
 		AtendimentoDeTeste(Paciente paciente, ProfissionalSaude profissional) {
 			super(paciente, profissional);
+		}
+
+		@Override
+		public LocalDateTime getDataHoraReferencia() {
+			return LocalDateTime.of(2030, 1, 1, 0, 0);
 		}
 
 		@Override

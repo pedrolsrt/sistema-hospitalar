@@ -8,6 +8,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 /**
@@ -99,6 +100,11 @@ public abstract class Consulta extends Atendimento {
 	private void mudarPara(SituacaoConsulta nova, String acao) {
 		exigirTransicao(situacao, nova, acao);
 		situacao = nova;
+	}
+
+	@Override
+	public LocalDateTime getDataHoraReferencia() {
+		return data.atTime(horario);
 	}
 
 	public LocalDate getData() {

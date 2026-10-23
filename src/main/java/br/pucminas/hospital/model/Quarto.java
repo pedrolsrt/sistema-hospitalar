@@ -4,6 +4,8 @@ import br.pucminas.hospital.exception.QuartoSemVagaException;
 import br.pucminas.hospital.exception.RegraNegocioException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -25,6 +27,10 @@ public class Quarto {
 	@Column(nullable = false)
 	private int andar;
 
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false, length = 20)
+	private TipoQuarto tipo;
+
 	@Column(nullable = false)
 	private int capacidadeMaxima;
 
@@ -39,10 +45,16 @@ public class Quarto {
 	protected Quarto() {
 	}
 
-	public Quarto(String numero, int andar, int capacidadeMaxima) {
+	/**
+	 * @throws RegraNegocioException se o tipo não for informado ou a capacidade não for positiva
+	 *         ou ultrapassar o limite do tipo
+	 */
+	public Quarto(String numero, int andar, TipoQuarto tipo, int capacidadeMaxima) {
+		validarTipo(tipo, capacidadeMaxima);
 		validarCapacidade(capacidadeMaxima, 0);
 		this.numero = numero;
 		this.andar = andar;
+		this.tipo = tipo;
 		this.capacidadeMaxima = capacidadeMaxima;
 	}
 
@@ -78,6 +90,16 @@ public class Quarto {
 		return temVaga() ? SituacaoQuarto.DISPONIVEL : SituacaoQuarto.OCUPADO;
 	}
 
+	private static void validarTipo(TipoQuarto tipo, int capacidadeMaxima) {
+		if (tipo == null) {
+			throw new RegraNegocioException("O tipo do quarto é obrigatório.");
+		}
+		if (!tipo.comporta(capacidadeMaxima)) {
+			throw new RegraNegocioException("Um quarto do tipo " + tipo.getDescricao() + " comporta no máximo "
+					+ tipo.getCapacidadeMaximaPermitida() + " leito(s); a capacidade informada foi " + capacidadeMaxima + ".");
+		}
+	}
+
 	private static void validarCapacidade(int capacidadeMaxima, int ocupacaoAtual) {
 		if (capacidadeMaxima <= 0) {
 			throw new RegraNegocioException("A capacidade máxima do quarto deve ser maior que zero.");
@@ -108,14 +130,28 @@ public class Quarto {
 		this.andar = andar;
 	}
 
+	public TipoQuarto getTipo() {
+		return tipo;
+	}
+
+	/**
+	 * Altera o tipo, que precisa comportar a capacidade atual do quarto.
+	 */
+	public void setTipo(TipoQuarto tipo) {
+		validarTipo(tipo, capacidadeMaxima);
+		this.tipo = tipo;
+	}
+
 	public int getCapacidadeMaxima() {
 		return capacidadeMaxima;
 	}
 
 	/**
-	 * Altera a capacidade, que precisa ser positiva e comportar os pacientes já internados.
+	 * Altera a capacidade, que precisa ser positiva, respeitar o limite do tipo e comportar os pacientes
+	 * já internados.
 	 */
 	public void setCapacidadeMaxima(int capacidadeMaxima) {
+		validarTipo(tipo, capacidadeMaxima);
 		validarCapacidade(capacidadeMaxima, ocupacaoAtual);
 		this.capacidadeMaxima = capacidadeMaxima;
 	}

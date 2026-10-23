@@ -140,6 +140,14 @@ public class ProcedimentoCirurgico extends Atendimento {
 		}
 	}
 
+	/**
+	 * O início real quando o procedimento já começou; antes disso, a data e hora prevista.
+	 */
+	@Override
+	public LocalDateTime getDataHoraReferencia() {
+		return dataHoraInicio != null ? dataHoraInicio : dataHoraPrevista;
+	}
+
 	public String getDescricao() {
 		return descricao;
 	}

@@ -12,6 +12,7 @@ import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import org.hibernate.Hibernate;
 
 /**
@@ -72,6 +73,12 @@ public abstract class Atendimento {
 	 * @throws RegraNegocioException se alguma condição não for atendida
 	 */
 	protected abstract void validarCondicoesEspecificas();
+
+	/**
+	 * Momento que situa o atendimento no histórico do paciente. Cada modalidade guarda a sua data em
+	 * um campo diferente, por isso o histórico ordena por este método e não por uma coluna.
+	 */
+	public abstract LocalDateTime getDataHoraReferencia();
 
 	/**
 	 * Exige que a máquina de estados permita ir da situação atual para a nova.

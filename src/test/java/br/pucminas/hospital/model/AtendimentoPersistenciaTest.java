@@ -69,7 +69,7 @@ class AtendimentoPersistenciaTest {
 
 	@Test
 	void recarregaInternacaoComQuarto() {
-		Quarto quarto = em.persist(new Quarto("201", 2, 2));
+		Quarto quarto = em.persist(new Quarto("201", 2, TipoQuarto.ENFERMARIA, 2));
 
 		Atendimento carregado = salvarERecarregar(new Internacao(paciente, cardiologista, quarto, DATA, DATA.plusDays(3)));
 
