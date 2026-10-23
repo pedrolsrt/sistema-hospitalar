@@ -1,6 +1,7 @@
 package br.pucminas.hospital.model;
 
-import br.pucminas.hospital.exception.TransicaoStatusInvalidaException;
+import br.pucminas.hospital.exception.RegraNegocioException;
+import br.pucminas.hospital.exception.TransicaoSituacaoInvalidaException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -9,9 +10,12 @@ import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+/**
+ * Consulta agendada. As mudanças de situação seguem a máquina de estados de {@link SituacaoConsulta}.
+ */
 @Entity
 @Table(name = "consulta")
-public class Consulta extends Atendimento {
+public abstract class Consulta extends Atendimento {
 
 	@Column(nullable = false)
 	private LocalDate data;
@@ -23,45 +27,89 @@ public class Consulta extends Atendimento {
 	private String motivo;
 
 	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
-	private StatusConsulta status;
+	@Column(nullable = false, length = 20)
+	private SituacaoConsulta situacao;
 
 	protected Consulta() {
 	}
 
-	public Consulta(Paciente paciente, ProfissionalSaude profissionalResponsavel, LocalDate data, LocalTime horario,
-			String motivo) {
+	protected Consulta(Paciente paciente, ProfissionalSaude profissionalResponsavel, LocalDate data,
+			LocalTime horario, String motivo) {
 		super(paciente, profissionalResponsavel);
 		this.data = data;
 		this.horario = horario;
 		this.motivo = motivo;
-		this.status = StatusConsulta.AGENDADA;
+		this.situacao = SituacaoConsulta.AGENDADA;
 	}
 
 	/**
-	 * Marca a consulta como realizada.
-	 *
-	 * @throws TransicaoStatusInvalidaException se a consulta não estiver agendada
+	 * @throws TransicaoSituacaoInvalidaException se a consulta não estiver agendada
 	 */
-	public void realizar() {
-		exigirAgendada("realizar");
-		this.status = StatusConsulta.REALIZADA;
+	public void confirmar() {
+		mudarPara(SituacaoConsulta.CONFIRMADA, "confirmar");
 	}
 
 	/**
-	 * Cancela a consulta.
+	 * Inicia o atendimento depois de verificar que ele pode ser realizado.
 	 *
-	 * @throws TransicaoStatusInvalidaException se a consulta não estiver agendada
+	 * @throws TransicaoSituacaoInvalidaException se a consulta não estiver confirmada
+	 * @throws RegraNegocioException se o atendimento não puder ser realizado
+	 */
+	public void iniciarAtendimento() {
+		exigirTransicao(SituacaoConsulta.EM_ATENDIMENTO, "iniciar o atendimento de");
+		validarRealizacao();
+		situacao = SituacaoConsulta.EM_ATENDIMENTO;
+	}
+
+	/**
+	 * @throws TransicaoSituacaoInvalidaException se a consulta não estiver em atendimento
+	 */
+	public void concluir() {
+		mudarPara(SituacaoConsulta.CONCLUIDA, "concluir");
+	}
+
+	/**
+	 * @throws TransicaoSituacaoInvalidaException se a consulta não estiver agendada ou confirmada
 	 */
 	public void cancelar() {
-		exigirAgendada("cancelar");
-		this.status = StatusConsulta.CANCELADA;
+		mudarPara(SituacaoConsulta.CANCELADA, "cancelar");
 	}
 
-	private void exigirAgendada(String acao) {
-		if (status != StatusConsulta.AGENDADA) {
-			throw new TransicaoStatusInvalidaException(acao, status);
+	/**
+	 * @throws TransicaoSituacaoInvalidaException se a consulta não estiver agendada ou confirmada
+	 */
+	public void registrarNaoComparecimento() {
+		mudarPara(SituacaoConsulta.NAO_COMPARECEU, "registrar o não comparecimento de");
+	}
+
+	/**
+	 * Registra as observações, permitido apenas durante o atendimento ou depois da conclusão.
+	 *
+	 * @throws RegraNegocioException se a consulta estiver em outra situação
+	 */
+	@Override
+	public void registrarObservacoes(String texto) {
+		if (!situacao.permiteRegistrarObservacoes()) {
+			throw new RegraNegocioException("As observações só podem ser registradas durante o atendimento "
+					+ "ou depois da conclusão da consulta. Situação atual: " + situacao.getDescricao() + ".");
 		}
+		super.registrarObservacoes(texto);
+	}
+
+	private void mudarPara(SituacaoConsulta nova, String acao) {
+		exigirTransicao(nova, acao);
+		situacao = nova;
+	}
+
+	private void exigirTransicao(SituacaoConsulta nova, String acao) {
+		if (situacao.podeMudarPara(nova)) {
+			return;
+		}
+		String mensagem = "Não é possível " + acao + " uma consulta na situação " + situacao.getDescricao() + ".";
+		if (situacao.isFinal()) {
+			mensagem += " Essa situação é final e não pode mais ser alterada.";
+		}
+		throw new TransicaoSituacaoInvalidaException(mensagem);
 	}
 
 	public LocalDate getData() {
@@ -80,8 +128,8 @@ public class Consulta extends Atendimento {
 		this.motivo = motivo;
 	}
 
-	public StatusConsulta getStatus() {
-		return status;
+	public SituacaoConsulta getSituacao() {
+		return situacao;
 	}
 
 }

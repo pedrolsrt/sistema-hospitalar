@@ -27,6 +27,12 @@ class ProfissionalSaudeTest {
 			assertThat(clinico.podeRealizarProcedimentos()).isFalse();
 		}
 
+		@ParameterizedTest
+		@EnumSource(AreaAtuacao.class)
+		void naoRealizaConsultaEspecializada(AreaAtuacao area) {
+			assertThat(clinico.podeRealizarConsultaEspecializada(area)).isFalse();
+		}
+
 	}
 
 	@Nested
@@ -49,6 +55,12 @@ class ProfissionalSaudeTest {
 		@Test
 		void naoPodeRealizarProcedimentos() {
 			assertThat(cardiologista.podeRealizarProcedimentos()).isFalse();
+		}
+
+		@Test
+		void realizaConsultaEspecializadaSoNaSuaArea() {
+			assertThat(cardiologista.podeRealizarConsultaEspecializada(AreaAtuacao.CARDIOLOGIA)).isTrue();
+			assertThat(cardiologista.podeRealizarConsultaEspecializada(AreaAtuacao.NEUROLOGIA)).isFalse();
 		}
 
 		@Test
@@ -94,6 +106,12 @@ class ProfissionalSaudeTest {
 		@Test
 		void podeRealizarProcedimentos() {
 			assertThat(cirurgiao.podeRealizarProcedimentos()).isTrue();
+		}
+
+		@ParameterizedTest
+		@EnumSource(AreaAtuacao.class)
+		void naoRealizaConsultaEspecializadaNemNaSuaArea(AreaAtuacao area) {
+			assertThat(cirurgiao.podeRealizarConsultaEspecializada(area)).isFalse();
 		}
 
 		@Test

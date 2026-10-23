@@ -32,6 +32,11 @@ public class MedicoEspecialista extends ProfissionalSaude {
 		return areaAtuacao == area;
 	}
 
+	@Override
+	public boolean podeRealizarConsultaEspecializada(AreaAtuacao area) {
+		return atendeArea(area);
+	}
+
 	public AreaAtuacao getAreaAtuacao() {
 		return areaAtuacao;
 	}

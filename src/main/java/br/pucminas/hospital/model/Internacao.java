@@ -36,17 +36,30 @@ public class Internacao extends Atendimento {
 	/**
 	 * Cria a internação ocupando uma vaga do quarto. A vaga é devolvida em {@link #darAlta(LocalDate)}.
 	 *
+	 * @throws RegraNegocioException se o paciente ou o profissional estiver inativo
 	 * @throws DataInvalidaException se a alta prevista for anterior à entrada
 	 * @throws QuartoSemVagaException se o quarto não tiver vaga
 	 */
 	public Internacao(Paciente paciente, ProfissionalSaude profissionalResponsavel, Quarto quarto,
 			LocalDate dataEntrada, LocalDate dataPrevistaAlta) {
 		super(paciente, profissionalResponsavel);
-		validarNaoAnteriorAEntrada(dataPrevistaAlta, dataEntrada, "prevista");
-		quarto.ocupar();
 		this.quarto = quarto;
 		this.dataEntrada = dataEntrada;
 		this.dataPrevistaAlta = dataPrevistaAlta;
+		// A internação se realiza na admissão: valida antes de ocupar a vaga, para que uma falha não a consuma.
+		validarRealizacao();
+		quarto.ocupar();
+	}
+
+	/**
+	 * Exige alta prevista não anterior à entrada e vaga no quarto.
+	 */
+	@Override
+	protected void validarCondicoesEspecificas() {
+		validarNaoAnteriorAEntrada(dataPrevistaAlta, dataEntrada, "prevista");
+		if (!quarto.temVaga()) {
+			throw new QuartoSemVagaException(quarto.getNumero());
+		}
 	}
 
 	/**

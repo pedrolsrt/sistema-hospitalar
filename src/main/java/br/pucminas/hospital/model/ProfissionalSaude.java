@@ -39,6 +39,14 @@ public abstract class ProfissionalSaude extends Pessoa {
 	}
 
 	/**
+	 * Indica se o profissional pode realizar uma consulta especializada na área informada. Por padrão, não.
+	 * Atuar na área não basta: o cirurgião atua na sua área cirúrgica, mas não faz consulta especializada.
+	 */
+	public boolean podeRealizarConsultaEspecializada(AreaAtuacao area) {
+		return false;
+	}
+
+	/**
 	 * Indica se o profissional pode ser responsável por procedimentos cirúrgicos. Por padrão, não.
 	 */
 	public boolean podeRealizarProcedimentos() {

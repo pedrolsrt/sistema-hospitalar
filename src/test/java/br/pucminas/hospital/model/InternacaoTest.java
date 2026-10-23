@@ -51,6 +51,26 @@ class InternacaoTest {
 	}
 
 	@Test
+	void naoInternaPacienteInativoENaoOcupaVaga() {
+		Quarto quarto = new Quarto("201", 2, 1);
+		paciente.inativar();
+
+		assertThatThrownBy(() -> internar(quarto))
+				.isInstanceOf(RegraNegocioException.class)
+				.hasMessage("O paciente Maria Silva está inativo e não pode ser atendido.");
+		assertThat(quarto.getOcupacaoAtual()).isZero();
+	}
+
+	@Test
+	void naoInternaComProfissionalInativo() {
+		Quarto quarto = new Quarto("201", 2, 1);
+		medico.inativar();
+
+		assertThatThrownBy(() -> internar(quarto)).isInstanceOf(RegraNegocioException.class);
+		assertThat(quarto.getOcupacaoAtual()).isZero();
+	}
+
+	@Test
 	void aceitaAltaPrevistaNoMesmoDiaDaEntrada() {
 		Internacao internacao = new Internacao(paciente, medico, new Quarto("201", 2, 1), ENTRADA, ENTRADA);
 

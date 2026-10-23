@@ -18,7 +18,7 @@ class HospitalApplicationTests {
 	@Test
 	void contextoSobeComBancoMigrado() {
 		assertThat(flyway.info().current()).isNotNull();
-		assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("3");
+		assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("4");
 	}
 
 }
