@@ -14,7 +14,7 @@ class InternacaoTest {
 	private static final LocalDate ENTRADA = LocalDate.of(2030, 3, 10);
 
 	private final Paciente paciente = new Paciente("Maria Silva", "52998224725", LocalDate.of(1990, 5, 10));
-	private final ProfissionalSaude medico = new ProfissionalSaude("Dr. João Souza", "CRM-MG 12345", "Clínica Geral");
+	private final ProfissionalSaude medico = new ClinicoGeral("Dr. João Souza", "CRM-MG 12345");
 
 	private Internacao internar(Quarto quarto) {
 		return new Internacao(paciente, medico, quarto, ENTRADA, ENTRADA.plusDays(5));

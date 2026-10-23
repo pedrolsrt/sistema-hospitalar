@@ -12,7 +12,7 @@ class ConsultaTest {
 
 	private Consulta novaConsulta() {
 		Paciente paciente = new Paciente("Maria Silva", "52998224725", LocalDate.of(1990, 5, 10));
-		ProfissionalSaude medico = new ProfissionalSaude("Dr. João Souza", "CRM-MG 12345", "Cardiologia");
+		ProfissionalSaude medico = new MedicoEspecialista("Dr. João Souza", "CRM-MG 12345", AreaAtuacao.CARDIOLOGIA);
 		return new Consulta(paciente, medico, LocalDate.of(2030, 1, 15), LocalTime.of(14, 0), "Dor no peito");
 	}
 
