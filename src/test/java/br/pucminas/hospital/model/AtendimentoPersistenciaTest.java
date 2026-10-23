@@ -3,6 +3,7 @@ package br.pucminas.hospital.model;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -76,6 +77,57 @@ class AtendimentoPersistenciaTest {
 			assertThat(i.getQuarto().getNumero()).isEqualTo("201");
 			assertThat(i.getQuarto().getOcupacaoAtual()).isEqualTo(1);
 		});
+	}
+
+	@Test
+	void recarregaAtendimentoDeEmergenciaSemPrioridadeDefinida() {
+		LocalDateTime chegada = LocalDateTime.of(2030, 1, 15, 22, 40);
+
+		Atendimento carregado = salvarERecarregar(new AtendimentoEmergencia(paciente, cardiologista, null, chegada));
+
+		assertThat(carregado).isInstanceOfSatisfying(AtendimentoEmergencia.class, e -> {
+			assertThat(e.getPrioridade()).isNull();
+			assertThat(e.getSituacao()).isEqualTo(SituacaoEmergencia.AGUARDANDO_AVALIACAO);
+			assertThat(e.getDataHoraChegada()).isEqualTo(chegada);
+		});
+	}
+
+	@Test
+	void recarregaAtendimentoDeEmergenciaEmAtendimento() {
+		AtendimentoEmergencia emergencia = new AtendimentoEmergencia(paciente, cardiologista,
+				PrioridadeEmergencia.CRITICA, LocalDateTime.of(2030, 1, 15, 22, 40));
+		emergencia.iniciar();
+
+		Atendimento carregado = salvarERecarregar(emergencia);
+
+		assertThat(carregado).isInstanceOfSatisfying(AtendimentoEmergencia.class, e -> {
+			assertThat(e.getPrioridade()).isEqualTo(PrioridadeEmergencia.CRITICA);
+			assertThat(e.getSituacao()).isEqualTo(SituacaoEmergencia.EM_ATENDIMENTO);
+		});
+	}
+
+	@Test
+	void recarregaProcedimentoCirurgicoConcluido() {
+		Cirurgiao cirurgiao = em.persist(new Cirurgiao("Dra. Carla Mendes", "CRM-MG 33333", AreaAtuacao.CIRURGIA_GERAL));
+		LocalDateTime inicio = LocalDateTime.of(2030, 3, 10, 8, 15);
+		ProcedimentoCirurgico procedimento = new ProcedimentoCirurgico(paciente, cirurgiao, "Apendicectomia",
+				TipoCirurgia.URGENCIA, inicio.minusMinutes(15));
+		procedimento.registrarObservacoesPreOperatorias("Jejum de 8 horas.");
+		procedimento.iniciar(inicio);
+		procedimento.concluir(inicio.plusHours(1));
+		procedimento.registrarObservacoesPosOperatorias("Sem intercorrências.");
+
+		Atendimento carregado = salvarERecarregar(procedimento);
+
+		assertThat(carregado).isInstanceOfSatisfying(ProcedimentoCirurgico.class, p -> {
+			assertThat(p.getSituacao()).isEqualTo(SituacaoProcedimento.CONCLUIDO);
+			assertThat(p.getTipoCirurgia()).isEqualTo(TipoCirurgia.URGENCIA);
+			assertThat(p.getDataHoraInicio()).isEqualTo(inicio);
+			assertThat(p.getDataHoraFim()).isEqualTo(inicio.plusHours(1));
+			assertThat(p.getObservacoesPreOperatorias()).isEqualTo("Jejum de 8 horas.");
+			assertThat(p.getObservacoesPosOperatorias()).isEqualTo("Sem intercorrências.");
+		});
+		assertThat(carregado.getProfissionalResponsavel().podeRealizarProcedimentos()).isTrue();
 	}
 
 }

@@ -7,7 +7,7 @@ import java.util.Set;
  * Situações da consulta e as transições permitidas entre elas. Remarcar uma consulta cancelada
  * não é uma transição: cria-se uma nova consulta.
  */
-public enum SituacaoConsulta {
+public enum SituacaoConsulta implements SituacaoAtendimento<SituacaoConsulta> {
 	AGENDADA("Agendada", true),
 	CONFIRMADA("Confirmada", true),
 	EM_ATENDIMENTO("Em atendimento", true),
@@ -27,6 +27,7 @@ public enum SituacaoConsulta {
 
 	// Um switch, e não um campo preenchido no construtor, porque uma constante não pode
 	// referenciar as que são declaradas depois dela.
+	@Override
 	public Set<SituacaoConsulta> getProximasPossiveis() {
 		return switch (this) {
 			case AGENDADA -> EnumSet.of(CONFIRMADA, CANCELADA, NAO_COMPARECEU);
@@ -34,14 +35,6 @@ public enum SituacaoConsulta {
 			case EM_ATENDIMENTO -> EnumSet.of(CONCLUIDA);
 			case CONCLUIDA, CANCELADA, NAO_COMPARECEU -> EnumSet.noneOf(SituacaoConsulta.class);
 		};
-	}
-
-	public boolean podeMudarPara(SituacaoConsulta nova) {
-		return getProximasPossiveis().contains(nova);
-	}
-
-	public boolean isFinal() {
-		return getProximasPossiveis().isEmpty();
 	}
 
 	public boolean isAtiva() {
@@ -52,6 +45,7 @@ public enum SituacaoConsulta {
 		return this == EM_ATENDIMENTO || this == CONCLUIDA;
 	}
 
+	@Override
 	public String getDescricao() {
 		return descricao;
 	}

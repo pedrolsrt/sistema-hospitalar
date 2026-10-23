@@ -46,7 +46,7 @@ public abstract class Consulta extends Atendimento {
 	 * @throws TransicaoSituacaoInvalidaException se a consulta não estiver agendada
 	 */
 	public void confirmar() {
-		mudarPara(SituacaoConsulta.CONFIRMADA, "confirmar");
+		mudarPara(SituacaoConsulta.CONFIRMADA, "confirmar uma consulta");
 	}
 
 	/**
@@ -56,7 +56,7 @@ public abstract class Consulta extends Atendimento {
 	 * @throws RegraNegocioException se o atendimento não puder ser realizado
 	 */
 	public void iniciarAtendimento() {
-		exigirTransicao(SituacaoConsulta.EM_ATENDIMENTO, "iniciar o atendimento de");
+		exigirTransicao(situacao, SituacaoConsulta.EM_ATENDIMENTO, "iniciar o atendimento de uma consulta");
 		validarRealizacao();
 		situacao = SituacaoConsulta.EM_ATENDIMENTO;
 	}
@@ -65,21 +65,21 @@ public abstract class Consulta extends Atendimento {
 	 * @throws TransicaoSituacaoInvalidaException se a consulta não estiver em atendimento
 	 */
 	public void concluir() {
-		mudarPara(SituacaoConsulta.CONCLUIDA, "concluir");
+		mudarPara(SituacaoConsulta.CONCLUIDA, "concluir uma consulta");
 	}
 
 	/**
 	 * @throws TransicaoSituacaoInvalidaException se a consulta não estiver agendada ou confirmada
 	 */
 	public void cancelar() {
-		mudarPara(SituacaoConsulta.CANCELADA, "cancelar");
+		mudarPara(SituacaoConsulta.CANCELADA, "cancelar uma consulta");
 	}
 
 	/**
 	 * @throws TransicaoSituacaoInvalidaException se a consulta não estiver agendada ou confirmada
 	 */
 	public void registrarNaoComparecimento() {
-		mudarPara(SituacaoConsulta.NAO_COMPARECEU, "registrar o não comparecimento de");
+		mudarPara(SituacaoConsulta.NAO_COMPARECEU, "registrar o não comparecimento de uma consulta");
 	}
 
 	/**
@@ -97,19 +97,8 @@ public abstract class Consulta extends Atendimento {
 	}
 
 	private void mudarPara(SituacaoConsulta nova, String acao) {
-		exigirTransicao(nova, acao);
+		exigirTransicao(situacao, nova, acao);
 		situacao = nova;
-	}
-
-	private void exigirTransicao(SituacaoConsulta nova, String acao) {
-		if (situacao.podeMudarPara(nova)) {
-			return;
-		}
-		String mensagem = "Não é possível " + acao + " uma consulta na situação " + situacao.getDescricao() + ".";
-		if (situacao.isFinal()) {
-			mensagem += " Essa situação é final e não pode mais ser alterada.";
-		}
-		throw new TransicaoSituacaoInvalidaException(mensagem);
 	}
 
 	public LocalDate getData() {

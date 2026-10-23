@@ -1,6 +1,7 @@
 package br.pucminas.hospital.model;
 
 import br.pucminas.hospital.exception.RegraNegocioException;
+import br.pucminas.hospital.exception.TransicaoSituacaoInvalidaException;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -71,6 +72,23 @@ public abstract class Atendimento {
 	 * @throws RegraNegocioException se alguma condição não for atendida
 	 */
 	protected abstract void validarCondicoesEspecificas();
+
+	/**
+	 * Exige que a máquina de estados permita ir da situação atual para a nova.
+	 *
+	 * @param acao o que se tentou fazer, completando a frase "Não é possível ...", por exemplo "confirmar uma consulta"
+	 * @throws TransicaoSituacaoInvalidaException se a transição não for permitida
+	 */
+	protected static <S extends SituacaoAtendimento<S>> void exigirTransicao(S atual, S nova, String acao) {
+		if (atual.podeMudarPara(nova)) {
+			return;
+		}
+		String mensagem = "Não é possível " + acao + " na situação " + atual.getDescricao() + ".";
+		if (atual.isFinal()) {
+			mensagem += " Essa situação é final e não pode mais ser alterada.";
+		}
+		throw new TransicaoSituacaoInvalidaException(mensagem);
+	}
 
 	/**
 	 * Registra as observações do atendimento. Modalidades que restringem quando isso é possível sobrescrevem.
