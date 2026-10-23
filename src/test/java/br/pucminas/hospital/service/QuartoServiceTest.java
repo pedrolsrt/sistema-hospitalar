@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Sort;
 
 @ExtendWith(MockitoExtension.class)
 class QuartoServiceTest {
@@ -136,14 +135,12 @@ class QuartoServiceTest {
 		Quarto uti = new Quarto("201", 2, TipoQuarto.UTI, 1);
 		Quarto enfermaria = new Quarto("101", 1, TipoQuarto.ENFERMARIA, 6);
 		when(repository.findById(1L)).thenReturn(Optional.of(uti));
-		when(repository.findAll(Sort.by("numero"))).thenReturn(List.of(enfermaria, uti));
-		when(repository.findComVaga()).thenReturn(List.of(enfermaria));
-		when(repository.findByTipoOrderByNumeroAsc(TipoQuarto.UTI)).thenReturn(List.of(uti));
+		when(repository.findComFiltros(null, false)).thenReturn(List.of(enfermaria, uti));
+		when(repository.findComFiltros(TipoQuarto.UTI, true)).thenReturn(List.of(uti));
 
 		assertThat(service.buscarPorId(1L).numero()).isEqualTo("201");
-		assertThat(service.listar()).extracting(QuartoResponse::numero).containsExactly("101", "201");
-		assertThat(service.listarComVaga()).extracting(QuartoResponse::numero).containsExactly("101");
-		assertThat(service.listarPorTipo(TipoQuarto.UTI)).extracting(QuartoResponse::numero).containsExactly("201");
+		assertThat(service.listar(null, false)).extracting(QuartoResponse::numero).containsExactly("101", "201");
+		assertThat(service.listar(TipoQuarto.UTI, true)).extracting(QuartoResponse::numero).containsExactly("201");
 	}
 
 	@Test

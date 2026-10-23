@@ -18,5 +18,6 @@ hospital:
     duracao-minutos: 30
 
 springdoc:
+  default-produces-media-type: application/json
   swagger-ui:
     path: /swagger-ui.html

@@ -11,7 +11,6 @@ import br.pucminas.hospital.model.TipoQuarto;
 import br.pucminas.hospital.repository.InternacaoRepository;
 import br.pucminas.hospital.repository.QuartoRepository;
 import java.util.List;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,16 +66,14 @@ public class QuartoService {
 		return mapper.paraResponse(buscar(id));
 	}
 
-	public List<QuartoResponse> listar() {
-		return paraResponses(repository.findAll(Sort.by("numero")));
-	}
-
-	public List<QuartoResponse> listarComVaga() {
-		return paraResponses(repository.findComVaga());
-	}
-
-	public List<QuartoResponse> listarPorTipo(TipoQuarto tipo) {
-		return paraResponses(repository.findByTipoOrderByNumeroAsc(tipo));
+	/**
+	 * Lista os quartos em ordem de número.
+	 *
+	 * @param tipo só os quartos deste tipo; nulo para todos
+	 * @param somenteComVaga se verdadeiro, só os quartos com vaga
+	 */
+	public List<QuartoResponse> listar(TipoQuarto tipo, boolean somenteComVaga) {
+		return paraResponses(repository.findComFiltros(tipo, somenteComVaga));
 	}
 
 	/**
