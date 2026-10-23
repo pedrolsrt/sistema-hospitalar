@@ -87,4 +87,19 @@ class InternacaoRepositoryTest {
 		assertThat(repository.existsByQuartoId(apartamentoVazio.getId())).isFalse();
 	}
 
+	@Test
+	void internacoesEncerradas() {
+		assertThat(repository.findByDataEfetivaAltaIsNotNullOrderByDataEfetivaAltaDesc())
+				.extracting(internacao -> internacao.getPaciente().getNome())
+				.containsExactly("José Lima");
+	}
+
+	@Test
+	void verificaInternacaoAtivaDePacienteEDeProfissional() {
+		assertThat(repository.existsByPacienteIdAndDataEfetivaAltaIsNull(maria.getId())).isTrue();
+		assertThat(repository.existsByPacienteIdAndDataEfetivaAltaIsNull(jose.getId())).isFalse();
+		Long medicoId = repository.findByPacienteIdAndDataEfetivaAltaIsNull(maria.getId()).orElseThrow()
+				.getProfissionalResponsavel().getId();
+		assertThat(repository.existsByProfissionalResponsavelIdAndDataEfetivaAltaIsNull(medicoId)).isTrue();
+	}
 }

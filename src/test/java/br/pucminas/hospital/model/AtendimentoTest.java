@@ -29,6 +29,16 @@ class AtendimentoTest {
 		}
 
 		@Override
+		public ModalidadeAtendimento getModalidade() {
+			return ModalidadeAtendimento.CONSULTA_ROTINA;
+		}
+
+		@Override
+		public <R> R aceitar(VisitanteAtendimento<R> visitante) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
 		protected void validarCondicoesEspecificas() {
 			verificacoesEspecificas++;
 			if (falhaEspecifica != null) {

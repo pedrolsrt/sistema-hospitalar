@@ -1,6 +1,6 @@
 package br.pucminas.hospital.model;
 
-public enum PrioridadeEmergencia {
+public enum PrioridadeEmergencia implements Descritivel {
 	BAIXA(1, "Baixa"),
 	MODERADA(2, "Moderada"),
 	ALTA(3, "Alta"),
@@ -19,6 +19,7 @@ public enum PrioridadeEmergencia {
 		return nivel;
 	}
 
+	@Override
 	public String getDescricao() {
 		return descricao;
 	}

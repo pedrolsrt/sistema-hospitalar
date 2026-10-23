@@ -118,4 +118,21 @@ class AtendimentoEmergenciaRepositoryTest {
 				.hasSize(8);
 	}
 
+	@Test
+	void verificaEmergenciaAtivaDePacienteEDeProfissional() {
+		assertThat(repository.existeAtivoDoPaciente(paciente.getId())).isTrue();
+		assertThat(repository.existeAtivoDoProfissional(plantonista.getId())).isTrue();
+
+		Paciente semEmergencia = em.persist(new Paciente("José Lima", "11144477735", LocalDate.of(1985, 2, 1)));
+		ProfissionalSaude outro = em.persist(new ClinicoGeral("Dr. Paulo Reis", "CRM-MG 2"));
+		AtendimentoEmergencia concluido = new AtendimentoEmergencia(semEmergencia, outro, PrioridadeEmergencia.BAIXA,
+				NOITE);
+		concluido.iniciar();
+		concluido.concluir();
+		em.persist(concluido);
+		em.flush();
+
+		assertThat(repository.existeAtivoDoPaciente(semEmergencia.getId())).isFalse();
+		assertThat(repository.existeAtivoDoProfissional(outro.getId())).isFalse();
+	}
 }

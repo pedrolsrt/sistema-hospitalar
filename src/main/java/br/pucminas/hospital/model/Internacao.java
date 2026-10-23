@@ -91,6 +91,16 @@ public class Internacao extends Atendimento {
 	}
 
 	@Override
+	public ModalidadeAtendimento getModalidade() {
+		return ModalidadeAtendimento.INTERNACAO;
+	}
+
+	@Override
+	public <R> R aceitar(VisitanteAtendimento<R> visitante) {
+		return visitante.visitar(this);
+	}
+
+	@Override
 	public LocalDateTime getDataHoraReferencia() {
 		return dataEntrada.atStartOfDay();
 	}

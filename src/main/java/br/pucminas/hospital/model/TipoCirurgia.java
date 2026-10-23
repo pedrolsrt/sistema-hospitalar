@@ -1,6 +1,6 @@
 package br.pucminas.hospital.model;
 
-public enum TipoCirurgia {
+public enum TipoCirurgia implements Descritivel {
 	ELETIVA("Eletiva"),
 	URGENCIA("Urgência"),
 	EMERGENCIA("Emergência");
@@ -11,6 +11,7 @@ public enum TipoCirurgia {
 		this.descricao = descricao;
 	}
 
+	@Override
 	public String getDescricao() {
 		return descricao;
 	}

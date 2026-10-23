@@ -1,6 +1,6 @@
 package br.pucminas.hospital.model;
 
-public enum AreaAtuacao {
+public enum AreaAtuacao implements Descritivel {
 	CARDIOLOGIA("Cardiologia"),
 	NEUROLOGIA("Neurologia"),
 	ORTOPEDIA("Ortopedia"),
@@ -27,6 +27,7 @@ public enum AreaAtuacao {
 		this.descricao = descricao;
 	}
 
+	@Override
 	public String getDescricao() {
 		return descricao;
 	}

@@ -113,4 +113,34 @@ class ConsultaRepositoryTest {
 		assertThat(repository.findAgendaDoProfissional(draAna.getId(), DIA.plusDays(1))).isEmpty();
 	}
 
+	@Test
+	void listaComFiltrosOpcionais() {
+		assertThat(repository.findComFiltros(null, null, null)).hasSize(8)
+				.extracting(c -> c.getDataHoraReferencia()).isSorted();
+		assertThat(repository.findComFiltros(SituacaoConsulta.AGENDADA, null, null)).hasSize(3);
+		assertThat(repository.findComFiltros(null, drJoao.getId(), DIA)).hasSize(6);
+		assertThat(repository.findComFiltros(SituacaoConsulta.CANCELADA, drJoao.getId(), DIA))
+				.extracting(Consulta::getHorario).containsExactly(LocalTime.of(12, 0));
+		assertThat(repository.findComFiltros(null, null, DIA.plusDays(1))).hasSize(1);
+		assertThat(repository.findComFiltros(SituacaoConsulta.CONCLUIDA, draAna.getId(), null)).isEmpty();
+	}
+
+	@Test
+	void verificaConsultaAtivaDePacienteEDeProfissional() {
+		assertThat(repository.existeAtivaDoPaciente(maria.getId())).isTrue();
+		assertThat(repository.existeAtivaDoProfissional(draAna.getId())).isTrue();
+	}
+
+	@Test
+	void consultasEmSituacaoFinalNaoContamComoAtivas() {
+		Paciente semAtivas = em.persist(new Paciente("Carla Dias", "39053344705", LocalDate.of(1970, 9, 30)));
+		ProfissionalSaude drPaulo = em.persist(new ClinicoGeral("Dr. Paulo Reis", "CRM-MG 3"));
+		consulta(drPaulo, semAtivas, DIA, 9, SituacaoConsulta.CONCLUIDA);
+		consulta(drPaulo, semAtivas, DIA, 10, SituacaoConsulta.CANCELADA);
+		consulta(drPaulo, semAtivas, DIA, 11, SituacaoConsulta.NAO_COMPARECEU);
+		em.flush();
+
+		assertThat(repository.existeAtivaDoPaciente(semAtivas.getId())).isFalse();
+		assertThat(repository.existeAtivaDoProfissional(drPaulo.getId())).isFalse();
+	}
 }

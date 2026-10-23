@@ -13,6 +13,7 @@ import br.pucminas.hospital.dto.ProfissionalSaudeRequest;
 import br.pucminas.hospital.dto.ProfissionalSaudeResponse;
 import br.pucminas.hospital.exception.DadoJaCadastradoException;
 import br.pucminas.hospital.exception.RecursoNaoEncontradoException;
+import br.pucminas.hospital.exception.RegraNegocioException;
 import br.pucminas.hospital.mapper.ProfissionalSaudeMapper;
 import br.pucminas.hospital.model.AreaAtuacao;
 import br.pucminas.hospital.model.CategoriaProfissional;
@@ -20,6 +21,10 @@ import br.pucminas.hospital.model.Cirurgiao;
 import br.pucminas.hospital.model.ClinicoGeral;
 import br.pucminas.hospital.model.MedicoEspecialista;
 import br.pucminas.hospital.model.ProfissionalSaude;
+import br.pucminas.hospital.repository.AtendimentoEmergenciaRepository;
+import br.pucminas.hospital.repository.ConsultaRepository;
+import br.pucminas.hospital.repository.InternacaoRepository;
+import br.pucminas.hospital.repository.ProcedimentoCirurgicoRepository;
 import br.pucminas.hospital.repository.ProfissionalSaudeRepository;
 import java.util.List;
 import java.util.Optional;
@@ -41,11 +46,24 @@ class ProfissionalSaudeServiceTest {
 	@Mock
 	private ProfissionalSaudeRepository repository;
 
+	@Mock
+	private ConsultaRepository consultaRepository;
+
+	@Mock
+	private AtendimentoEmergenciaRepository emergenciaRepository;
+
+	@Mock
+	private ProcedimentoCirurgicoRepository procedimentoRepository;
+
+	@Mock
+	private InternacaoRepository internacaoRepository;
+
 	private ProfissionalSaudeService service;
 
 	@BeforeEach
 	void criarService() {
-		service = new ProfissionalSaudeService(repository, new ProfissionalSaudeMapper());
+		service = new ProfissionalSaudeService(repository, consultaRepository, emergenciaRepository,
+				procedimentoRepository, internacaoRepository, new ProfissionalSaudeMapper());
 	}
 
 	private static ProfissionalSaudeRequest request(CategoriaProfissional categoria, AreaAtuacao area) {
@@ -157,6 +175,49 @@ class ProfissionalSaudeServiceTest {
 		assertThat(service.inativar(1L).ativo()).isFalse();
 		assertThat(service.inativar(1L).ativo()).isFalse();
 		assertThat(service.reativar(1L).ativo()).isTrue();
+		assertThat(profissional.isAtivo()).isTrue();
+	}
+
+	@Test
+	void naoInativaProfissionalComConsultaAtiva() {
+		ProfissionalSaude profissional = new ClinicoGeral("Dra. Ana Lima", "CRM-MG 1");
+		when(repository.findById(1L)).thenReturn(Optional.of(profissional));
+		when(consultaRepository.existeAtivaDoProfissional(1L)).thenReturn(true);
+
+		assertThatThrownBy(() -> service.inativar(1L))
+				.isInstanceOf(RegraNegocioException.class)
+				.hasMessage("O profissional Dra. Ana Lima não pode ser inativado porque tem sob sua responsabilidade: "
+						+ "consulta agendada, confirmada ou em atendimento.");
+		assertThat(profissional.isAtivo()).isTrue();
+	}
+
+	@Test
+	void naoInativaProfissionalComEmergenciaAtiva() {
+		ProfissionalSaude profissional = new ClinicoGeral("Dra. Ana Lima", "CRM-MG 1");
+		when(repository.findById(1L)).thenReturn(Optional.of(profissional));
+		when(emergenciaRepository.existeAtivoDoProfissional(1L)).thenReturn(true);
+
+		assertThatThrownBy(() -> service.inativar(1L)).hasMessageContaining("atendimento de emergência");
+		assertThat(profissional.isAtivo()).isTrue();
+	}
+
+	@Test
+	void naoInativaCirurgiaoComProcedimentoAtivo() {
+		ProfissionalSaude cirurgiao = new Cirurgiao("Dra. Carla", "CRM-MG 3", AreaAtuacao.CIRURGIA_GERAL);
+		when(repository.findById(1L)).thenReturn(Optional.of(cirurgiao));
+		when(procedimentoRepository.existeAtivoDoProfissional(1L)).thenReturn(true);
+
+		assertThatThrownBy(() -> service.inativar(1L)).hasMessageContaining("procedimento cirúrgico");
+		assertThat(cirurgiao.isAtivo()).isTrue();
+	}
+
+	@Test
+	void naoInativaProfissionalResponsavelPorInternacaoAtiva() {
+		ProfissionalSaude profissional = new ClinicoGeral("Dra. Ana Lima", "CRM-MG 1");
+		when(repository.findById(1L)).thenReturn(Optional.of(profissional));
+		when(internacaoRepository.existsByProfissionalResponsavelIdAndDataEfetivaAltaIsNull(1L)).thenReturn(true);
+
+		assertThatThrownBy(() -> service.inativar(1L)).hasMessageEndingWith(": internação ativa.");
 		assertThat(profissional.isAtivo()).isTrue();
 	}
 

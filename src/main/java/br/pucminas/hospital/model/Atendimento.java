@@ -56,6 +56,18 @@ public abstract class Atendimento {
 	 * @throws RegraNegocioException se alguma condição não for atendida
 	 */
 	public final void validarRealizacao() {
+		validarParticipantesAtivos();
+		validarCondicoesEspecificas();
+	}
+
+	/**
+	 * Verificações comuns a todas as modalidades: paciente e profissional ativos. Exposta à parte para
+	 * quando o registro do atendimento já exige participantes ativos, mas ainda não as condições da
+	 * modalidade (por exemplo, a emergência registrada antes da definição da prioridade).
+	 *
+	 * @throws RegraNegocioException se o paciente ou o profissional estiver inativo
+	 */
+	public final void validarParticipantesAtivos() {
 		if (!paciente.isAtivo()) {
 			throw new RegraNegocioException(
 					"O paciente " + paciente.getNome() + " está inativo e não pode ser atendido.");
@@ -64,7 +76,6 @@ public abstract class Atendimento {
 			throw new RegraNegocioException("O profissional " + profissionalResponsavel.getNome()
 					+ " está inativo e não pode realizar atendimentos.");
 		}
-		validarCondicoesEspecificas();
 	}
 
 	/**
@@ -79,6 +90,13 @@ public abstract class Atendimento {
 	 * um campo diferente, por isso o histórico ordena por este método e não por uma coluna.
 	 */
 	public abstract LocalDateTime getDataHoraReferencia();
+
+	public abstract ModalidadeAtendimento getModalidade();
+
+	/**
+	 * Executa a operação do visitante correspondente à modalidade deste atendimento.
+	 */
+	public abstract <R> R aceitar(VisitanteAtendimento<R> visitante);
 
 	/**
 	 * Exige que a máquina de estados permita ir da situação atual para a nova.

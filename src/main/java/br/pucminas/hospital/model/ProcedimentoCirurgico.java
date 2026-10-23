@@ -144,6 +144,16 @@ public class ProcedimentoCirurgico extends Atendimento {
 	 * O início real quando o procedimento já começou; antes disso, a data e hora prevista.
 	 */
 	@Override
+	public ModalidadeAtendimento getModalidade() {
+		return ModalidadeAtendimento.PROCEDIMENTO_CIRURGICO;
+	}
+
+	@Override
+	public <R> R aceitar(VisitanteAtendimento<R> visitante) {
+		return visitante.visitar(this);
+	}
+
+	@Override
 	public LocalDateTime getDataHoraReferencia() {
 		return dataHoraInicio != null ? dataHoraInicio : dataHoraPrevista;
 	}

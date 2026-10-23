@@ -25,6 +25,18 @@ public interface ConsultaRepository extends JpaRepository<Consulta, Long> {
 		return findByPacienteIdAndDataAndSituacaoIn(pacienteId, data, SituacaoConsulta.ativas());
 	}
 
+	default boolean existeAtivaDoPaciente(Long pacienteId) {
+		return existsByPacienteIdAndSituacaoIn(pacienteId, SituacaoConsulta.ativas());
+	}
+
+	default boolean existeAtivaDoProfissional(Long profissionalId) {
+		return existsByProfissionalResponsavelIdAndSituacaoIn(profissionalId, SituacaoConsulta.ativas());
+	}
+
+	boolean existsByPacienteIdAndSituacaoIn(Long pacienteId, Collection<SituacaoConsulta> situacoes);
+
+	boolean existsByProfissionalResponsavelIdAndSituacaoIn(Long profissionalId, Collection<SituacaoConsulta> situacoes);
+
 	List<Consulta> findByProfissionalResponsavelIdAndDataAndSituacaoIn(Long profissionalId, LocalDate data,
 			Collection<SituacaoConsulta> situacoes);
 
@@ -41,5 +53,18 @@ public interface ConsultaRepository extends JpaRepository<Consulta, Long> {
 			""")
 	List<Consulta> findAgendaDoProfissional(@Param("profissionalId") Long profissionalId,
 			@Param("data") LocalDate data);
+
+	/**
+	 * Consultas com filtros opcionais (nulo = sem filtro), em ordem de data e horário.
+	 */
+	@Query("""
+			select c from Consulta c
+			where (:situacao is null or c.situacao = :situacao)
+			  and (:profissionalId is null or c.profissionalResponsavel.id = :profissionalId)
+			  and (:data is null or c.data = :data)
+			order by c.data, c.horario
+			""")
+	List<Consulta> findComFiltros(@Param("situacao") SituacaoConsulta situacao,
+			@Param("profissionalId") Long profissionalId, @Param("data") LocalDate data);
 
 }

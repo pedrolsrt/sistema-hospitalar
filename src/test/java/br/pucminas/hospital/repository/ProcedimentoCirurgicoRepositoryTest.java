@@ -94,4 +94,21 @@ class ProcedimentoCirurgicoRepositoryTest {
 				.containsExactly("Início do dia", "Meio do dia", "Cancelado no dia", "Fim do dia");
 	}
 
+	@Test
+	void verificaProcedimentoAtivoDePacienteEDeCirurgiao() {
+		concluido(drPaulo, "Artroscopia", DIA.atTime(10, 0));
+		ProcedimentoCirurgico cancelado = agendar(drPaulo, "Biópsia", DIA.atTime(15, 0));
+		cancelado.cancelar();
+		em.persist(cancelado);
+		salvarERecarregar();
+		assertThat(repository.existeAtivoDoProfissional(drPaulo.getId())).isFalse();
+		assertThat(repository.existeAtivoDoPaciente(paciente.getId())).isFalse();
+
+		ProcedimentoCirurgico emAndamento = agendar(draCarla, "Herniorrafia", DIA.atTime(8, 0));
+		emAndamento.iniciar(DIA.atTime(8, 5));
+		em.persist(emAndamento);
+		salvarERecarregar();
+		assertThat(repository.existeAtivoDoProfissional(draCarla.getId())).isTrue();
+		assertThat(repository.existeAtivoDoPaciente(paciente.getId())).isTrue();
+	}
 }

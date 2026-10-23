@@ -1,8 +1,11 @@
 package br.pucminas.hospital.repository;
 
 import br.pucminas.hospital.model.ProcedimentoCirurgico;
+import br.pucminas.hospital.model.SituacaoAtendimento;
+import br.pucminas.hospital.model.SituacaoProcedimento;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -37,5 +40,19 @@ public interface ProcedimentoCirurgicoRepository extends JpaRepository<Procedime
 			""")
 	List<ProcedimentoCirurgico> findPrevistosEntre(@Param("inicio") LocalDateTime inicio,
 			@Param("fim") LocalDateTime fim);
+
+	default boolean existeAtivoDoPaciente(Long pacienteId) {
+		return existsByPacienteIdAndSituacaoIn(pacienteId, SituacaoAtendimento.ativas(SituacaoProcedimento.class));
+	}
+
+	default boolean existeAtivoDoProfissional(Long profissionalId) {
+		return existsByProfissionalResponsavelIdAndSituacaoIn(profissionalId,
+				SituacaoAtendimento.ativas(SituacaoProcedimento.class));
+	}
+
+	boolean existsByPacienteIdAndSituacaoIn(Long pacienteId, Collection<SituacaoProcedimento> situacoes);
+
+	boolean existsByProfissionalResponsavelIdAndSituacaoIn(Long profissionalId,
+			Collection<SituacaoProcedimento> situacoes);
 
 }

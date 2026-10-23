@@ -13,10 +13,15 @@ import br.pucminas.hospital.dto.PacienteRequest;
 import br.pucminas.hospital.dto.PacienteResponse;
 import br.pucminas.hospital.exception.DadoJaCadastradoException;
 import br.pucminas.hospital.exception.RecursoNaoEncontradoException;
+import br.pucminas.hospital.exception.RegraNegocioException;
 import br.pucminas.hospital.mapper.PacienteMapper;
 import br.pucminas.hospital.model.Endereco;
 import br.pucminas.hospital.model.Paciente;
+import br.pucminas.hospital.repository.AtendimentoEmergenciaRepository;
+import br.pucminas.hospital.repository.ConsultaRepository;
+import br.pucminas.hospital.repository.InternacaoRepository;
 import br.pucminas.hospital.repository.PacienteRepository;
+import br.pucminas.hospital.repository.ProcedimentoCirurgicoRepository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -36,11 +41,24 @@ class PacienteServiceTest {
 	@Mock
 	private PacienteRepository repository;
 
+	@Mock
+	private InternacaoRepository internacaoRepository;
+
+	@Mock
+	private ConsultaRepository consultaRepository;
+
+	@Mock
+	private AtendimentoEmergenciaRepository emergenciaRepository;
+
+	@Mock
+	private ProcedimentoCirurgicoRepository procedimentoRepository;
+
 	private PacienteService service;
 
 	@BeforeEach
 	void criarService() {
-		service = new PacienteService(repository, new PacienteMapper());
+		service = new PacienteService(repository, internacaoRepository, consultaRepository, emergenciaRepository,
+				procedimentoRepository, new PacienteMapper());
 	}
 
 	private PacienteRequest request(String cpf) {
@@ -154,6 +172,63 @@ class PacienteServiceTest {
 		assertThat(paciente.isAtivo()).isFalse();
 		assertThat(service.reativar(1L).ativo()).isTrue();
 		assertThat(paciente.isAtivo()).isTrue();
+	}
+
+	@Test
+	void naoInativaPacienteComInternacaoAtiva() {
+		Paciente paciente = pacienteSalvo();
+		when(repository.findById(1L)).thenReturn(Optional.of(paciente));
+		when(internacaoRepository.existsByPacienteIdAndDataEfetivaAltaIsNull(1L)).thenReturn(true);
+
+		assertThatThrownBy(() -> service.inativar(1L))
+				.isInstanceOf(RegraNegocioException.class)
+				.hasMessage("O paciente Maria Silva não pode ser inativado porque tem: internação ativa.");
+		assertThat(paciente.isAtivo()).isTrue();
+	}
+
+	@Test
+	void naoInativaPacienteComConsultaAtiva() {
+		Paciente paciente = pacienteSalvo();
+		when(repository.findById(1L)).thenReturn(Optional.of(paciente));
+		when(consultaRepository.existeAtivaDoPaciente(1L)).thenReturn(true);
+
+		assertThatThrownBy(() -> service.inativar(1L))
+				.hasMessage("O paciente Maria Silva não pode ser inativado porque tem: "
+						+ "consulta agendada, confirmada ou em atendimento.");
+		assertThat(paciente.isAtivo()).isTrue();
+	}
+
+	@Test
+	void naoInativaPacienteComEmergenciaAtiva() {
+		Paciente paciente = pacienteSalvo();
+		when(repository.findById(1L)).thenReturn(Optional.of(paciente));
+		when(emergenciaRepository.existeAtivoDoPaciente(1L)).thenReturn(true);
+
+		assertThatThrownBy(() -> service.inativar(1L)).hasMessageContaining("atendimento de emergência");
+		assertThat(paciente.isAtivo()).isTrue();
+	}
+
+	@Test
+	void naoInativaPacienteComProcedimentoAtivo() {
+		Paciente paciente = pacienteSalvo();
+		when(repository.findById(1L)).thenReturn(Optional.of(paciente));
+		when(procedimentoRepository.existeAtivoDoPaciente(1L)).thenReturn(true);
+
+		assertThatThrownBy(() -> service.inativar(1L)).hasMessageContaining("procedimento cirúrgico agendado ou em andamento");
+		assertThat(paciente.isAtivo()).isTrue();
+	}
+
+	@Test
+	void mensagemListaTodosOsImpedimentos() {
+		when(repository.findById(1L)).thenReturn(Optional.of(pacienteSalvo()));
+		when(internacaoRepository.existsByPacienteIdAndDataEfetivaAltaIsNull(1L)).thenReturn(true);
+		when(consultaRepository.existeAtivaDoPaciente(1L)).thenReturn(true);
+		when(emergenciaRepository.existeAtivoDoPaciente(1L)).thenReturn(true);
+		when(procedimentoRepository.existeAtivoDoPaciente(1L)).thenReturn(true);
+
+		assertThatThrownBy(() -> service.inativar(1L)).hasMessage("O paciente Maria Silva não pode ser inativado "
+				+ "porque tem: internação ativa; consulta agendada, confirmada ou em atendimento; atendimento de "
+				+ "emergência aguardando avaliação ou em atendimento; procedimento cirúrgico agendado ou em andamento.");
 	}
 
 	@Test

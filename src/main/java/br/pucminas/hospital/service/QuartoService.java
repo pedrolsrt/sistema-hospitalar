@@ -110,8 +110,7 @@ public class QuartoService {
 	}
 
 	private Quarto buscar(Long id) {
-		return repository.findById(id)
-				.orElseThrow(() -> new RecursoNaoEncontradoException("Quarto não encontrado (id " + id + ")."));
+		return Busca.quarto(repository, id);
 	}
 
 	private List<QuartoResponse> paraResponses(List<Quarto> quartos) {

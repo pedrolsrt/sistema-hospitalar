@@ -5,9 +5,14 @@ import br.pucminas.hospital.dto.ProfissionalSaudeRequest;
 import br.pucminas.hospital.dto.ProfissionalSaudeResponse;
 import br.pucminas.hospital.exception.DadoJaCadastradoException;
 import br.pucminas.hospital.exception.RecursoNaoEncontradoException;
+import br.pucminas.hospital.exception.RegraNegocioException;
 import br.pucminas.hospital.mapper.ProfissionalSaudeMapper;
 import br.pucminas.hospital.model.AreaAtuacao;
 import br.pucminas.hospital.model.ProfissionalSaude;
+import br.pucminas.hospital.repository.AtendimentoEmergenciaRepository;
+import br.pucminas.hospital.repository.ConsultaRepository;
+import br.pucminas.hospital.repository.InternacaoRepository;
+import br.pucminas.hospital.repository.ProcedimentoCirurgicoRepository;
 import br.pucminas.hospital.repository.ProfissionalSaudeRepository;
 import java.util.List;
 import org.springframework.data.domain.Sort;
@@ -23,10 +28,20 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProfissionalSaudeService {
 
 	private final ProfissionalSaudeRepository repository;
+	private final ConsultaRepository consultaRepository;
+	private final AtendimentoEmergenciaRepository emergenciaRepository;
+	private final ProcedimentoCirurgicoRepository procedimentoRepository;
+	private final InternacaoRepository internacaoRepository;
 	private final ProfissionalSaudeMapper mapper;
 
-	public ProfissionalSaudeService(ProfissionalSaudeRepository repository, ProfissionalSaudeMapper mapper) {
+	public ProfissionalSaudeService(ProfissionalSaudeRepository repository, ConsultaRepository consultaRepository,
+			AtendimentoEmergenciaRepository emergenciaRepository, ProcedimentoCirurgicoRepository procedimentoRepository,
+			InternacaoRepository internacaoRepository, ProfissionalSaudeMapper mapper) {
 		this.repository = repository;
+		this.consultaRepository = consultaRepository;
+		this.emergenciaRepository = emergenciaRepository;
+		this.procedimentoRepository = procedimentoRepository;
+		this.internacaoRepository = internacaoRepository;
 		this.mapper = mapper;
 	}
 
@@ -83,14 +98,28 @@ public class ProfissionalSaudeService {
 	}
 
 	/**
-	 * Inativa o profissional. Não tem efeito se ele já estiver inativo.
+	 * Inativa o profissional. Não é permitido enquanto houver consulta, emergência, procedimento ou
+	 * internação ativos sob a sua responsabilidade. Não tem efeito se ele já estiver inativo.
 	 *
 	 * @throws RecursoNaoEncontradoException se o profissional não existir
+	 * @throws RegraNegocioException se houver atendimento ativo sob sua responsabilidade, informando quais
 	 */
 	@Transactional
 	public ProfissionalSaudeResponse inativar(Long id) {
 		ProfissionalSaude profissional = buscar(id);
-		profissional.inativar();
+		if (profissional.isAtivo()) {
+			new Impedimentos()
+					.se(consultaRepository.existeAtivaDoProfissional(id), "consulta agendada, confirmada ou em atendimento")
+					.se(emergenciaRepository.existeAtivoDoProfissional(id),
+							"atendimento de emergência aguardando avaliação ou em atendimento")
+					.se(procedimentoRepository.existeAtivoDoProfissional(id),
+							"procedimento cirúrgico agendado ou em andamento")
+					.se(internacaoRepository.existsByProfissionalResponsavelIdAndDataEfetivaAltaIsNull(id),
+							"internação ativa")
+					.exigirNenhum("O profissional " + profissional.getNome()
+							+ " não pode ser inativado porque tem sob sua responsabilidade");
+			profissional.inativar();
+		}
 		return mapper.paraResponse(profissional);
 	}
 
@@ -107,8 +136,7 @@ public class ProfissionalSaudeService {
 	}
 
 	private ProfissionalSaude buscar(Long id) {
-		return repository.findById(id).orElseThrow(
-				() -> new RecursoNaoEncontradoException("Profissional de saúde não encontrado (id " + id + ")."));
+		return Busca.profissional(repository, id);
 	}
 
 }

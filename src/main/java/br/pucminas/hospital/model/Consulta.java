@@ -103,6 +103,18 @@ public abstract class Consulta extends Atendimento {
 	}
 
 	@Override
+	public <R> R aceitar(VisitanteAtendimento<R> visitante) {
+		return visitante.visitar(this);
+	}
+
+	/**
+	 * Área da consulta especializada; nula na consulta de rotina.
+	 */
+	public AreaAtuacao getAreaAtuacao() {
+		return null;
+	}
+
+	@Override
 	public LocalDateTime getDataHoraReferencia() {
 		return data.atTime(horario);
 	}

@@ -17,6 +17,11 @@ public class ConsultaRotina extends Consulta {
 		super(paciente, profissionalResponsavel, data, horario, motivo);
 	}
 
+	@Override
+	public ModalidadeAtendimento getModalidade() {
+		return ModalidadeAtendimento.CONSULTA_ROTINA;
+	}
+
 	// Qualquer profissional ativo realiza consulta de rotina; as verificações comuns já bastam.
 	@Override
 	protected void validarCondicoesEspecificas() {

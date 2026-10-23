@@ -4,7 +4,6 @@ import br.pucminas.hospital.dto.CodigoDescricao;
 import br.pucminas.hospital.dto.QuartoRequest;
 import br.pucminas.hospital.dto.QuartoResponse;
 import br.pucminas.hospital.model.Quarto;
-import br.pucminas.hospital.model.TipoQuarto;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -21,9 +20,8 @@ public class QuartoMapper {
 	}
 
 	public QuartoResponse paraResponse(Quarto quarto) {
-		TipoQuarto tipo = quarto.getTipo();
 		return new QuartoResponse(quarto.getId(), quarto.getNumero(), quarto.getAndar(),
-				new CodigoDescricao(tipo.name(), tipo.getDescricao()), quarto.getCapacidadeMaxima(),
+				CodigoDescricao.de(quarto.getTipo()), quarto.getCapacidadeMaxima(),
 				quarto.getOcupacaoAtual(), quarto.getSituacao());
 	}
 

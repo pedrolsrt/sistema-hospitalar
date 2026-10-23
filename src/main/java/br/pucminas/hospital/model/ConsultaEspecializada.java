@@ -45,6 +45,12 @@ public class ConsultaEspecializada extends Consulta {
 		}
 	}
 
+	@Override
+	public ModalidadeAtendimento getModalidade() {
+		return ModalidadeAtendimento.CONSULTA_ESPECIALIZADA;
+	}
+
+	@Override
 	public AreaAtuacao getAreaAtuacao() {
 		return areaAtuacao;
 	}

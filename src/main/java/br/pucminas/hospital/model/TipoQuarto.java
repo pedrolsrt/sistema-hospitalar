@@ -4,7 +4,7 @@ package br.pucminas.hospital.model;
  * Tipos de quarto e a capacidade máxima permitida em cada um. Os limites são uma suposição do grupo e
  * ficam só aqui (o banco não os repete) para que mudá-los não exija migration.
  */
-public enum TipoQuarto {
+public enum TipoQuarto implements Descritivel {
 	ENFERMARIA("Enfermaria", 6),
 	APARTAMENTO("Apartamento", 2),
 	UTI("UTI", 1);
@@ -21,6 +21,7 @@ public enum TipoQuarto {
 		return capacidade <= capacidadeMaximaPermitida;
 	}
 
+	@Override
 	public String getDescricao() {
 		return descricao;
 	}

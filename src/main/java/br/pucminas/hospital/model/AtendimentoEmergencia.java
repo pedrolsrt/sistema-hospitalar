@@ -94,6 +94,16 @@ public class AtendimentoEmergencia extends Atendimento {
 	}
 
 	@Override
+	public ModalidadeAtendimento getModalidade() {
+		return ModalidadeAtendimento.EMERGENCIA;
+	}
+
+	@Override
+	public <R> R aceitar(VisitanteAtendimento<R> visitante) {
+		return visitante.visitar(this);
+	}
+
+	@Override
 	public LocalDateTime getDataHoraReferencia() {
 		return dataHoraChegada;
 	}

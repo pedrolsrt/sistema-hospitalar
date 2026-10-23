@@ -4,7 +4,7 @@ package br.pucminas.hospital.model;
  * Categorias de profissional de saúde. Cada constante sabe criar o profissional da sua categoria,
  * o que evita decidir a subclasse com condicionais fora daqui.
  */
-public enum CategoriaProfissional {
+public enum CategoriaProfissional implements Descritivel {
 
 	CLINICO_GERAL("Clínico geral", false) {
 		@Override
@@ -44,6 +44,7 @@ public enum CategoriaProfissional {
 		return exigeArea;
 	}
 
+	@Override
 	public String getDescricao() {
 		return descricao;
 	}

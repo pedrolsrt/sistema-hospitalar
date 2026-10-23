@@ -10,10 +10,16 @@ public interface InternacaoRepository extends JpaRepository<Internacao, Long> {
 
 	List<Internacao> findByDataEfetivaAltaIsNullOrderByDataEntradaAsc();
 
+	List<Internacao> findByDataEfetivaAltaIsNotNullOrderByDataEfetivaAltaDesc();
+
 	Optional<Internacao> findByPacienteIdAndDataEfetivaAltaIsNull(Long pacienteId);
 
 	boolean existsByQuartoIdAndDataEfetivaAltaIsNull(Long quartoId);
 
 	boolean existsByQuartoId(Long quartoId);
+
+	boolean existsByPacienteIdAndDataEfetivaAltaIsNull(Long pacienteId);
+
+	boolean existsByProfissionalResponsavelIdAndDataEfetivaAltaIsNull(Long profissionalId);
 
 }
