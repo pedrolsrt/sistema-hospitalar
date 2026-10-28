@@ -15,7 +15,7 @@ public interface ProcedimentoCirurgicoRepository extends JpaRepository<Procedime
 
 	/**
 	 * Procedimentos realizados (concluídos) pelo cirurgião, do mais recente para o mais antigo. Substitui
-	 * uma coleção mapeada em Cirurgiao (ver CLAUDE.md).
+	 * uma coleção mapeada em Cirurgiao, que traria também os cancelados e cresceria sem limite.
 	 */
 	@Query("""
 			select p from ProcedimentoCirurgico p

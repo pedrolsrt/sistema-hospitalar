@@ -117,14 +117,6 @@ public class Internacao extends Atendimento {
 		return dataPrevistaAlta;
 	}
 
-	/**
-	 * Altera a previsão de alta, que não pode ser anterior à entrada.
-	 */
-	public void setDataPrevistaAlta(LocalDate dataPrevistaAlta) {
-		validarNaoAnteriorAEntrada(dataPrevistaAlta, dataEntrada, "prevista");
-		this.dataPrevistaAlta = dataPrevistaAlta;
-	}
-
 	public LocalDate getDataEfetivaAlta() {
 		return dataEfetivaAlta;
 	}

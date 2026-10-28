@@ -12,11 +12,6 @@ public interface QuartoRepository extends JpaRepository<Quarto, Long> {
 
 	Optional<Quarto> findByNumero(String numero);
 
-	@Query("select q from Quarto q where q.ocupacaoAtual < q.capacidadeMaxima order by q.numero")
-	List<Quarto> findComVaga();
-
-	List<Quarto> findByTipoOrderByNumeroAsc(TipoQuarto tipo);
-
 	/**
 	 * Quartos em ordem de número, opcionalmente só de um tipo (nulo = todos) e só os com vaga.
 	 */

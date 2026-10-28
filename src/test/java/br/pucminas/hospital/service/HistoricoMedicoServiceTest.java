@@ -33,7 +33,6 @@ import br.pucminas.hospital.model.TipoQuarto;
 import br.pucminas.hospital.repository.AtendimentoRepository;
 import br.pucminas.hospital.repository.PacienteRepository;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;

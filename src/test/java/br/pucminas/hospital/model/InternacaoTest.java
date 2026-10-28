@@ -124,22 +124,4 @@ class InternacaoTest {
 		assertThat(quarto.getOcupacaoAtual()).isZero();
 	}
 
-	@Test
-	void alteraAltaPrevistaValida() {
-		Internacao internacao = internar(new Quarto("201", 2, TipoQuarto.ENFERMARIA, 1));
-
-		internacao.setDataPrevistaAlta(ENTRADA.plusDays(10));
-
-		assertThat(internacao.getDataPrevistaAlta()).isEqualTo(ENTRADA.plusDays(10));
-	}
-
-	@Test
-	void naoAlteraAltaPrevistaParaAntesDaEntrada() {
-		Internacao internacao = internar(new Quarto("201", 2, TipoQuarto.ENFERMARIA, 1));
-
-		assertThatThrownBy(() -> internacao.setDataPrevistaAlta(ENTRADA.minusDays(2)))
-				.isInstanceOf(DataInvalidaException.class);
-		assertThat(internacao.getDataPrevistaAlta()).isEqualTo(ENTRADA.plusDays(5));
-	}
-
 }

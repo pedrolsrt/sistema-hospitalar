@@ -21,7 +21,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class SituacaoConsultaTest {
 
-	// Transições do CLAUDE.md, escritas de forma independente da implementação do enum.
+	// Transições definidas para a consulta, escritas de forma independente da implementação do enum.
 	private static final Map<SituacaoConsulta, Set<SituacaoConsulta>> TRANSICOES_VALIDAS = Map.of(
 			AGENDADA, Set.of(CONFIRMADA, CANCELADA, NAO_COMPARECEU),
 			CONFIRMADA, Set.of(EM_ATENDIMENTO, CANCELADA, NAO_COMPARECEU),

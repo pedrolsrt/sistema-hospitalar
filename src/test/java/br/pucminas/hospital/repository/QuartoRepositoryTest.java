@@ -44,19 +44,6 @@ class QuartoRepositoryTest {
 	}
 
 	@Test
-	void quartosComVagaEmOrdemDeNumero() {
-		assertThat(repository.findComVaga()).extracting(Quarto::getNumero).containsExactly("101", "301", "302");
-	}
-
-	@Test
-	void quartosPorTipo() {
-		assertThat(repository.findByTipoOrderByNumeroAsc(TipoQuarto.APARTAMENTO)).extracting(Quarto::getNumero)
-				.containsExactly("301", "302");
-		assertThat(repository.findByTipoOrderByNumeroAsc(TipoQuarto.UTI)).extracting(Quarto::getNumero)
-				.containsExactly("201");
-	}
-
-	@Test
 	void filtrosOpcionaisDeTipoEVaga() {
 		assertThat(repository.findComFiltros(null, false)).extracting(Quarto::getNumero)
 				.containsExactly("101", "201", "301", "302");

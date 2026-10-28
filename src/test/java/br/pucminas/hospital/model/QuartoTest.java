@@ -82,7 +82,7 @@ class QuartoTest {
 		quarto.ocupar();
 		quarto.ocupar();
 
-		quarto.setCapacidadeMaxima(2);
+		quarto.alterarTipoECapacidade(TipoQuarto.ENFERMARIA, 2);
 
 		assertThat(quarto.getCapacidadeMaxima()).isEqualTo(2);
 		assertThat(quarto.getSituacao()).isEqualTo(SituacaoQuarto.OCUPADO);
@@ -94,7 +94,7 @@ class QuartoTest {
 		quarto.ocupar();
 		quarto.ocupar();
 
-		assertThatThrownBy(() -> quarto.setCapacidadeMaxima(1))
+		assertThatThrownBy(() -> quarto.alterarTipoECapacidade(TipoQuarto.ENFERMARIA, 1))
 				.isInstanceOf(RegraNegocioException.class)
 				.hasMessageContaining("menor que a ocupação atual");
 		assertThat(quarto.getCapacidadeMaxima()).isEqualTo(3);
@@ -138,7 +138,8 @@ class QuartoTest {
 	void naoAumentaCapacidadeAcimaDoLimiteDoTipo() {
 		Quarto quarto = new Quarto("101", 1, TipoQuarto.APARTAMENTO, 1);
 
-		assertThatThrownBy(() -> quarto.setCapacidadeMaxima(3)).isInstanceOf(RegraNegocioException.class);
+		assertThatThrownBy(() -> quarto.alterarTipoECapacidade(TipoQuarto.APARTAMENTO, 3))
+				.isInstanceOf(RegraNegocioException.class);
 		assertThat(quarto.getCapacidadeMaxima()).isEqualTo(1);
 	}
 

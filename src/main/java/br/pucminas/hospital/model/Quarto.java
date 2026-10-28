@@ -153,16 +153,6 @@ public class Quarto {
 		return capacidadeMaxima;
 	}
 
-	/**
-	 * Altera a capacidade, que precisa ser positiva, respeitar o limite do tipo e comportar os pacientes
-	 * já internados.
-	 */
-	public void setCapacidadeMaxima(int capacidadeMaxima) {
-		validarTipo(tipo, capacidadeMaxima);
-		validarCapacidade(capacidadeMaxima, ocupacaoAtual);
-		this.capacidadeMaxima = capacidadeMaxima;
-	}
-
 	public int getOcupacaoAtual() {
 		return ocupacaoAtual;
 	}

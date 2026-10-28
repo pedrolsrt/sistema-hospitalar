@@ -35,12 +35,6 @@ class PacienteRepositoryTest {
 	}
 
 	@Test
-	void buscaPorCpf() {
-		assertThat(repository.findByCpf("11144477735")).get().extracting(Paciente::getNome).isEqualTo("Ana Costa");
-		assertThat(repository.findByCpf("00000000000")).isEmpty();
-	}
-
-	@Test
 	void verificaCpfJaCadastrado() {
 		assertThat(repository.existsByCpf("52998224725")).isTrue();
 		assertThat(repository.existsByCpf("39053344705")).isTrue();

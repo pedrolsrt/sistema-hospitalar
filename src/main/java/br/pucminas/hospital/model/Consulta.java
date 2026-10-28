@@ -131,10 +131,6 @@ public abstract class Consulta extends Atendimento {
 		return motivo;
 	}
 
-	public void setMotivo(String motivo) {
-		this.motivo = motivo;
-	}
-
 	public SituacaoConsulta getSituacao() {
 		return situacao;
 	}
