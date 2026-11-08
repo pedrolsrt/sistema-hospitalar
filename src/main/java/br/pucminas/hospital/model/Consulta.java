@@ -97,6 +97,24 @@ public abstract class Consulta extends Atendimento {
 		super.registrarObservacoes(texto);
 	}
 
+	/**
+	 * Encaminha o paciente para atendimento especializado na área informada. Só a consulta de rotina,
+	 * realizada por um profissional que possa encaminhar, admite encaminhamento.
+	 *
+	 * @throws RegraNegocioException se a modalidade ou o profissional não puder encaminhar, a área não for
+	 *         informada ou a consulta não estiver em atendimento nem concluída
+	 */
+	public void encaminhar(AreaAtuacao area) {
+		throw new RegraNegocioException("Só é possível encaminhar o paciente em uma consulta de rotina.");
+	}
+
+	/**
+	 * Área para a qual o paciente foi encaminhado; nula se não houve encaminhamento.
+	 */
+	public AreaAtuacao getAreaEncaminhamento() {
+		return null;
+	}
+
 	private void mudarPara(SituacaoConsulta nova, String acao) {
 		exigirTransicao(situacao, nova, acao);
 		situacao = nova;

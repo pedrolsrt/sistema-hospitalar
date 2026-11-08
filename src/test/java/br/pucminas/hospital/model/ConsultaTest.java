@@ -180,4 +180,70 @@ class ConsultaTest {
 		assertThat(consulta.getObservacoes()).isNull();
 	}
 
+	@ParameterizedTest
+	@EnumSource(value = SituacaoConsulta.class, names = { "EM_ATENDIMENTO", "CONCLUIDA" })
+	void clinicoGeralEncaminhaParaEspecialistaDuranteOuDepoisDoAtendimento(SituacaoConsulta situacao) {
+		Consulta consulta = consultaEm(situacao);
+
+		consulta.encaminhar(AreaAtuacao.CARDIOLOGIA);
+
+		assertThat(consulta.getAreaEncaminhamento()).isEqualTo(AreaAtuacao.CARDIOLOGIA);
+	}
+
+	@ParameterizedTest
+	@EnumSource(value = SituacaoConsulta.class, names = { "AGENDADA", "CONFIRMADA", "CANCELADA", "NAO_COMPARECEU" })
+	void naoEncaminhaForaDoAtendimento(SituacaoConsulta situacao) {
+		Consulta consulta = consultaEm(situacao);
+
+		assertThatThrownBy(() -> consulta.encaminhar(AreaAtuacao.CARDIOLOGIA))
+				.isInstanceOf(RegraNegocioException.class)
+				.hasMessageStartingWith("O encaminhamento só pode ser registrado durante o atendimento");
+		assertThat(consulta.getAreaEncaminhamento()).isNull();
+	}
+
+	@Test
+	void novoEncaminhamentoSubstituiOAnterior() {
+		Consulta consulta = consultaEm(SituacaoConsulta.EM_ATENDIMENTO);
+		consulta.encaminhar(AreaAtuacao.CARDIOLOGIA);
+
+		consulta.encaminhar(AreaAtuacao.NEUROLOGIA);
+
+		assertThat(consulta.getAreaEncaminhamento()).isEqualTo(AreaAtuacao.NEUROLOGIA);
+	}
+
+	@Test
+	void encaminhamentoExigeAArea() {
+		Consulta consulta = consultaEm(SituacaoConsulta.EM_ATENDIMENTO);
+
+		assertThatThrownBy(() -> consulta.encaminhar(null)).isInstanceOf(RegraNegocioException.class);
+	}
+
+	@Test
+	void especialistaNaoEncaminha() {
+		ProfissionalSaude cardiologista = new MedicoEspecialista("Dr. Pedro", "CRM-MG 2", AreaAtuacao.CARDIOLOGIA);
+		Consulta consulta = new ConsultaRotina(paciente, cardiologista, LocalDate.of(2030, 1, 15), LocalTime.of(14, 0),
+				"Dor no peito");
+		consulta.confirmar();
+		consulta.iniciarAtendimento();
+
+		assertThatThrownBy(() -> consulta.encaminhar(AreaAtuacao.NEUROLOGIA))
+				.isInstanceOf(RegraNegocioException.class)
+				.hasMessageContaining("é necessário um clínico geral");
+		assertThat(consulta.getAreaEncaminhamento()).isNull();
+	}
+
+	@Test
+	void consultaEspecializadaNaoAdmiteEncaminhamento() {
+		ProfissionalSaude cardiologista = new MedicoEspecialista("Dr. Pedro", "CRM-MG 2", AreaAtuacao.CARDIOLOGIA);
+		Consulta consulta = new ConsultaEspecializada(paciente, cardiologista, LocalDate.of(2030, 1, 15),
+				LocalTime.of(14, 0), "Arritmia", AreaAtuacao.CARDIOLOGIA);
+		consulta.confirmar();
+		consulta.iniciarAtendimento();
+
+		assertThatThrownBy(() -> consulta.encaminhar(AreaAtuacao.NEUROLOGIA))
+				.isInstanceOf(RegraNegocioException.class)
+				.hasMessage("Só é possível encaminhar o paciente em uma consulta de rotina.");
+		assertThat(consulta.getAreaEncaminhamento()).isNull();
+	}
+
 }
