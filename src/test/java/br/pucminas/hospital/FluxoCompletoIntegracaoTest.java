@@ -101,6 +101,9 @@ class FluxoCompletoIntegracaoTest {
 		String concluida = chamar(patch("/consultas/" + consulta + "/concluir"), null, 200);
 		assertThat(campo(concluida, "$.situacao.codigo")).isEqualTo("CONCLUIDA");
 		assertThat(campo(concluida, "$.observacoes")).isEqualTo("Pressão 12x8.");
+		chamar(patch("/consultas/" + consulta + "/encaminhar"), "{\"areaAtuacao\": \"CARDIOLOGIA\"}", 200);
+		String encaminhada = chamar(get("/consultas/" + consulta), null, 200);
+		assertThat(campo(encaminhada, "$.areaEncaminhamento.codigo")).isEqualTo("CARDIOLOGIA");
 
 		// Transição inválida: consulta concluída não pode ser cancelada.
 		String transicao = chamar(patch("/consultas/" + consulta + "/cancelar"), null, 409);

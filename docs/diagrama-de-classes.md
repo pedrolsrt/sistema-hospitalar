@@ -146,6 +146,7 @@ Uso de cada enum pelas classes do modelo. Em todas as associações, a multiplic
 | Enum | Relação | Classe e papel |
 |------|---------|----------------|
 | `AreaAtuacao` | Associação (1) | `MedicoEspecialista.areaAtuacao`, `Cirurgiao.areaCirurgica`, `ConsultaEspecializada.areaAtuacao` |
+| `AreaAtuacao` | Associação (0..1) | `ConsultaRotina.areaEncaminhamento`, nula quando não houve encaminhamento |
 | `CategoriaProfissional` | Dependência | `ProfissionalSaude.getCategoria()`; a categoria cria o profissional (`«cria»`) |
 | `ModalidadeAtendimento` | Dependência | `Atendimento.getModalidade()` |
 | `SituacaoConsulta` | Associação (1) | `Consulta.situacao` |
