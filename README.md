@@ -47,6 +47,10 @@ API REST com os endpoints de todos os recursos e diagrama de classes atualizado.
   médico especialista (com área de atuação) e cirurgião (com área cirúrgica). A listagem por área traz
   especialistas e cirurgiões daquela área. Só o especialista da área realiza consulta especializada, e só
   o cirurgião realiza procedimentos.
+- **Encaminhamento.** O clínico geral encaminha o paciente para atendimento especializado em uma área,
+  registrado na consulta de rotina (`areaEncaminhamento`). Só vale durante o atendimento ou depois da
+  conclusão; especialistas, cirurgiões e consultas especializadas não encaminham. Os especialistas da área
+  são listados em `GET /profissionais?area=`.
 - **Modalidades de atendimento.** `Atendimento` é abstrata, com as modalidades consulta de rotina,
   consulta especializada, internação, atendimento de emergência e procedimento cirúrgico. Todas validam
   paciente e profissional ativos antes da realização (padrão Template Method), e cada uma acrescenta as
@@ -114,6 +118,7 @@ inválida e 422 para as demais regras de negócio. Cadastros respondem 201 com o
 | | PATCH | `/consultas/{id}/cancelar` | Cancela uma consulta agendada ou confirmada |
 | | PATCH | `/consultas/{id}/registrar-nao-comparecimento` | Registra que o paciente não compareceu |
 | | PATCH | `/consultas/{id}/registrar-observacoes` | Registra as observações da consulta |
+| | PATCH | `/consultas/{id}/encaminhar` | Encaminha o paciente para atendimento especializado |
 | Internações | POST | `/internacoes` | Interna um paciente |
 | | GET | `/internacoes?ativas=` | Lista as internações ativas (padrão) ou as encerradas |
 | | GET | `/internacoes/{id}` | Busca uma internação |

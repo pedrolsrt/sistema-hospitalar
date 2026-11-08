@@ -208,6 +208,7 @@ classDiagram
         +atendeArea(AreaAtuacao) boolean
         +podeRealizarConsultaEspecializada(AreaAtuacao) boolean
         +podeRealizarProcedimentos() boolean
+        +podeEncaminharParaEspecialista() boolean
     }
 
     class CategoriaProfissional {
@@ -239,7 +240,9 @@ classDiagram
 
     class ProfissionalSaude { <<abstract>> }
 
-    class ClinicoGeral
+    class ClinicoGeral {
+        +podeEncaminharParaEspecialista() boolean
+    }
 
     class MedicoEspecialista {
         -AreaAtuacao areaAtuacao
@@ -286,11 +289,11 @@ classDiagram
     Cirurgiao "*" --> "1" AreaAtuacao : areaCirurgica
 ```
 
-| Categoria | `atendeArea(area)` | `podeRealizarConsultaEspecializada(area)` | `podeRealizarProcedimentos()` |
-|-----------|--------------------|-------------------------------------------|-------------------------------|
-| `ClinicoGeral` | falso | falso | falso |
-| `MedicoEspecialista` | verdadeiro na sua área de atuação | verdadeiro na sua área de atuação | falso |
-| `Cirurgiao` | verdadeiro na sua área cirúrgica | falso | verdadeiro |
+| Categoria | `atendeArea(area)` | `podeRealizarConsultaEspecializada(area)` | `podeRealizarProcedimentos()` | `podeEncaminharParaEspecialista()` |
+|-----------|--------------------|-------------------------------------------|-------------------------------|------------------------------------|
+| `ClinicoGeral` | falso | falso | falso | verdadeiro |
+| `MedicoEspecialista` | verdadeiro na sua área de atuação | verdadeiro na sua área de atuação | falso | falso |
+| `Cirurgiao` | verdadeiro na sua área cirúrgica | falso | verdadeiro | falso |
 
 ## 3. Atendimentos
 
@@ -303,7 +306,7 @@ Toda modalidade concreta implementa os métodos abstratos de `Atendimento`: `val
 
 | Modalidade | Condições específicas (`validarCondicoesEspecificas`) | Data e hora de referência no histórico |
 |------------|--------------------------------------------------------|-----------------------------------------|
-| `ConsultaRotina` | nenhuma além das comuns | data e horário da consulta |
+| `ConsultaRotina` | nenhuma além das comuns (admite encaminhamento por clínico geral) | data e horário da consulta |
 | `ConsultaEspecializada` | médico especialista da área da consulta | data e horário da consulta |
 | `AtendimentoEmergencia` | prioridade definida | chegada |
 | `ProcedimentoCirurgico` | profissional que realiza procedimentos (cirurgião), descrição, tipo de cirurgia e data e hora prevista | início real ou, antes dele, a data e hora prevista |
@@ -352,10 +355,16 @@ classDiagram
         +cancelar() void
         +registrarNaoComparecimento() void
         +registrarObservacoes(String) void
+        +encaminhar(AreaAtuacao) void
         +getAreaAtuacao() AreaAtuacao
+        +getAreaEncaminhamento() AreaAtuacao
     }
 
-    class ConsultaRotina
+    class ConsultaRotina {
+        -AreaAtuacao areaEncaminhamento
+        +encaminhar(AreaAtuacao) void
+        +getAreaEncaminhamento() AreaAtuacao
+    }
 
     class ConsultaEspecializada {
         -AreaAtuacao areaAtuacao
