@@ -3,6 +3,7 @@ package br.pucminas.hospital.controller;
 import br.pucminas.hospital.dto.ConsultaEspecializadaRequest;
 import br.pucminas.hospital.dto.ConsultaResponse;
 import br.pucminas.hospital.dto.ConsultaRotinaRequest;
+import br.pucminas.hospital.dto.EncaminhamentoRequest;
 import br.pucminas.hospital.dto.ObservacoesRequest;
 import br.pucminas.hospital.model.SituacaoConsulta;
 import br.pucminas.hospital.service.ConsultaService;
@@ -140,6 +141,19 @@ public class ConsultaController {
 	@ApiResponse(responseCode = "422", description = "A consulta não está em atendimento nem concluída")
 	public ConsultaResponse registrarObservacoes(@PathVariable Long id, @Valid @RequestBody ObservacoesRequest request) {
 		return service.registrarObservacoes(id, request);
+	}
+
+	@PatchMapping("/{id}/encaminhar")
+	@Operation(summary = "Encaminha o paciente para atendimento especializado",
+			description = "Só em consulta de rotina realizada por clínico geral, durante o atendimento ou depois da "
+					+ "conclusão. Os especialistas da área estão em GET /profissionais?area=.")
+	@ApiResponse(responseCode = "200", description = "Encaminhamento registrado")
+	@ApiResponse(responseCode = "400", description = "Área ausente ou inválida")
+	@ApiResponse(responseCode = "404", description = "Consulta não encontrada")
+	@ApiResponse(responseCode = "422", description = "Consulta que não admite encaminhamento, profissional que não "
+			+ "pode encaminhar ou consulta fora de atendimento")
+	public ConsultaResponse encaminhar(@PathVariable Long id, @Valid @RequestBody EncaminhamentoRequest request) {
+		return service.encaminhar(id, request);
 	}
 
 }

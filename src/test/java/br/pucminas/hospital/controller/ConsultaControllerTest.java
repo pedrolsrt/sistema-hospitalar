@@ -14,9 +14,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import br.pucminas.hospital.dto.ConsultaEspecializadaRequest;
 import br.pucminas.hospital.dto.ConsultaRotinaRequest;
+import br.pucminas.hospital.dto.EncaminhamentoRequest;
 import br.pucminas.hospital.dto.ObservacoesRequest;
 import br.pucminas.hospital.exception.RegraNegocioException;
 import br.pucminas.hospital.exception.TransicaoSituacaoInvalidaException;
+import br.pucminas.hospital.model.AreaAtuacao;
 import br.pucminas.hospital.model.SituacaoConsulta;
 import br.pucminas.hospital.service.ConsultaService;
 import java.time.LocalDate;
@@ -148,6 +150,33 @@ class ConsultaControllerTest {
 				.content("{\"texto\": \" \"}"))
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.campos[0].mensagem").value("O texto das observações é obrigatório."));
+	}
+
+	@Test
+	void encaminhaOPaciente() throws Exception {
+		when(service.encaminhar(eq(10L), any(EncaminhamentoRequest.class))).thenReturn(Exemplos.consulta("CONCLUIDA"));
+
+		mvc.perform(patch("/consultas/10/encaminhar").contentType(MediaType.APPLICATION_JSON)
+				.content("{\"areaAtuacao\": \"CARDIOLOGIA\"}"))
+				.andExpect(status().isOk());
+		verify(service).encaminhar(10L, new EncaminhamentoRequest(AreaAtuacao.CARDIOLOGIA));
+	}
+
+	@Test
+	void encaminhamentoSemAreaResponde400() throws Exception {
+		mvc.perform(patch("/consultas/10/encaminhar").contentType(MediaType.APPLICATION_JSON).content("{}"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.campos[0].mensagem").value("A área do atendimento especializado é obrigatória."));
+	}
+
+	@Test
+	void encaminhamentoNaoPermitidoResponde422() throws Exception {
+		when(service.encaminhar(eq(10L), any(EncaminhamentoRequest.class)))
+				.thenThrow(new RegraNegocioException("Só é possível encaminhar o paciente em uma consulta de rotina."));
+
+		mvc.perform(patch("/consultas/10/encaminhar").contentType(MediaType.APPLICATION_JSON)
+				.content("{\"areaAtuacao\": \"CARDIOLOGIA\"}"))
+				.andExpect(status().isUnprocessableContent());
 	}
 
 	@Test

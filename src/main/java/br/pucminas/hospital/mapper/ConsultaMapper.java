@@ -12,7 +12,8 @@ public class ConsultaMapper {
 		return new ConsultaResponse(consulta.getId(), CodigoDescricao.de(consulta.getModalidade()),
 				Resumos.de(consulta.getPaciente()), Resumos.de(consulta.getProfissionalResponsavel()), consulta.getData(),
 				consulta.getHorario(), consulta.getMotivo(), CodigoDescricao.de(consulta.getAreaAtuacao()),
-				CodigoDescricao.de(consulta.getSituacao()), consulta.getObservacoes());
+				CodigoDescricao.de(consulta.getSituacao()), consulta.getObservacoes(),
+				CodigoDescricao.de(consulta.getAreaEncaminhamento()));
 	}
 
 }

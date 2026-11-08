@@ -3,6 +3,7 @@ package br.pucminas.hospital.service;
 import br.pucminas.hospital.dto.ConsultaEspecializadaRequest;
 import br.pucminas.hospital.dto.ConsultaResponse;
 import br.pucminas.hospital.dto.ConsultaRotinaRequest;
+import br.pucminas.hospital.dto.EncaminhamentoRequest;
 import br.pucminas.hospital.dto.ObservacoesRequest;
 import br.pucminas.hospital.exception.DataInvalidaException;
 import br.pucminas.hospital.exception.RecursoNaoEncontradoException;
@@ -187,6 +188,18 @@ public class ConsultaService {
 	@Transactional
 	public ConsultaResponse registrarObservacoes(Long id, ObservacoesRequest request) {
 		return alterar(id, consulta -> consulta.registrarObservacoes(request.texto().strip()));
+	}
+
+	/**
+	 * Encaminha o paciente para atendimento especializado. Para escolher o profissional, consulte os
+	 * especialistas da área em {@code GET /profissionais?area=}.
+	 *
+	 * @throws RegraNegocioException se a consulta não for de rotina, o profissional não for clínico geral
+	 *         ou a consulta não estiver em atendimento nem concluída
+	 */
+	@Transactional
+	public ConsultaResponse encaminhar(Long id, EncaminhamentoRequest request) {
+		return alterar(id, consulta -> consulta.encaminhar(request.areaAtuacao()));
 	}
 
 	/**

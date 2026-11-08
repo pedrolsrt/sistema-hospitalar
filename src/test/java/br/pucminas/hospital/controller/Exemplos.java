@@ -44,7 +44,7 @@ final class Exemplos {
 	static ConsultaResponse consulta(String situacao) {
 		return new ConsultaResponse(10L, new CodigoDescricao("CONSULTA_ROTINA", "Consulta de rotina"), MARIA, DR_JOAO,
 				LocalDate.of(2030, 1, 15), LocalTime.of(14, 0), "Check-up", null, new CodigoDescricao(situacao, situacao),
-				null);
+				null, null);
 	}
 
 	static InternacaoResponse internacao(boolean ativa) {

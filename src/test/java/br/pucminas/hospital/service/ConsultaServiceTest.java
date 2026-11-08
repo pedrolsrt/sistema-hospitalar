@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import br.pucminas.hospital.dto.ConsultaEspecializadaRequest;
 import br.pucminas.hospital.dto.ConsultaResponse;
 import br.pucminas.hospital.dto.ConsultaRotinaRequest;
+import br.pucminas.hospital.dto.EncaminhamentoRequest;
 import br.pucminas.hospital.dto.ObservacoesRequest;
 import br.pucminas.hospital.exception.DataInvalidaException;
 import br.pucminas.hospital.exception.RecursoNaoEncontradoException;
@@ -318,6 +319,31 @@ class ConsultaServiceTest {
 
 		assertThatThrownBy(() -> service.registrarObservacoes(10L, new ObservacoesRequest("Texto")))
 				.isInstanceOf(RegraNegocioException.class);
+	}
+
+	@Test
+	void encaminhaOPacienteParaUmaArea() {
+		consultaSalva(SituacaoConsulta.EM_ATENDIMENTO);
+
+		ConsultaResponse resposta = service.encaminhar(10L, new EncaminhamentoRequest(AreaAtuacao.CARDIOLOGIA));
+
+		assertThat(resposta.areaEncaminhamento().codigo()).isEqualTo("CARDIOLOGIA");
+	}
+
+	@Test
+	void naoEncaminhaConsultaForaDoAtendimento() {
+		consultaSalva(SituacaoConsulta.AGENDADA);
+
+		assertThatThrownBy(() -> service.encaminhar(10L, new EncaminhamentoRequest(AreaAtuacao.CARDIOLOGIA)))
+				.isInstanceOf(RegraNegocioException.class);
+	}
+
+	@Test
+	void naoEncaminhaConsultaInexistente() {
+		when(repository.findById(99L)).thenReturn(Optional.empty());
+
+		assertThatThrownBy(() -> service.encaminhar(99L, new EncaminhamentoRequest(AreaAtuacao.CARDIOLOGIA)))
+				.isInstanceOf(RecursoNaoEncontradoException.class);
 	}
 
 	@Test

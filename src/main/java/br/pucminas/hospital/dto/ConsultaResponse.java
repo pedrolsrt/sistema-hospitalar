@@ -4,7 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 /**
- * Consulta de rotina ou especializada; a área de atuação só vem na especializada.
+ * Consulta de rotina ou especializada; a área de atuação só vem na especializada e a área de
+ * encaminhamento só na rotina em que o paciente foi encaminhado.
  */
 public record ConsultaResponse(
 		Long id,
@@ -16,5 +17,6 @@ public record ConsultaResponse(
 		String motivo,
 		CodigoDescricao areaAtuacao,
 		CodigoDescricao situacao,
-		String observacoes) implements AtendimentoResponse {
+		String observacoes,
+		CodigoDescricao areaEncaminhamento) implements AtendimentoResponse {
 }
