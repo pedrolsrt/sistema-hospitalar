@@ -62,6 +62,13 @@ public abstract class ProfissionalSaude extends Pessoa {
 		return false;
 	}
 
+	/**
+	 * Indica se o profissional pode encaminhar pacientes para atendimento especializado. Por padrão, não.
+	 */
+	public boolean podeEncaminharParaEspecialista() {
+		return false;
+	}
+
 	public String getRegistroProfissional() {
 		return registroProfissional;
 	}

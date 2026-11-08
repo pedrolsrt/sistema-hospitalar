@@ -27,6 +27,11 @@ class ProfissionalSaudeTest {
 			assertThat(clinico.podeRealizarProcedimentos()).isFalse();
 		}
 
+		@Test
+		void podeEncaminharParaEspecialista() {
+			assertThat(clinico.podeEncaminharParaEspecialista()).isTrue();
+		}
+
 		@ParameterizedTest
 		@EnumSource(AreaAtuacao.class)
 		void naoRealizaConsultaEspecializada(AreaAtuacao area) {

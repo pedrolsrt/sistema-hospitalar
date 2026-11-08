@@ -19,4 +19,9 @@ public class ClinicoGeral extends ProfissionalSaude {
 		return CategoriaProfissional.CLINICO_GERAL;
 	}
 
+	@Override
+	public boolean podeEncaminharParaEspecialista() {
+		return true;
+	}
+
 }
