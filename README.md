@@ -78,7 +78,23 @@ API REST com os endpoints de todos os recursos e diagrama de classes atualizado.
 ### Diagrama de classes
 
 [Diagrama de classes da Sprint 2](docs/diagrama-de-classes.md), em Mermaid: modelo de domínio,
-arquitetura em camadas, padrões de projeto e as principais decisões de modelagem.
+arquitetura em camadas, padrões de projeto e as principais decisões de modelagem. O diagrama completo,
+com todas as classes num único desenho, está em imagem ([PNG](docs/diagrama-de-classes-sprint2.png) e
+[SVG](docs/diagrama-de-classes-sprint2.svg)); a fonte em Mermaid é
+[diagrama-de-classes-completo.mmd](docs/diagrama-de-classes-completo.mmd).
+
+### Decisões de modelagem
+
+- **Endereço como objeto de valor.** Na conversa em sala sobre o diagrama da Sprint 1, o professor
+  questionou se fazia sentido manter uma classe só para o endereço. Analisamos depois e decidimos
+  mantê-la, por três motivos: os sete campos do endereço (logradouro, número, complemento, bairro,
+  cidade, UF e CEP) sempre andam juntos, e agrupá-los deixa a classe `Paciente` mais coesa; o endereço é
+  um objeto de valor, sem identidade própria e que não existe sem o paciente, o que justifica a
+  composição; e ele não gera uma tabela separada no banco, porque fica embutido na própria tabela do
+  paciente, então organiza o código sem nenhum custo na persistência.
+
+As demais decisões (heranças, padrões de projeto e regras de cada modalidade) estão explicadas na seção
+[Decisões de modelagem](docs/diagrama-de-classes.md#7-decisões-de-modelagem) do diagrama de classes.
 
 ### Endpoints
 

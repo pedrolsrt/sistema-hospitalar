@@ -1,9 +1,15 @@
 # Diagrama de classes - Sprint 2
 
-Modelo de domínio do pacote `br.pucminas.hospital.model` ao fim da Sprint 2. O modelo tem 28 tipos; para
-que cada desenho fique legível na largura da página, ele está dividido em uma visão geral, só com os nomes
-dos tipos, e em diagramas de detalhe com no máximo dez tipos cada. O diagrama da Sprint 1 continua
-disponível em
+Modelo de domínio do pacote `br.pucminas.hospital.model` ao fim da Sprint 2, com os 28 tipos num único
+diagrama:
+
+![Diagrama de classes completo da Sprint 2](diagrama-de-classes-sprint2.png)
+
+A mesma imagem está em [SVG](diagrama-de-classes-sprint2.svg), que pode ser ampliado sem perder
+nitidez, e a fonte em Mermaid está em [diagrama-de-classes-completo.mmd](diagrama-de-classes-completo.mmd).
+Para facilitar a leitura, os
+diagramas a seguir dividem o mesmo modelo por assunto: uma visão geral, só com os nomes dos tipos, e
+diagramas de detalhe com no máximo dez tipos cada. O diagrama da Sprint 1 continua disponível em
 [diagrama-de-classes.png](diagrama-de-classes.png).
 
 ## Sumário
@@ -37,12 +43,21 @@ disponível em
 | «embeddable» | Objeto de valor embutido na entidade (JPA `@Embeddable`) |
 | Linha cheia com triângulo vazado | Herança |
 | Linha tracejada com triângulo vazado | Realização de interface |
-| Linha cheia com losango cheio | Composição (o losango fica no lado do todo) |
+| Linha cheia com losango cheio | Composição: a parte não existe sem o todo (o losango fica no lado do todo) |
+| Linha cheia com losango vazio | Agregação: a parte tem vida própria (o losango fica no lado do todo) |
 | Linha cheia com seta | Associação, com multiplicidade nas pontas e nome do papel |
 | Linha tracejada com seta | Dependência, com a operação ou o estereótipo que a origina |
 
+Relação com enums: quando a classe guarda o enum num campo, a ligação é uma associação (linha cheia), com
+multiplicidade e com o nome do campo como papel. A dependência (linha tracejada) fica só para os enums
+que aparecem apenas como retorno de método, sem ser campo da classe: `CategoriaProfissional`
+(`ProfissionalSaude.getCategoria()`), `ModalidadeAtendimento` (`Atendimento.getModalidade()`) e
+`SituacaoQuarto` (`Quarto.getSituacao()`).
+
 Critérios usados em todos os diagramas:
 
+- Propriedade desenhada como linha (associação, composição ou agregação, com o nome do papel) não se
+  repete como atributo no compartimento da classe.
 - Nos parâmetros dos métodos consta apenas o tipo.
 - Getters e setters não aparecem, exceto os que têm comportamento de domínio: os que as subclasses
   sobrescrevem (`getArea`, `getAreaAtuacao`) e os que expressam uma regra (`Quarto.getSituacao`, derivada
@@ -65,7 +80,8 @@ diagramas de detalhe.
 ### 1.1 Classes e associações
 
 As duas hierarquias do modelo, `Pessoa` e `Atendimento`, e as associações que ligam um atendimento ao
-paciente, ao profissional responsável e, na internação, ao quarto.
+paciente e ao profissional responsável, a composição do paciente com o endereço e a agregação das
+internações no quarto.
 
 ```mermaid
 classDiagram
@@ -99,10 +115,10 @@ classDiagram
     Atendimento <|-- Internacao
     Consulta <|-- ConsultaRotina
     Consulta <|-- ConsultaEspecializada
-    Internacao "*" --> "1" Quarto : quarto
+    Quarto "1" o-- "0..*" Internacao : quarto
     VisitanteAtendimento <.. Atendimento : aceitar()
-    Paciente "1" <-- "*" Atendimento : paciente
-    ProfissionalSaude "1" <-- "*" Atendimento : profissionalResponsavel
+    Paciente "1" <-- "0..*" Atendimento : paciente
+    ProfissionalSaude "1" <-- "0..*" Atendimento : profissionalResponsavel
     Endereco "0..1" --* "1" Paciente : endereco
 ```
 
@@ -141,7 +157,7 @@ classDiagram
 ```
 
 Uso de cada enum pelas classes do modelo. Em todas as associações, a multiplicidade no lado da classe é
-`*`.
+`0..*`.
 
 | Enum | Relação | Classe e papel |
 |------|---------|----------------|
@@ -187,7 +203,6 @@ classDiagram
     class Paciente {
         -String cpf
         -LocalDate dataNascimento
-        -Endereco endereco
     }
 
     class Endereco {
@@ -246,14 +261,12 @@ classDiagram
     }
 
     class MedicoEspecialista {
-        -AreaAtuacao areaAtuacao
         +getArea() AreaAtuacao
         +atendeArea(AreaAtuacao) boolean
         +podeRealizarConsultaEspecializada(AreaAtuacao) boolean
     }
 
     class Cirurgiao {
-        -AreaAtuacao areaCirurgica
         +getArea() AreaAtuacao
         +atendeArea(AreaAtuacao) boolean
         +podeRealizarProcedimentos() boolean
@@ -286,8 +299,8 @@ classDiagram
     ProfissionalSaude <|-- ClinicoGeral
     ProfissionalSaude <|-- MedicoEspecialista
     ProfissionalSaude <|-- Cirurgiao
-    MedicoEspecialista "*" --> "1" AreaAtuacao : areaAtuacao
-    Cirurgiao "*" --> "1" AreaAtuacao : areaCirurgica
+    MedicoEspecialista "0..*" --> "1" AreaAtuacao : areaAtuacao
+    Cirurgiao "0..*" --> "1" AreaAtuacao : areaCirurgica
 ```
 
 | Categoria | `atendeArea(area)` | `podeRealizarConsultaEspecializada(area)` | `podeRealizarProcedimentos()` | `podeEncaminharParaEspecialista()` |
@@ -318,8 +331,8 @@ profissional ativos.
 
 ### 3.1 Atendimento e consultas
 
-A classe base, as consultas de rotina e especializada, a modalidade de cada atendimento e o visitante
-usado para montar o histórico médico.
+A classe base, as consultas de rotina e especializada com os enums ligados a elas, a modalidade de cada
+atendimento e o visitante usado para montar o histórico médico.
 
 ```mermaid
 classDiagram
@@ -327,12 +340,12 @@ classDiagram
 
     class Paciente
     class ProfissionalSaude { <<abstract>> }
+    class AreaAtuacao { <<enumeration>> }
+    class SituacaoConsulta { <<enumeration>> }
 
     class Atendimento {
         <<abstract>>
         -Long id
-        -Paciente paciente
-        -ProfissionalSaude profissionalResponsavel
         -String observacoes
         +validarRealizacao() void
         +validarParticipantesAtivos() void
@@ -349,7 +362,6 @@ classDiagram
         -LocalDate data
         -LocalTime horario
         -String motivo
-        -SituacaoConsulta situacao
         +confirmar() void
         +iniciarAtendimento() void
         +concluir() void
@@ -362,13 +374,11 @@ classDiagram
     }
 
     class ConsultaRotina {
-        -AreaAtuacao areaEncaminhamento
         +encaminhar(AreaAtuacao) void
         +getAreaEncaminhamento() AreaAtuacao
     }
 
     class ConsultaEspecializada {
-        -AreaAtuacao areaAtuacao
         +getAreaAtuacao() AreaAtuacao
     }
 
@@ -390,29 +400,36 @@ classDiagram
         +visitar(ProcedimentoCirurgico)* R
     }
 
-    Paciente "1" <-- "*" Atendimento : paciente
-    ProfissionalSaude "1" <-- "*" Atendimento : profissionalResponsavel
+    Paciente "1" <-- "0..*" Atendimento : paciente
+    ProfissionalSaude "1" <-- "0..*" Atendimento : profissionalResponsavel
     ModalidadeAtendimento <.. Atendimento : getModalidade()
     Atendimento <|-- Consulta
     Consulta <|-- ConsultaRotina
     Consulta <|-- ConsultaEspecializada
+    ConsultaRotina "0..*" --> "0..1" AreaAtuacao : areaEncaminhamento
+    ConsultaEspecializada "0..*" --> "1" AreaAtuacao : areaAtuacao
+    Consulta "0..*" --> "1" SituacaoConsulta : situacao
     Atendimento ..> VisitanteAtendimento : aceitar()
 ```
 
 ### 3.2 Emergência, procedimento cirúrgico e internação
 
-As outras três modalidades, com as operações que conduzem cada uma pela sua máquina de estados.
+As outras três modalidades, com as operações que conduzem cada uma pela sua máquina de estados. Os enums
+e o quarto aparecem só pelo nome, para mostrar as associações.
 
 ```mermaid
 classDiagram
     direction LR
 
     class Atendimento { <<abstract>> }
+    class PrioridadeEmergencia { <<enumeration>> }
+    class SituacaoEmergencia { <<enumeration>> }
+    class TipoCirurgia { <<enumeration>> }
+    class SituacaoProcedimento { <<enumeration>> }
+    class Quarto
 
     class AtendimentoEmergencia {
-        -PrioridadeEmergencia prioridade
         -LocalDateTime dataHoraChegada
-        -SituacaoEmergencia situacao
         +definirPrioridade(PrioridadeEmergencia) void
         +iniciar() void
         +concluir() void
@@ -420,13 +437,11 @@ classDiagram
 
     class ProcedimentoCirurgico {
         -String descricao
-        -TipoCirurgia tipoCirurgia
         -String observacoesPreOperatorias
         -String observacoesPosOperatorias
         -LocalDateTime dataHoraPrevista
         -LocalDateTime dataHoraInicio
         -LocalDateTime dataHoraFim
-        -SituacaoProcedimento situacao
         +iniciar(LocalDateTime) void
         +concluir(LocalDateTime) void
         +cancelar() void
@@ -435,7 +450,6 @@ classDiagram
     }
 
     class Internacao {
-        -Quarto quarto
         -LocalDate dataEntrada
         -LocalDate dataPrevistaAlta
         -LocalDate dataEfetivaAlta
@@ -446,6 +460,11 @@ classDiagram
     Atendimento <|-- AtendimentoEmergencia
     Atendimento <|-- ProcedimentoCirurgico
     Atendimento <|-- Internacao
+    AtendimentoEmergencia "0..*" --> "0..1" PrioridadeEmergencia : prioridade
+    AtendimentoEmergencia "0..*" --> "1" SituacaoEmergencia : situacao
+    ProcedimentoCirurgico "0..*" --> "1" TipoCirurgia : tipoCirurgia
+    ProcedimentoCirurgico "0..*" --> "1" SituacaoProcedimento : situacao
+    Quarto "1" o-- "0..*" Internacao : quarto
 ```
 
 ## 4. Situações
@@ -517,9 +536,9 @@ classDiagram
     SituacaoEmergencia ..|> SituacaoAtendimento
     SituacaoAtendimento <|.. SituacaoConsulta
     SituacaoAtendimento <|.. SituacaoProcedimento
-    SituacaoEmergencia "1" <-- "*" AtendimentoEmergencia : situacao
-    SituacaoConsulta "1" <-- "*" Consulta : situacao
-    SituacaoProcedimento "1" <-- "*" ProcedimentoCirurgico : situacao
+    SituacaoEmergencia "1" <-- "0..*" AtendimentoEmergencia : situacao
+    SituacaoConsulta "1" <-- "0..*" Consulta : situacao
+    SituacaoProcedimento "1" <-- "0..*" ProcedimentoCirurgico : situacao
 ```
 
 Transições permitidas. Qualquer outra lança `TransicaoSituacaoInvalidaException`, com a mensagem montada
@@ -591,8 +610,8 @@ classDiagram
         -String descricao
     }
 
-    AtendimentoEmergencia "*" --> "0..1" PrioridadeEmergencia : prioridade
-    ProcedimentoCirurgico "*" --> "1" TipoCirurgia : tipoCirurgia
+    AtendimentoEmergencia "0..*" --> "0..1" PrioridadeEmergencia : prioridade
+    ProcedimentoCirurgico "0..*" --> "1" TipoCirurgia : tipoCirurgia
 ```
 
 ## 5. Quartos e internação
@@ -607,7 +626,6 @@ classDiagram
     class Atendimento { <<abstract>> }
 
     class Internacao {
-        -Quarto quarto
         -LocalDate dataEntrada
         -LocalDate dataPrevistaAlta
         -LocalDate dataEfetivaAlta
@@ -619,7 +637,6 @@ classDiagram
         -Long id
         -String numero
         -int andar
-        -TipoQuarto tipo
         -int capacidadeMaxima
         -int ocupacaoAtual
         -Long versao
@@ -647,8 +664,8 @@ classDiagram
     }
 
     Atendimento <|-- Internacao
-    Internacao "*" --> "1" Quarto : quarto
-    Quarto "*" --> "1" TipoQuarto : tipo
+    Quarto "1" o-- "0..*" Internacao : quarto
+    Quarto "0..*" --> "1" TipoQuarto : tipo
     Quarto ..> SituacaoQuarto : getSituacao()
 ```
 
@@ -703,11 +720,21 @@ flowchart TB
 
 ## 7. Decisões de modelagem
 
+- **Endereço como objeto de valor.** Na conversa em sala sobre o diagrama da Sprint 1, o professor
+  questionou se fazia sentido manter uma classe só para o endereço. Analisamos depois e decidimos
+  mantê-la, por três motivos: os sete campos do endereço (logradouro, número, complemento, bairro,
+  cidade, UF e CEP) sempre andam juntos, e agrupá-los deixa a classe `Paciente` mais coesa; o endereço é
+  um objeto de valor, sem identidade própria e que não existe sem o paciente, o que justifica a
+  composição; e ele não gera uma tabela separada no banco, porque fica embutido na própria tabela do
+  paciente, então organiza o código sem nenhum custo na persistência.
+- **Internação agregada ao quarto.** O quarto reúne as internações que recebe, mas cada internação tem
+  identidade e ciclo de vida próprios e continua no histórico depois da alta; por isso a relação é uma
+  agregação, e não uma composição.
 - **Categorias de profissional por herança (SINGLE_TABLE).** `ClinicoGeral`, `MedicoEspecialista` e
   `Cirurgiao` diferem por uma coluna de área; com tabela única, listar profissionais e carregar o
   responsável de um atendimento não exige joins. O que muda entre as categorias fica em métodos
-  sobrescritos (`atendeArea`, `podeRealizarConsultaEspecializada` e `podeRealizarProcedimentos`), sem
-  testes de tipo. O cirurgião aparece na listagem da sua área, mas não realiza consulta especializada.
+  sobrescritos (`atendeArea`, `podeRealizarConsultaEspecializada`, `podeRealizarProcedimentos` e
+  `podeEncaminharParaEspecialista`), sem testes de tipo. O cirurgião aparece na listagem da sua área, mas não realiza consulta especializada.
 - **Modalidades de atendimento por herança (JOINED).** As modalidades têm campos muito diferentes; com
   uma tabela por modalidade, cada uma mantém as suas colunas obrigatórias como `NOT NULL`. Os campos
   comuns (paciente, profissional e observações) ficam na tabela `atendimento`.

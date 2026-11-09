@@ -1,0 +1,318 @@
+---
+title: Diagrama de Classes - Sistema de Informação Hospitalar (Sprint 2)
+---
+classDiagram
+    direction TB
+
+    class Endereco {
+        <<embeddable>>
+        -String logradouro
+        -String numero
+        -String complemento
+        -String bairro
+        -String cidade
+        -String uf
+        -String cep
+    }
+
+    class Pessoa {
+        <<abstract>>
+        -Long id
+        -String nome
+        -String telefone
+        -String email
+        -boolean ativo
+        +inativar() void
+        +reativar() void
+    }
+
+    class Paciente {
+        -String cpf
+        -LocalDate dataNascimento
+    }
+
+    class ProfissionalSaude {
+        <<abstract>>
+        -String registroProfissional
+        +getCategoria()* CategoriaProfissional
+        +getArea() AreaAtuacao
+        +atendeArea(AreaAtuacao) boolean
+        +podeRealizarConsultaEspecializada(AreaAtuacao) boolean
+        +podeRealizarProcedimentos() boolean
+        +podeEncaminharParaEspecialista() boolean
+    }
+
+    class CategoriaProfissional {
+        <<enumeration>>
+        CLINICO_GERAL
+        MEDICO_ESPECIALISTA
+        CIRURGIAO
+        -String descricao
+        -boolean exigeArea
+        +criar(String, String, AreaAtuacao)* ProfissionalSaude
+        +exigeArea() boolean
+    }
+
+    class ClinicoGeral {
+        +podeEncaminharParaEspecialista() boolean
+    }
+
+    class MedicoEspecialista {
+        +getArea() AreaAtuacao
+        +atendeArea(AreaAtuacao) boolean
+        +podeRealizarConsultaEspecializada(AreaAtuacao) boolean
+    }
+
+    class Cirurgiao {
+        +getArea() AreaAtuacao
+        +atendeArea(AreaAtuacao) boolean
+        +podeRealizarProcedimentos() boolean
+    }
+
+    class AreaAtuacao {
+        <<enumeration>>
+        CARDIOLOGIA
+        NEUROLOGIA
+        ORTOPEDIA
+        PEDIATRIA
+        DERMATOLOGIA
+        GINECOLOGIA
+        OBSTETRICIA
+        OFTALMOLOGIA
+        OTORRINOLARINGOLOGIA
+        PSIQUIATRIA
+        ENDOCRINOLOGIA
+        GASTROENTEROLOGIA
+        PNEUMOLOGIA
+        NEFROLOGIA
+        UROLOGIA
+        ONCOLOGIA
+        CIRURGIA_GERAL
+        CIRURGIA_CARDIOVASCULAR
+        NEUROCIRURGIA
+        -String descricao
+    }
+
+    class Atendimento {
+        <<abstract>>
+        -Long id
+        -String observacoes
+        +validarRealizacao() void
+        +validarParticipantesAtivos() void
+        #validarCondicoesEspecificas()* void
+        #exigirTransicao(S, S, String)$ void
+        +registrarObservacoes(String) void
+        +getDataHoraReferencia()* LocalDateTime
+        +getModalidade()* ModalidadeAtendimento
+        +aceitar(VisitanteAtendimento~R~)* R
+    }
+
+    class VisitanteAtendimento~R~ {
+        <<interface>>
+        +visitar(Consulta)* R
+        +visitar(Internacao)* R
+        +visitar(AtendimentoEmergencia)* R
+        +visitar(ProcedimentoCirurgico)* R
+    }
+
+    class ModalidadeAtendimento {
+        <<enumeration>>
+        CONSULTA_ROTINA
+        CONSULTA_ESPECIALIZADA
+        EMERGENCIA
+        PROCEDIMENTO_CIRURGICO
+        INTERNACAO
+        -String descricao
+    }
+
+    class Consulta {
+        <<abstract>>
+        -LocalDate data
+        -LocalTime horario
+        -String motivo
+        +confirmar() void
+        +iniciarAtendimento() void
+        +concluir() void
+        +cancelar() void
+        +registrarNaoComparecimento() void
+        +registrarObservacoes(String) void
+        +encaminhar(AreaAtuacao) void
+        +getAreaAtuacao() AreaAtuacao
+        +getAreaEncaminhamento() AreaAtuacao
+    }
+
+    class ConsultaRotina {
+        +encaminhar(AreaAtuacao) void
+        +getAreaEncaminhamento() AreaAtuacao
+    }
+
+    class ConsultaEspecializada {
+        +getAreaAtuacao() AreaAtuacao
+    }
+
+    class SituacaoConsulta {
+        <<enumeration>>
+        AGENDADA
+        CONFIRMADA
+        EM_ATENDIMENTO
+        CONCLUIDA
+        CANCELADA
+        NAO_COMPARECEU
+        -String descricao
+        -boolean ativa
+        +ativas()$ Set~SituacaoConsulta~
+        +isAtiva() boolean
+        +permiteRegistrarObservacoes() boolean
+    }
+
+    class AtendimentoEmergencia {
+        -LocalDateTime dataHoraChegada
+        +definirPrioridade(PrioridadeEmergencia) void
+        +iniciar() void
+        +concluir() void
+    }
+
+    class PrioridadeEmergencia {
+        <<enumeration>>
+        BAIXA
+        MODERADA
+        ALTA
+        CRITICA
+        -int nivel
+        -String descricao
+    }
+
+    class SituacaoEmergencia {
+        <<enumeration>>
+        AGUARDANDO_AVALIACAO
+        EM_ATENDIMENTO
+        CONCLUIDO
+        -String descricao
+    }
+
+    class ProcedimentoCirurgico {
+        -String descricao
+        -String observacoesPreOperatorias
+        -String observacoesPosOperatorias
+        -LocalDateTime dataHoraPrevista
+        -LocalDateTime dataHoraInicio
+        -LocalDateTime dataHoraFim
+        +iniciar(LocalDateTime) void
+        +concluir(LocalDateTime) void
+        +cancelar() void
+        +registrarObservacoesPreOperatorias(String) void
+        +registrarObservacoesPosOperatorias(String) void
+    }
+
+    class TipoCirurgia {
+        <<enumeration>>
+        ELETIVA
+        URGENCIA
+        EMERGENCIA
+        -String descricao
+    }
+
+    class SituacaoProcedimento {
+        <<enumeration>>
+        AGENDADO
+        EM_ANDAMENTO
+        CONCLUIDO
+        CANCELADO
+        -String descricao
+        +permiteObservacoesPosOperatorias() boolean
+    }
+
+    class Internacao {
+        -LocalDate dataEntrada
+        -LocalDate dataPrevistaAlta
+        -LocalDate dataEfetivaAlta
+        +darAlta(LocalDate) void
+        +isAtiva() boolean
+    }
+
+    class Quarto {
+        -Long id
+        -String numero
+        -int andar
+        -int capacidadeMaxima
+        -int ocupacaoAtual
+        -Long versao
+        +ocupar() void
+        +liberar() void
+        +temVaga() boolean
+        +getSituacao() SituacaoQuarto
+        +alterarTipoECapacidade(TipoQuarto, int) void
+    }
+
+    class TipoQuarto {
+        <<enumeration>>
+        ENFERMARIA
+        APARTAMENTO
+        UTI
+        -String descricao
+        -int capacidadeMaximaPermitida
+        +comporta(int) boolean
+    }
+
+    class SituacaoQuarto {
+        <<enumeration>>
+        DISPONIVEL
+        OCUPADO
+    }
+
+    class Descritivel {
+        <<interface>>
+        +name()* String
+        +getDescricao()* String
+    }
+
+    class SituacaoAtendimento~S~ {
+        <<interface>>
+        +getProximasPossiveis()* Set~S~
+        +podeMudarPara(S) boolean
+        +isFinal() boolean
+        +ativas(Class~S~)$ Set~S~
+    }
+
+    Pessoa <|-- Paciente
+    Pessoa <|-- ProfissionalSaude
+    Paciente "1" *-- "0..1" Endereco : endereco
+    ProfissionalSaude <|-- ClinicoGeral
+    ProfissionalSaude <|-- MedicoEspecialista
+    ProfissionalSaude <|-- Cirurgiao
+    ProfissionalSaude ..> CategoriaProfissional : getCategoria()
+    ProfissionalSaude <.. CategoriaProfissional : «cria»
+    MedicoEspecialista "0..*" --> "1" AreaAtuacao : areaAtuacao
+    Cirurgiao "0..*" --> "1" AreaAtuacao : areaCirurgica
+
+    Paciente "1" <-- "0..*" Atendimento : paciente
+    ProfissionalSaude "1" <-- "0..*" Atendimento : profissionalResponsavel
+    Atendimento ..> ModalidadeAtendimento : getModalidade()
+    Atendimento ..> VisitanteAtendimento : aceitar()
+    Atendimento <|-- Consulta
+    Atendimento <|-- AtendimentoEmergencia
+    Atendimento <|-- ProcedimentoCirurgico
+    Atendimento <|-- Internacao
+    Consulta <|-- ConsultaRotina
+    Consulta <|-- ConsultaEspecializada
+    Consulta "0..*" --> "1" SituacaoConsulta : situacao
+    ConsultaRotina "0..*" --> "0..1" AreaAtuacao : areaEncaminhamento
+    ConsultaEspecializada "0..*" --> "1" AreaAtuacao : areaAtuacao
+    AtendimentoEmergencia "0..*" --> "0..1" PrioridadeEmergencia : prioridade
+    AtendimentoEmergencia "0..*" --> "1" SituacaoEmergencia : situacao
+    ProcedimentoCirurgico "0..*" --> "1" TipoCirurgia : tipoCirurgia
+    ProcedimentoCirurgico "0..*" --> "1" SituacaoProcedimento : situacao
+    Internacao "0..*" --o "1" Quarto : quarto
+    Quarto "0..*" --> "1" TipoQuarto : tipo
+    Quarto ..> SituacaoQuarto : getSituacao()
+
+    SituacaoConsulta ..|> SituacaoAtendimento
+    SituacaoEmergencia ..|> SituacaoAtendimento
+    SituacaoProcedimento ..|> SituacaoAtendimento
+    SituacaoAtendimento --|> Descritivel
+    CategoriaProfissional ..|> Descritivel
+    AreaAtuacao ..|> Descritivel
+    ModalidadeAtendimento ..|> Descritivel
+    PrioridadeEmergencia ..|> Descritivel
+    TipoCirurgia ..|> Descritivel
+    TipoQuarto ..|> Descritivel

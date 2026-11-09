@@ -4,7 +4,9 @@ import jakarta.persistence.Embeddable;
 import java.util.Objects;
 
 /**
- * Objeto de valor imutável: para alterar o endereço de um paciente, substitui-se o objeto inteiro.
+ * Objeto de valor do paciente: não tem identidade própria (nem id), só existe como parte do paciente e
+ * tem os campos embutidos na tabela paciente. É imutável: para alterar o endereço de um paciente,
+ * substitui-se o objeto inteiro.
  */
 @Embeddable
 public class Endereco {
