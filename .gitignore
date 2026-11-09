@@ -41,3 +41,6 @@ Thumbs.db
 
 # Variáveis de ambiente locais
 .env
+
+# Gerador do diagrama de classes (Node.js)
+docs/diagrama/gerador/node_modules/

@@ -1,0 +1,15 @@
+{
+  "name": "gerador-diagrama-de-classes",
+  "private": true,
+  "description": "Gera o diagrama de classes completo (PNG e SVG) a partir de docs/diagrama-de-classes-completo.mmd.",
+  "type": "module",
+  "scripts": {
+    "gerar": "node gerar.mjs",
+    "inspecionar": "node inspecionar.mjs"
+  },
+  "dependencies": {
+    "@mermaid-js/layout-elk": "0.1.7",
+    "mermaid": "11.4.1",
+    "puppeteer-core": "23.11.1"
+  }
+}

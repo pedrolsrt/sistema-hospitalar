@@ -83,6 +83,8 @@ com todas as classes num único desenho, está em imagem ([PNG](docs/diagrama-de
 [SVG](docs/diagrama-de-classes-sprint2.svg)); a fonte em Mermaid é
 [diagrama-de-classes-completo.mmd](docs/diagrama-de-classes-completo.mmd).
 
+Para gerar a imagem de novo a partir da fonte, com Node.js e Google Chrome instalados: `cd docs/diagrama/gerador`, `npm ci` e `npm run gerar`. Se o Chrome estiver em outro caminho, informe-o na variável `CHROME_PATH`.
+
 ### Decisões de modelagem
 
 - **Endereço como objeto de valor.** Na conversa em sala sobre o diagrama da Sprint 1, o professor
