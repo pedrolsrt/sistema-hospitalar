@@ -32,7 +32,7 @@ public interface ProcedimentoCirurgicoRepository extends JpaRepository<Procedime
 		return findPrevistosEntre(data.atStartOfDay(), data.plusDays(1).atStartOfDay());
 	}
 
-	// Intervalo semiaberto [inicio, fim): compara a data e hora sem converter a coluna.
+	// Intervalo semiaberto [início, fim): compara a data e hora sem converter a coluna.
 	@Query("""
 			select p from ProcedimentoCirurgico p
 			where p.dataHoraPrevista >= :inicio and p.dataHoraPrevista < :fim
