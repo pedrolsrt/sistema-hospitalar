@@ -116,7 +116,8 @@ class FluxoCompletoIntegracaoTest {
 				""".formatted(maria, clinico));
 		String sobreposta = chamar(post("/consultas/rotina"), """
 				{"pacienteId": %d, "profissionalId": %d, "data": "2099-01-16", "horario": "10:15", "motivo": "Exames"}
-				""".formatted(maria, clinico), 422);
+				""".formatted(maria, clinico), 409);
+		assertThat(campo(sobreposta, "$.title")).isEqualTo("Horário indisponível");
 		assertThat(campo(sobreposta, "$.detail")).startsWith("O profissional Dra. Ana Lima já tem consulta em 16/01/2099 às 10:00");
 		String agenda = chamar(get("/profissionais/" + clinico + "/agenda").param("data", "2099-01-16"), null, 200);
 		assertThat(JsonPath.<List<Integer>>read(agenda, "$[*].id")).containsExactly((int) retorno);

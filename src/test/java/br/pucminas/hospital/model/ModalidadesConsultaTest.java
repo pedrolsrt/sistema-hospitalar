@@ -3,6 +3,7 @@ package br.pucminas.hospital.model;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import br.pucminas.hospital.exception.ProfissionalIncompativelException;
 import br.pucminas.hospital.exception.RegraNegocioException;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -64,7 +65,7 @@ class ModalidadesConsultaTest {
 					new MedicoEspecialista("Dr. Pedro Alves", "CRM-MG 44444", AreaAtuacao.NEUROLOGIA));
 
 			assertThatThrownBy(consulta::validarRealizacao)
-					.isInstanceOf(RegraNegocioException.class)
+					.isInstanceOf(ProfissionalIncompativelException.class)
 					.hasMessage("O profissional Dr. Pedro Alves não pode realizar consulta especializada em "
 							+ "Cardiologia: é necessário um médico especialista dessa área.");
 		}
@@ -74,14 +75,14 @@ class ModalidadesConsultaTest {
 			ConsultaEspecializada consulta = consultaDeCardiologiaCom(
 					new Cirurgiao("Dra. Carla Mendes", "CRM-MG 33333", AreaAtuacao.CARDIOLOGIA));
 
-			assertThatThrownBy(consulta::validarRealizacao).isInstanceOf(RegraNegocioException.class);
+			assertThatThrownBy(consulta::validarRealizacao).isInstanceOf(ProfissionalIncompativelException.class);
 		}
 
 		@Test
 		void clinicoGeralNaoRealiza() {
 			ConsultaEspecializada consulta = consultaDeCardiologiaCom(new ClinicoGeral("Dra. Ana Lima", "CRM-MG 11111"));
 
-			assertThatThrownBy(consulta::validarRealizacao).isInstanceOf(RegraNegocioException.class);
+			assertThatThrownBy(consulta::validarRealizacao).isInstanceOf(ProfissionalIncompativelException.class);
 		}
 
 		@Test
@@ -89,7 +90,7 @@ class ModalidadesConsultaTest {
 			ConsultaEspecializada consulta = consultaDeCardiologiaCom(new ClinicoGeral("Dra. Ana Lima", "CRM-MG 11111"));
 			consulta.confirmar();
 
-			assertThatThrownBy(consulta::iniciarAtendimento).isInstanceOf(RegraNegocioException.class);
+			assertThatThrownBy(consulta::iniciarAtendimento).isInstanceOf(ProfissionalIncompativelException.class);
 			assertThat(consulta.getSituacao()).isEqualTo(SituacaoConsulta.CONFIRMADA);
 		}
 

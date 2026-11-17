@@ -51,7 +51,24 @@ class TratadorDeErrosTest {
 
 		@GetMapping("/regra")
 		void regra() {
-			throw new QuartoSemVagaException("101");
+			throw new RegraNegocioException("O quarto 101 não possui pacientes internados.");
+		}
+
+		@GetMapping("/indisponivel")
+		void indisponivel() {
+			throw new AtendimentoIndisponivelException("O profissional Dr. João Souza já tem consulta em 15/01/2030 "
+					+ "às 14:00, que se sobrepõe ao horário pedido (cada consulta dura 30 minutos).");
+		}
+
+		@GetMapping("/sem-vagas")
+		void semVagas() {
+			throw new QuartoSemVagasException("101");
+		}
+
+		@GetMapping("/incompativel")
+		void incompativel() {
+			throw new ProfissionalIncompativelException("O profissional Dra. Ana Lima não pode realizar procedimentos "
+					+ "cirúrgicos: é necessário um cirurgião.");
 		}
 
 		@GetMapping("/integridade")
@@ -125,11 +142,36 @@ class TratadorDeErrosTest {
 	}
 
 	@Test
+	void atendimentoIndisponivelResponde409() throws Exception {
+		mvc.perform(get("/indisponivel"))
+				.andExpect(status().isConflict())
+				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+				.andExpect(jsonPath("$.title").value("Horário indisponível"))
+				.andExpect(jsonPath("$.detail", containsString("já tem consulta em 15/01/2030 às 14:00")));
+	}
+
+	@Test
+	void quartoSemVagasResponde409() throws Exception {
+		mvc.perform(get("/sem-vagas"))
+				.andExpect(status().isConflict())
+				.andExpect(jsonPath("$.title").value("Quarto sem vagas"))
+				.andExpect(jsonPath("$.detail").value("O quarto 101 não possui vagas disponíveis."));
+	}
+
+	@Test
+	void profissionalIncompativelResponde422() throws Exception {
+		mvc.perform(get("/incompativel"))
+				.andExpect(status().isUnprocessableContent())
+				.andExpect(jsonPath("$.title").value("Profissional incompatível"))
+				.andExpect(jsonPath("$.detail", containsString("é necessário um cirurgião")));
+	}
+
+	@Test
 	void demaisRegrasDeNegocioRespondem422() throws Exception {
 		mvc.perform(get("/regra"))
 				.andExpect(status().isUnprocessableContent())
 				.andExpect(jsonPath("$.title").value("Regra de negócio violada"))
-				.andExpect(jsonPath("$.detail").value("O quarto 101 não possui vagas disponíveis."));
+				.andExpect(jsonPath("$.detail").value("O quarto 101 não possui pacientes internados."));
 	}
 
 	@Test

@@ -14,7 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import br.pucminas.hospital.dto.AltaRequest;
 import br.pucminas.hospital.dto.InternacaoRequest;
-import br.pucminas.hospital.exception.QuartoSemVagaException;
+import br.pucminas.hospital.exception.QuartoSemVagasException;
 import br.pucminas.hospital.service.InternacaoService;
 import java.time.LocalDate;
 import java.util.List;
@@ -50,11 +50,12 @@ class InternacaoControllerTest {
 	}
 
 	@Test
-	void quartoSemVagaResponde422() throws Exception {
-		when(service.internar(any(InternacaoRequest.class))).thenThrow(new QuartoSemVagaException("201"));
+	void quartoSemVagasResponde409() throws Exception {
+		when(service.internar(any(InternacaoRequest.class))).thenThrow(new QuartoSemVagasException("201"));
 
 		mvc.perform(post("/internacoes").contentType(MediaType.APPLICATION_JSON).content(INTERNACAO))
-				.andExpect(status().isUnprocessableContent())
+				.andExpect(status().isConflict())
+				.andExpect(jsonPath("$.title").value("Quarto sem vagas"))
 				.andExpect(jsonPath("$.detail").value("O quarto 201 não possui vagas disponíveis."));
 	}
 

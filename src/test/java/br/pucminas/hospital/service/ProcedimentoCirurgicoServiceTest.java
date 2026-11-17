@@ -14,6 +14,7 @@ import br.pucminas.hospital.dto.ObservacoesRequest;
 import br.pucminas.hospital.dto.ProcedimentoCirurgicoRequest;
 import br.pucminas.hospital.dto.ProcedimentoCirurgicoResponse;
 import br.pucminas.hospital.exception.DataInvalidaException;
+import br.pucminas.hospital.exception.ProfissionalIncompativelException;
 import br.pucminas.hospital.exception.RecursoNaoEncontradoException;
 import br.pucminas.hospital.exception.RegraNegocioException;
 import br.pucminas.hospital.exception.TransicaoSituacaoInvalidaException;
@@ -97,7 +98,7 @@ class ProcedimentoCirurgicoServiceTest {
 		when(profissionalRepository.findById(4L)).thenReturn(Optional.of(new ClinicoGeral("Dra. Ana Lima", "CRM-MG 1")));
 
 		assertThatThrownBy(() -> service.agendar(request(4L, null)))
-				.isInstanceOf(RegraNegocioException.class)
+				.isInstanceOf(ProfissionalIncompativelException.class)
 				.hasMessage("O profissional Dra. Ana Lima não pode realizar procedimentos cirúrgicos: é necessário um cirurgião.");
 		verify(repository, never()).save(any());
 	}
@@ -107,7 +108,8 @@ class ProcedimentoCirurgicoServiceTest {
 		when(profissionalRepository.findById(5L)).thenReturn(Optional.of(
 				new MedicoEspecialista("Dr. João Souza", "CRM-MG 2", AreaAtuacao.CIRURGIA_GERAL)));
 
-		assertThatThrownBy(() -> service.agendar(request(5L, null))).isInstanceOf(RegraNegocioException.class);
+		assertThatThrownBy(() -> service.agendar(request(5L, null)))
+				.isInstanceOf(ProfissionalIncompativelException.class);
 		verify(repository, never()).save(any());
 	}
 

@@ -1,7 +1,7 @@
 package br.pucminas.hospital.model;
 
 import br.pucminas.hospital.exception.DataInvalidaException;
-import br.pucminas.hospital.exception.QuartoSemVagaException;
+import br.pucminas.hospital.exception.QuartoSemVagasException;
 import br.pucminas.hospital.exception.RegraNegocioException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -39,7 +39,7 @@ public class Internacao extends Atendimento {
 	 *
 	 * @throws RegraNegocioException se o paciente ou o profissional estiver inativo
 	 * @throws DataInvalidaException se a alta prevista for anterior à entrada
-	 * @throws QuartoSemVagaException se o quarto não tiver vaga
+	 * @throws QuartoSemVagasException se o quarto não tiver vaga
 	 */
 	public Internacao(Paciente paciente, ProfissionalSaude profissionalResponsavel, Quarto quarto,
 			LocalDate dataEntrada, LocalDate dataPrevistaAlta) {
@@ -59,7 +59,7 @@ public class Internacao extends Atendimento {
 	protected void validarCondicoesEspecificas() {
 		validarNaoAnteriorAEntrada(dataPrevistaAlta, dataEntrada, "prevista");
 		if (!quarto.temVaga()) {
-			throw new QuartoSemVagaException(quarto.getNumero());
+			throw new QuartoSemVagasException(quarto.getNumero());
 		}
 	}
 

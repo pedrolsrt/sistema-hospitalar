@@ -5,7 +5,9 @@ import br.pucminas.hospital.dto.ConsultaResponse;
 import br.pucminas.hospital.dto.ConsultaRotinaRequest;
 import br.pucminas.hospital.dto.EncaminhamentoRequest;
 import br.pucminas.hospital.dto.ObservacoesRequest;
+import br.pucminas.hospital.exception.AtendimentoIndisponivelException;
 import br.pucminas.hospital.exception.DataInvalidaException;
+import br.pucminas.hospital.exception.ProfissionalIncompativelException;
 import br.pucminas.hospital.exception.RecursoNaoEncontradoException;
 import br.pucminas.hospital.exception.RegraNegocioException;
 import br.pucminas.hospital.exception.TransicaoSituacaoInvalidaException;
@@ -88,7 +90,10 @@ public class ConsultaService {
 	 * consultas ativas do profissional ou do paciente, considerando a duração configurada.
 	 *
 	 * @throws DataInvalidaException se a data e o horário não estiverem no futuro
-	 * @throws RegraNegocioException se a consulta não puder ser realizada ou o horário estiver ocupado
+	 * @throws ProfissionalIncompativelException se, na consulta especializada, o profissional não for especialista
+	 *         da área
+	 * @throws AtendimentoIndisponivelException se o horário estiver ocupado pelo profissional ou pelo paciente
+	 * @throws RegraNegocioException se o paciente ou o profissional estiver inativo
 	 */
 	private ConsultaResponse agendar(Consulta consulta) {
 		LocalDateTime inicio = consulta.getDataHoraReferencia();
@@ -131,8 +136,8 @@ public class ConsultaService {
 		}).findFirst();
 	}
 
-	private RegraNegocioException horarioOcupado(String quem, Consulta existente) {
-		return new RegraNegocioException(quem + " já tem consulta em "
+	private AtendimentoIndisponivelException horarioOcupado(String quem, Consulta existente) {
+		return new AtendimentoIndisponivelException(quem + " já tem consulta em "
 				+ FORMATO_DATA_HORA.format(existente.getDataHoraReferencia()) + ", que se sobrepõe ao horário pedido "
 				+ "(cada consulta dura " + duracao.toMinutes() + " minutos).");
 	}
@@ -194,8 +199,9 @@ public class ConsultaService {
 	 * Encaminha o paciente para atendimento especializado. Para escolher o profissional, consulte os
 	 * especialistas da área em {@code GET /profissionais?area=}.
 	 *
-	 * @throws RegraNegocioException se a consulta não for de rotina, o profissional não for clínico geral
-	 *         ou a consulta não estiver em atendimento nem concluída
+	 * @throws ProfissionalIncompativelException se o profissional da consulta não for clínico geral
+	 * @throws RegraNegocioException se a consulta não for de rotina ou não estiver em atendimento nem
+	 *         concluída
 	 */
 	@Transactional
 	public ConsultaResponse encaminhar(Long id, EncaminhamentoRequest request) {

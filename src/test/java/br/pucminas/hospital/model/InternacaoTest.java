@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import br.pucminas.hospital.exception.DataInvalidaException;
-import br.pucminas.hospital.exception.QuartoSemVagaException;
+import br.pucminas.hospital.exception.QuartoSemVagasException;
 import br.pucminas.hospital.exception.RegraNegocioException;
 import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
@@ -32,11 +32,21 @@ class InternacaoTest {
 	}
 
 	@Test
+	void internaNaUltimaVagaDoQuarto() {
+		Quarto quarto = new Quarto("301", 3, TipoQuarto.UTI, 1);
+
+		internar(quarto);
+
+		assertThat(quarto.getOcupacaoAtual()).isEqualTo(1);
+		assertThat(quarto.getSituacao()).isEqualTo(SituacaoQuarto.OCUPADO);
+	}
+
+	@Test
 	void naoInternaEmQuartoSemVaga() {
 		Quarto quarto = new Quarto("201", 2, TipoQuarto.ENFERMARIA, 1);
 		quarto.ocupar();
 
-		assertThatThrownBy(() -> internar(quarto)).isInstanceOf(QuartoSemVagaException.class);
+		assertThatThrownBy(() -> internar(quarto)).isInstanceOf(QuartoSemVagasException.class);
 		assertThat(quarto.getOcupacaoAtual()).isEqualTo(1);
 	}
 

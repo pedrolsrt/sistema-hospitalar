@@ -44,7 +44,9 @@ public class ConsultaController {
 	@ApiResponse(responseCode = "201", description = "Consulta agendada; o cabeçalho Location aponta para ela")
 	@ApiResponse(responseCode = "400", description = "Dados inválidos")
 	@ApiResponse(responseCode = "404", description = "Paciente ou profissional não encontrado")
-	@ApiResponse(responseCode = "422", description = "Data no passado, participante inativo ou horário ocupado")
+	@ApiResponse(responseCode = "409", description = "Horário já ocupado por consulta ativa do profissional ou do "
+			+ "paciente")
+	@ApiResponse(responseCode = "422", description = "Data no passado ou participante inativo")
 	public ResponseEntity<ConsultaResponse> agendarRotina(@Valid @RequestBody ConsultaRotinaRequest request) {
 		ConsultaResponse resposta = service.agendarRotina(request);
 		return ResponseEntity.created(Localizacao.de("/consultas/{id}", resposta.id())).body(resposta);
@@ -56,8 +58,10 @@ public class ConsultaController {
 	@ApiResponse(responseCode = "201", description = "Consulta agendada; o cabeçalho Location aponta para ela")
 	@ApiResponse(responseCode = "400", description = "Dados inválidos")
 	@ApiResponse(responseCode = "404", description = "Paciente ou profissional não encontrado")
-	@ApiResponse(responseCode = "422", description = "Profissional não é especialista da área, data no passado, "
-			+ "participante inativo ou horário ocupado")
+	@ApiResponse(responseCode = "409", description = "Horário já ocupado por consulta ativa do profissional ou do "
+			+ "paciente")
+	@ApiResponse(responseCode = "422", description = "Profissional não é especialista da área, data no passado ou "
+			+ "participante inativo")
 	public ResponseEntity<ConsultaResponse> agendarEspecializada(
 			@Valid @RequestBody ConsultaEspecializadaRequest request) {
 		ConsultaResponse resposta = service.agendarEspecializada(request);
@@ -100,7 +104,8 @@ public class ConsultaController {
 	@ApiResponse(responseCode = "200", description = "Consulta em atendimento")
 	@ApiResponse(responseCode = "404", description = "Consulta não encontrada")
 	@ApiResponse(responseCode = "409", description = "A consulta não está confirmada")
-	@ApiResponse(responseCode = "422", description = "A consulta não pode mais ser realizada")
+	@ApiResponse(responseCode = "422", description = "A consulta não pode mais ser realizada (participante inativo ou "
+			+ "profissional que não é especialista da área)")
 	public ConsultaResponse iniciar(@PathVariable Long id) {
 		return service.iniciarAtendimento(id);
 	}

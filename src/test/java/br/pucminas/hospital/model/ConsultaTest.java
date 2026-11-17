@@ -3,6 +3,7 @@ package br.pucminas.hospital.model;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import br.pucminas.hospital.exception.ProfissionalIncompativelException;
 import br.pucminas.hospital.exception.RegraNegocioException;
 import br.pucminas.hospital.exception.TransicaoSituacaoInvalidaException;
 import java.time.LocalDate;
@@ -197,6 +198,7 @@ class ConsultaTest {
 
 		assertThatThrownBy(() -> consulta.encaminhar(AreaAtuacao.CARDIOLOGIA))
 				.isInstanceOf(RegraNegocioException.class)
+				.isNotInstanceOf(ProfissionalIncompativelException.class)
 				.hasMessageStartingWith("O encaminhamento só pode ser registrado durante o atendimento");
 		assertThat(consulta.getAreaEncaminhamento()).isNull();
 	}
@@ -227,8 +229,22 @@ class ConsultaTest {
 		consulta.iniciarAtendimento();
 
 		assertThatThrownBy(() -> consulta.encaminhar(AreaAtuacao.NEUROLOGIA))
-				.isInstanceOf(RegraNegocioException.class)
-				.hasMessageContaining("é necessário um clínico geral");
+				.isInstanceOf(ProfissionalIncompativelException.class)
+				.hasMessage("O profissional Dr. Pedro não pode encaminhar pacientes para atendimento especializado: "
+						+ "é necessário um clínico geral.");
+		assertThat(consulta.getAreaEncaminhamento()).isNull();
+	}
+
+	@Test
+	void cirurgiaoNaoEncaminha() {
+		ProfissionalSaude cirurgiao = new Cirurgiao("Dra. Carla Mendes", "CRM-MG 3", AreaAtuacao.CIRURGIA_GERAL);
+		Consulta consulta = new ConsultaRotina(paciente, cirurgiao, LocalDate.of(2030, 1, 15), LocalTime.of(14, 0),
+				"Avaliação pré-operatória");
+		consulta.confirmar();
+		consulta.iniciarAtendimento();
+
+		assertThatThrownBy(() -> consulta.encaminhar(AreaAtuacao.CARDIOLOGIA))
+				.isInstanceOf(ProfissionalIncompativelException.class);
 		assertThat(consulta.getAreaEncaminhamento()).isNull();
 	}
 
@@ -242,6 +258,7 @@ class ConsultaTest {
 
 		assertThatThrownBy(() -> consulta.encaminhar(AreaAtuacao.NEUROLOGIA))
 				.isInstanceOf(RegraNegocioException.class)
+				.isNotInstanceOf(ProfissionalIncompativelException.class)
 				.hasMessage("Só é possível encaminhar o paciente em uma consulta de rotina.");
 		assertThat(consulta.getAreaEncaminhamento()).isNull();
 	}

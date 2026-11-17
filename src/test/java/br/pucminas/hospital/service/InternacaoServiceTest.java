@@ -12,7 +12,7 @@ import br.pucminas.hospital.dto.AltaRequest;
 import br.pucminas.hospital.dto.InternacaoRequest;
 import br.pucminas.hospital.dto.InternacaoResponse;
 import br.pucminas.hospital.exception.DataInvalidaException;
-import br.pucminas.hospital.exception.QuartoSemVagaException;
+import br.pucminas.hospital.exception.QuartoSemVagasException;
 import br.pucminas.hospital.exception.RecursoNaoEncontradoException;
 import br.pucminas.hospital.exception.RegraNegocioException;
 import br.pucminas.hospital.mapper.InternacaoMapper;
@@ -106,7 +106,7 @@ class InternacaoServiceTest {
 		quarto.ocupar();
 		quarto.ocupar();
 
-		assertThatThrownBy(() -> service.internar(request())).isInstanceOf(QuartoSemVagaException.class);
+		assertThatThrownBy(() -> service.internar(request())).isInstanceOf(QuartoSemVagasException.class);
 		verify(repository, never()).save(any());
 	}
 

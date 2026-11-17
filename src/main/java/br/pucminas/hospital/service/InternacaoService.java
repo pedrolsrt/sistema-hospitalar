@@ -4,7 +4,7 @@ import br.pucminas.hospital.dto.AltaRequest;
 import br.pucminas.hospital.dto.InternacaoRequest;
 import br.pucminas.hospital.dto.InternacaoResponse;
 import br.pucminas.hospital.exception.DataInvalidaException;
-import br.pucminas.hospital.exception.QuartoSemVagaException;
+import br.pucminas.hospital.exception.QuartoSemVagasException;
 import br.pucminas.hospital.exception.RecursoNaoEncontradoException;
 import br.pucminas.hospital.exception.RegraNegocioException;
 import br.pucminas.hospital.mapper.InternacaoMapper;
@@ -52,7 +52,7 @@ public class InternacaoService {
 	 *
 	 * @throws RegraNegocioException se o paciente já estiver internado ou o paciente ou o profissional
 	 *         estiver inativo
-	 * @throws QuartoSemVagaException se o quarto não tiver vaga
+	 * @throws QuartoSemVagasException se o quarto não tiver vaga
 	 * @throws DataInvalidaException se a alta prevista for anterior à entrada
 	 */
 	@Transactional

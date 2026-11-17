@@ -1,5 +1,6 @@
 package br.pucminas.hospital.model;
 
+import br.pucminas.hospital.exception.ProfissionalIncompativelException;
 import br.pucminas.hospital.exception.RegraNegocioException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -34,12 +35,14 @@ public class ConsultaEspecializada extends Consulta {
 
 	/**
 	 * Exige um médico especialista na área da consulta.
+	 *
+	 * @throws ProfissionalIncompativelException se o profissional não for especialista da área
 	 */
 	@Override
 	protected void validarCondicoesEspecificas() {
 		ProfissionalSaude profissional = getProfissionalResponsavel();
 		if (!profissional.podeRealizarConsultaEspecializada(areaAtuacao)) {
-			throw new RegraNegocioException("O profissional " + profissional.getNome()
+			throw new ProfissionalIncompativelException("O profissional " + profissional.getNome()
 					+ " não pode realizar consulta especializada em " + areaAtuacao.getDescricao()
 					+ ": é necessário um médico especialista dessa área.");
 		}

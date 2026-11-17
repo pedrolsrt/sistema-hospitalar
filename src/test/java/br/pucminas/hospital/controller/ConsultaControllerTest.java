@@ -16,6 +16,8 @@ import br.pucminas.hospital.dto.ConsultaEspecializadaRequest;
 import br.pucminas.hospital.dto.ConsultaRotinaRequest;
 import br.pucminas.hospital.dto.EncaminhamentoRequest;
 import br.pucminas.hospital.dto.ObservacoesRequest;
+import br.pucminas.hospital.exception.AtendimentoIndisponivelException;
+import br.pucminas.hospital.exception.ProfissionalIncompativelException;
 import br.pucminas.hospital.exception.RegraNegocioException;
 import br.pucminas.hospital.exception.TransicaoSituacaoInvalidaException;
 import br.pucminas.hospital.model.AreaAtuacao;
@@ -35,6 +37,11 @@ class ConsultaControllerTest {
 
 	private static final String ROTINA = """
 			{"pacienteId": 1, "profissionalId": 2, "data": "2030-01-15", "horario": "14:00", "motivo": "Check-up"}
+			""";
+
+	private static final String ESPECIALIZADA = """
+			{"pacienteId": 1, "profissionalId": 2, "data": "2030-01-15", "horario": "14:00", "motivo": "Dor",
+			 "areaAtuacao": "CARDIOLOGIA"}
 			""";
 
 	@Autowired
@@ -58,10 +65,7 @@ class ConsultaControllerTest {
 		when(service.agendarEspecializada(any(ConsultaEspecializadaRequest.class)))
 				.thenReturn(Exemplos.consulta("AGENDADA"));
 
-		mvc.perform(post("/consultas/especializadas").contentType(MediaType.APPLICATION_JSON).content("""
-				{"pacienteId": 1, "profissionalId": 2, "data": "2030-01-15", "horario": "14:00", "motivo": "Dor",
-				 "areaAtuacao": "CARDIOLOGIA"}
-				"""))
+		mvc.perform(post("/consultas/especializadas").contentType(MediaType.APPLICATION_JSON).content(ESPECIALIZADA))
 				.andExpect(status().isCreated())
 				.andExpect(header().string("Location", "http://localhost/consultas/10"));
 	}
@@ -75,14 +79,25 @@ class ConsultaControllerTest {
 	}
 
 	@Test
-	void horarioOcupadoResponde422() throws Exception {
-		when(service.agendarRotina(any(ConsultaRotinaRequest.class))).thenThrow(new RegraNegocioException(
+	void horarioOcupadoResponde409() throws Exception {
+		when(service.agendarRotina(any(ConsultaRotinaRequest.class))).thenThrow(new AtendimentoIndisponivelException(
 				"O profissional Dr. João Souza já tem consulta em 15/01/2030 às 14:00, que se sobrepõe ao horário pedido "
 						+ "(cada consulta dura 30 minutos)."));
 
 		mvc.perform(post("/consultas/rotina").contentType(MediaType.APPLICATION_JSON).content(ROTINA))
+				.andExpect(status().isConflict())
+				.andExpect(jsonPath("$.title").value("Horário indisponível"));
+	}
+
+	@Test
+	void especializadaComProfissionalSemAAreaResponde422() throws Exception {
+		when(service.agendarEspecializada(any(ConsultaEspecializadaRequest.class)))
+				.thenThrow(new ProfissionalIncompativelException("O profissional Dr. Pedro Alves não pode realizar "
+						+ "consulta especializada em Cardiologia: é necessário um médico especialista dessa área."));
+
+		mvc.perform(post("/consultas/especializadas").contentType(MediaType.APPLICATION_JSON).content(ESPECIALIZADA))
 				.andExpect(status().isUnprocessableContent())
-				.andExpect(jsonPath("$.title").value("Regra de negócio violada"));
+				.andExpect(jsonPath("$.title").value("Profissional incompatível"));
 	}
 
 	@Test
@@ -167,6 +182,18 @@ class ConsultaControllerTest {
 		mvc.perform(patch("/consultas/10/encaminhar").contentType(MediaType.APPLICATION_JSON).content("{}"))
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.campos[0].mensagem").value("A área do atendimento especializado é obrigatória."));
+	}
+
+	@Test
+	void encaminhamentoPorQuemNaoEClinicoGeralResponde422() throws Exception {
+		when(service.encaminhar(eq(10L), any(EncaminhamentoRequest.class)))
+				.thenThrow(new ProfissionalIncompativelException("O profissional Dra. Ana Lima não pode encaminhar "
+						+ "pacientes para atendimento especializado: é necessário um clínico geral."));
+
+		mvc.perform(patch("/consultas/10/encaminhar").contentType(MediaType.APPLICATION_JSON)
+				.content("{\"areaAtuacao\": \"CARDIOLOGIA\"}"))
+				.andExpect(status().isUnprocessableContent())
+				.andExpect(jsonPath("$.title").value("Profissional incompatível"));
 	}
 
 	@Test

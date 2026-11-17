@@ -32,9 +32,9 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
  * <ul>
  * <li>400: dados da requisição inválidos, com a lista de campos em {@code campos};</li>
  * <li>404: recurso não encontrado;</li>
- * <li>409: dado único já cadastrado, transição de situação inválida, violação de integridade e conflito
- * de versão;</li>
- * <li>422: demais regras de negócio;</li>
+ * <li>409: dado único já cadastrado, transição de situação inválida, horário indisponível, quarto sem
+ * vagas, violação de integridade e conflito de versão;</li>
+ * <li>422: profissional incompatível com a operação e demais regras de negócio;</li>
  * <li>500: erro inesperado, sem detalhes internos.</li>
  * </ul>
  */
@@ -58,6 +58,21 @@ public class TratadorDeErros extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(TransicaoSituacaoInvalidaException.class)
 	public ProblemDetail transicaoInvalida(TransicaoSituacaoInvalidaException ex) {
 		return problema(HttpStatus.CONFLICT, "Transição de situação inválida", ex.getMessage());
+	}
+
+	@ExceptionHandler(AtendimentoIndisponivelException.class)
+	public ProblemDetail atendimentoIndisponivel(AtendimentoIndisponivelException ex) {
+		return problema(HttpStatus.CONFLICT, "Horário indisponível", ex.getMessage());
+	}
+
+	@ExceptionHandler(QuartoSemVagasException.class)
+	public ProblemDetail quartoSemVagas(QuartoSemVagasException ex) {
+		return problema(HttpStatus.CONFLICT, "Quarto sem vagas", ex.getMessage());
+	}
+
+	@ExceptionHandler(ProfissionalIncompativelException.class)
+	public ProblemDetail profissionalIncompativel(ProfissionalIncompativelException ex) {
+		return problema(HttpStatus.UNPROCESSABLE_CONTENT, "Profissional incompatível", ex.getMessage());
 	}
 
 	@ExceptionHandler(RegraNegocioException.class)

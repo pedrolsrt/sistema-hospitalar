@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import br.pucminas.hospital.exception.DataInvalidaException;
+import br.pucminas.hospital.exception.ProfissionalIncompativelException;
 import br.pucminas.hospital.exception.RegraNegocioException;
 import br.pucminas.hospital.exception.TransicaoSituacaoInvalidaException;
 import java.time.LocalDate;
@@ -63,7 +64,7 @@ class ProcedimentoCirurgicoTest {
 	void naoAgendaComProfissionalQueNaoECirurgiao(ProfissionalSaude profissional) {
 		assertThatThrownBy(() -> new ProcedimentoCirurgico(paciente, profissional, "Apendicectomia",
 				TipoCirurgia.URGENCIA, PREVISTA))
-				.isInstanceOf(RegraNegocioException.class)
+				.isInstanceOf(ProfissionalIncompativelException.class)
 				.hasMessage("O profissional " + profissional.getNome()
 						+ " não pode realizar procedimentos cirúrgicos: é necessário um cirurgião.");
 	}

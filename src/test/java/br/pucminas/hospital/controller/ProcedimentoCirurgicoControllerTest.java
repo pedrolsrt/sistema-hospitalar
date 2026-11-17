@@ -16,7 +16,7 @@ import br.pucminas.hospital.dto.ConclusaoProcedimentoRequest;
 import br.pucminas.hospital.dto.InicioProcedimentoRequest;
 import br.pucminas.hospital.dto.ObservacoesRequest;
 import br.pucminas.hospital.dto.ProcedimentoCirurgicoRequest;
-import br.pucminas.hospital.exception.RegraNegocioException;
+import br.pucminas.hospital.exception.ProfissionalIncompativelException;
 import br.pucminas.hospital.exception.TransicaoSituacaoInvalidaException;
 import br.pucminas.hospital.service.ProcedimentoCirurgicoService;
 import java.time.LocalDate;
@@ -55,11 +55,12 @@ class ProcedimentoCirurgicoControllerTest {
 
 	@Test
 	void profissionalQueNaoECirurgiaoResponde422() throws Exception {
-		when(service.agendar(any(ProcedimentoCirurgicoRequest.class))).thenThrow(new RegraNegocioException(
+		when(service.agendar(any(ProcedimentoCirurgicoRequest.class))).thenThrow(new ProfissionalIncompativelException(
 				"O profissional Dra. Ana Lima não pode realizar procedimentos cirúrgicos: é necessário um cirurgião."));
 
 		mvc.perform(post("/procedimentos").contentType(MediaType.APPLICATION_JSON).content(PROCEDIMENTO))
-				.andExpect(status().isUnprocessableContent());
+				.andExpect(status().isUnprocessableContent())
+				.andExpect(jsonPath("$.title").value("Profissional incompatível"));
 	}
 
 	@Test

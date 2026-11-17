@@ -13,7 +13,9 @@ import br.pucminas.hospital.dto.ConsultaResponse;
 import br.pucminas.hospital.dto.ConsultaRotinaRequest;
 import br.pucminas.hospital.dto.EncaminhamentoRequest;
 import br.pucminas.hospital.dto.ObservacoesRequest;
+import br.pucminas.hospital.exception.AtendimentoIndisponivelException;
 import br.pucminas.hospital.exception.DataInvalidaException;
+import br.pucminas.hospital.exception.ProfissionalIncompativelException;
 import br.pucminas.hospital.exception.RecursoNaoEncontradoException;
 import br.pucminas.hospital.exception.RegraNegocioException;
 import br.pucminas.hospital.exception.TransicaoSituacaoInvalidaException;
@@ -132,7 +134,7 @@ class ConsultaServiceTest {
 	void naoAgendaConsultaEspecializadaComProfissionalQueNaoEEspecialistaDaArea() {
 		assertThatThrownBy(() -> service.agendarEspecializada(new ConsultaEspecializadaRequest(1L, 2L, DIA,
 				LocalTime.of(9, 0), "Dor no peito", AreaAtuacao.CARDIOLOGIA)))
-				.isInstanceOf(RegraNegocioException.class)
+				.isInstanceOf(ProfissionalIncompativelException.class)
 				.hasMessageContaining("não pode realizar consulta especializada em Cardiologia");
 		verify(repository, never()).save(any());
 	}
@@ -190,7 +192,7 @@ class ConsultaServiceTest {
 				.thenReturn(List.of(existente(drJoao, outro, DIA, "14:00", situacao)));
 
 		assertThatThrownBy(() -> service.agendarRotina(rotina(DIA, "14:15")))
-				.isInstanceOf(RegraNegocioException.class)
+				.isInstanceOf(AtendimentoIndisponivelException.class)
 				.hasMessage("O profissional Dr. João Souza já tem consulta em 15/01/2030 às 14:00, que se sobrepõe ao "
 						+ "horário pedido (cada consulta dura 30 minutos).");
 		verify(repository, never()).save(any());
@@ -203,7 +205,7 @@ class ConsultaServiceTest {
 				.thenReturn(List.of(existente(cardiologista, maria, DIA, "14:00", situacao)));
 
 		assertThatThrownBy(() -> service.agendarRotina(rotina(DIA, "13:45")))
-				.isInstanceOf(RegraNegocioException.class)
+				.isInstanceOf(AtendimentoIndisponivelException.class)
 				.hasMessageStartingWith("O paciente Maria Silva já tem consulta em 15/01/2030 às 14:00");
 		verify(repository, never()).save(any());
 	}
@@ -219,7 +221,7 @@ class ConsultaServiceTest {
 			assertThat(service.agendarRotina(rotina(DIA, horario)).horario()).isEqualTo(LocalTime.parse(horario));
 		} else {
 			assertThatThrownBy(() -> service.agendarRotina(rotina(DIA, horario)))
-					.isInstanceOf(RegraNegocioException.class);
+					.isInstanceOf(AtendimentoIndisponivelException.class);
 		}
 	}
 
@@ -240,6 +242,7 @@ class ConsultaServiceTest {
 				.thenReturn(List.of(existente(drJoao, maria, DIA.plusDays(1), "00:10", SituacaoConsulta.AGENDADA)));
 
 		assertThatThrownBy(() -> service.agendarRotina(rotina(DIA, "23:50")))
+				.isInstanceOf(AtendimentoIndisponivelException.class)
 				.hasMessageStartingWith("O profissional Dr. João Souza já tem consulta em 16/01/2030 às 00:10");
 	}
 
@@ -249,6 +252,7 @@ class ConsultaServiceTest {
 				.thenReturn(List.of(existente(cardiologista, maria, DIA.minusDays(1), "23:45", SituacaoConsulta.CONFIRMADA)));
 
 		assertThatThrownBy(() -> service.agendarRotina(rotina(DIA, "00:05")))
+				.isInstanceOf(AtendimentoIndisponivelException.class)
 				.hasMessageStartingWith("O paciente Maria Silva já tem consulta em 14/01/2030 às 23:45");
 	}
 
@@ -328,6 +332,17 @@ class ConsultaServiceTest {
 		ConsultaResponse resposta = service.encaminhar(10L, new EncaminhamentoRequest(AreaAtuacao.CARDIOLOGIA));
 
 		assertThat(resposta.areaEncaminhamento().codigo()).isEqualTo("CARDIOLOGIA");
+	}
+
+	@Test
+	void naoEncaminhaQuandoOProfissionalNaoEClinicoGeral() {
+		Consulta consulta = existente(cardiologista, maria, DIA, "14:00", SituacaoConsulta.EM_ATENDIMENTO);
+		when(repository.findById(10L)).thenReturn(Optional.of(consulta));
+
+		assertThatThrownBy(() -> service.encaminhar(10L, new EncaminhamentoRequest(AreaAtuacao.NEUROLOGIA)))
+				.isInstanceOf(ProfissionalIncompativelException.class)
+				.hasMessageEndingWith("é necessário um clínico geral.");
+		assertThat(consulta.getAreaEncaminhamento()).isNull();
 	}
 
 	@Test

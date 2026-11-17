@@ -1,6 +1,6 @@
 package br.pucminas.hospital.model;
 
-import br.pucminas.hospital.exception.QuartoSemVagaException;
+import br.pucminas.hospital.exception.QuartoSemVagasException;
 import br.pucminas.hospital.exception.RegraNegocioException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -61,11 +61,11 @@ public class Quarto {
 	/**
 	 * Ocupa uma vaga do quarto.
 	 *
-	 * @throws QuartoSemVagaException se o quarto já estiver na capacidade máxima
+	 * @throws QuartoSemVagasException se o quarto já estiver na capacidade máxima
 	 */
 	public void ocupar() {
 		if (!temVaga()) {
-			throw new QuartoSemVagaException(numero);
+			throw new QuartoSemVagasException(numero);
 		}
 		ocupacaoAtual++;
 	}

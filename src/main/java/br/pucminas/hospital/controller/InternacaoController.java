@@ -37,9 +37,8 @@ public class InternacaoController {
 	@ApiResponse(responseCode = "201", description = "Paciente internado; o cabeçalho Location aponta para a internação")
 	@ApiResponse(responseCode = "400", description = "Dados inválidos")
 	@ApiResponse(responseCode = "404", description = "Paciente, profissional ou quarto não encontrado")
-	@ApiResponse(responseCode = "409", description = "O quarto foi alterado por outra operação ao mesmo tempo")
-	@ApiResponse(responseCode = "422", description = "Paciente já internado, quarto sem vaga, participante inativo "
-			+ "ou datas incoerentes")
+	@ApiResponse(responseCode = "409", description = "Quarto sem vagas ou alterado por outra operação ao mesmo tempo")
+	@ApiResponse(responseCode = "422", description = "Paciente já internado, participante inativo ou datas incoerentes")
 	public ResponseEntity<InternacaoResponse> internar(@Valid @RequestBody InternacaoRequest request) {
 		InternacaoResponse resposta = service.internar(request);
 		return ResponseEntity.created(Localizacao.de("/internacoes/{id}", resposta.id())).body(resposta);

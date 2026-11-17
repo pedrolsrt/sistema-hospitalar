@@ -1,5 +1,6 @@
 package br.pucminas.hospital.model;
 
+import br.pucminas.hospital.exception.ProfissionalIncompativelException;
 import br.pucminas.hospital.exception.RegraNegocioException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -29,6 +30,10 @@ public class ConsultaRotina extends Consulta {
 	 * Registra o encaminhamento do paciente para a área informada. Só o profissional que pode encaminhar
 	 * (clínico geral) o faz, e apenas durante o atendimento ou depois da conclusão da consulta. Um novo
 	 * encaminhamento substitui o anterior.
+	 *
+	 * @throws ProfissionalIncompativelException se o profissional não for clínico geral
+	 * @throws RegraNegocioException se a área não for informada ou a consulta não estiver em atendimento
+	 *         nem concluída
 	 */
 	@Override
 	public void encaminhar(AreaAtuacao area) {
@@ -37,7 +42,7 @@ public class ConsultaRotina extends Consulta {
 		}
 		ProfissionalSaude profissional = getProfissionalResponsavel();
 		if (!profissional.podeEncaminharParaEspecialista()) {
-			throw new RegraNegocioException("O profissional " + profissional.getNome()
+			throw new ProfissionalIncompativelException("O profissional " + profissional.getNome()
 					+ " não pode encaminhar pacientes para atendimento especializado: é necessário um clínico geral.");
 		}
 		if (!getSituacao().permiteRegistrarObservacoes()) {

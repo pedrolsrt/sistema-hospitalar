@@ -75,7 +75,7 @@ public class ProcedimentoCirurgicoController {
 	@ApiResponse(responseCode = "400", description = "Data e hora de início ausente")
 	@ApiResponse(responseCode = "404", description = "Procedimento não encontrado")
 	@ApiResponse(responseCode = "409", description = "O procedimento não está agendado")
-	@ApiResponse(responseCode = "422", description = "O procedimento não pode mais ser realizado")
+	@ApiResponse(responseCode = "422", description = "O procedimento não pode mais ser realizado (participante inativo)")
 	public ProcedimentoCirurgicoResponse iniciar(@PathVariable Long id,
 			@Valid @RequestBody InicioProcedimentoRequest request) {
 		return service.iniciar(id, request);

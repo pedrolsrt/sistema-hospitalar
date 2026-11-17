@@ -3,7 +3,7 @@ package br.pucminas.hospital.model;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import br.pucminas.hospital.exception.QuartoSemVagaException;
+import br.pucminas.hospital.exception.QuartoSemVagasException;
 import br.pucminas.hospital.exception.RegraNegocioException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -50,7 +50,7 @@ class QuartoTest {
 		quarto.ocupar();
 
 		assertThatThrownBy(quarto::ocupar)
-				.isInstanceOf(QuartoSemVagaException.class)
+				.isInstanceOf(QuartoSemVagasException.class)
 				.hasMessage("O quarto 101 não possui vagas disponíveis.");
 		assertThat(quarto.getOcupacaoAtual()).isEqualTo(1);
 	}

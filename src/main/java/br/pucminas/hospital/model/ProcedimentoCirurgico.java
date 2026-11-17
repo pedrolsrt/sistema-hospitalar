@@ -1,6 +1,7 @@
 package br.pucminas.hospital.model;
 
 import br.pucminas.hospital.exception.DataInvalidaException;
+import br.pucminas.hospital.exception.ProfissionalIncompativelException;
 import br.pucminas.hospital.exception.RegraNegocioException;
 import br.pucminas.hospital.exception.TransicaoSituacaoInvalidaException;
 import jakarta.persistence.Column;
@@ -121,12 +122,15 @@ public class ProcedimentoCirurgico extends Atendimento {
 	/**
 	 * Exige um profissional que possa realizar procedimentos (cirurgião), a descrição, o tipo de cirurgia
 	 * e a data e hora prevista.
+	 *
+	 * @throws ProfissionalIncompativelException se o profissional não puder realizar procedimentos
+	 * @throws RegraNegocioException se faltar a descrição, o tipo de cirurgia ou a data e hora prevista
 	 */
 	@Override
 	protected void validarCondicoesEspecificas() {
 		ProfissionalSaude profissional = getProfissionalResponsavel();
 		if (!profissional.podeRealizarProcedimentos()) {
-			throw new RegraNegocioException("O profissional " + profissional.getNome()
+			throw new ProfissionalIncompativelException("O profissional " + profissional.getNome()
 					+ " não pode realizar procedimentos cirúrgicos: é necessário um cirurgião.");
 		}
 		if (descricao == null || descricao.isBlank()) {
@@ -140,9 +144,6 @@ public class ProcedimentoCirurgico extends Atendimento {
 		}
 	}
 
-	/**
-	 * O início real quando o procedimento já começou; antes disso, a data e hora prevista.
-	 */
 	@Override
 	public ModalidadeAtendimento getModalidade() {
 		return ModalidadeAtendimento.PROCEDIMENTO_CIRURGICO;
@@ -153,6 +154,9 @@ public class ProcedimentoCirurgico extends Atendimento {
 		return visitante.visitar(this);
 	}
 
+	/**
+	 * O início real quando o procedimento já começou; antes disso, a data e hora prevista.
+	 */
 	@Override
 	public LocalDateTime getDataHoraReferencia() {
 		return dataHoraInicio != null ? dataHoraInicio : dataHoraPrevista;

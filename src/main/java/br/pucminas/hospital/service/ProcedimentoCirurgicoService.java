@@ -6,6 +6,7 @@ import br.pucminas.hospital.dto.ObservacoesRequest;
 import br.pucminas.hospital.dto.ProcedimentoCirurgicoRequest;
 import br.pucminas.hospital.dto.ProcedimentoCirurgicoResponse;
 import br.pucminas.hospital.exception.DataInvalidaException;
+import br.pucminas.hospital.exception.ProfissionalIncompativelException;
 import br.pucminas.hospital.exception.RecursoNaoEncontradoException;
 import br.pucminas.hospital.exception.RegraNegocioException;
 import br.pucminas.hospital.exception.TransicaoSituacaoInvalidaException;
@@ -45,7 +46,8 @@ public class ProcedimentoCirurgicoService {
 	/**
 	 * Agenda o procedimento.
 	 *
-	 * @throws RegraNegocioException se o profissional não for um cirurgião ativo ou o paciente estiver inativo
+	 * @throws ProfissionalIncompativelException se o profissional não for cirurgião
+	 * @throws RegraNegocioException se o paciente ou o cirurgião estiver inativo
 	 */
 	@Transactional
 	public ProcedimentoCirurgicoResponse agendar(ProcedimentoCirurgicoRequest request) {
