@@ -3,6 +3,7 @@ package br.pucminas.hospital.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -30,6 +31,7 @@ import br.pucminas.hospital.model.ProfissionalSaude;
 import br.pucminas.hospital.model.SituacaoConsulta;
 import br.pucminas.hospital.repository.ConsultaRepository;
 import br.pucminas.hospital.repository.PacienteRepository;
+import br.pucminas.hospital.repository.ProcedimentoCirurgicoRepository;
 import br.pucminas.hospital.repository.ProfissionalSaudeRepository;
 import java.time.Clock;
 import java.time.LocalDate;
@@ -63,6 +65,9 @@ class ConsultaServiceTest {
 	@Mock
 	private ProfissionalSaudeRepository profissionalRepository;
 
+	@Mock
+	private ProcedimentoCirurgicoRepository procedimentoRepository;
+
 	private ConsultaService service;
 
 	private Paciente maria;
@@ -83,7 +88,8 @@ class ConsultaServiceTest {
 
 	private ConsultaService criarService(long duracaoMinutos) {
 		return new ConsultaService(repository, pacienteRepository, profissionalRepository, new ConsultaMapper(),
-				Clock.fixed(AGORA.toInstant(ZoneOffset.UTC), ZoneOffset.UTC), duracaoMinutos);
+				Clock.fixed(AGORA.toInstant(ZoneOffset.UTC), ZoneOffset.UTC),
+				new VerificadorDeDisponibilidade(repository, procedimentoRepository, duracaoMinutos));
 	}
 
 	private static <T> T comId(T entidade, Long id) {
@@ -188,25 +194,25 @@ class ConsultaServiceTest {
 	@EnumSource(value = SituacaoConsulta.class, names = { "AGENDADA", "CONFIRMADA", "EM_ATENDIMENTO" })
 	void naoAgendaSobreConsultaAtivaDoProfissional(SituacaoConsulta situacao) {
 		Paciente outro = comId(new Paciente("José Lima", "11144477735", LocalDate.of(1985, 2, 1)), 4L);
-		when(repository.findAtivasDoProfissionalNaData(2L, DIA))
+		when(repository.findAtivasDoProfissionalProximasDe(eq(2L), any()))
 				.thenReturn(List.of(existente(drJoao, outro, DIA, "14:00", situacao)));
 
 		assertThatThrownBy(() -> service.agendarRotina(rotina(DIA, "14:15")))
 				.isInstanceOf(AtendimentoIndisponivelException.class)
-				.hasMessage("O profissional Dr. João Souza já tem consulta em 15/01/2030 às 14:00, que se sobrepõe ao "
-						+ "horário pedido (cada consulta dura 30 minutos).");
+				.hasMessage("O profissional Dr. João Souza já tem consulta em 15/01/2030, das 14:00 às 14:30, que se "
+						+ "sobrepõe ao período pedido (15/01/2030, das 14:15 às 14:45).");
 		verify(repository, never()).save(any());
 	}
 
 	@ParameterizedTest
 	@EnumSource(value = SituacaoConsulta.class, names = { "AGENDADA", "CONFIRMADA", "EM_ATENDIMENTO" })
 	void naoAgendaSobreConsultaAtivaDoPaciente(SituacaoConsulta situacao) {
-		when(repository.findAtivasDoPacienteNaData(1L, DIA))
+		when(repository.findAtivasDoPacienteProximasDe(eq(1L), any()))
 				.thenReturn(List.of(existente(cardiologista, maria, DIA, "14:00", situacao)));
 
 		assertThatThrownBy(() -> service.agendarRotina(rotina(DIA, "13:45")))
 				.isInstanceOf(AtendimentoIndisponivelException.class)
-				.hasMessageStartingWith("O paciente Maria Silva já tem consulta em 15/01/2030 às 14:00");
+				.hasMessageStartingWith("O paciente Maria Silva já tem consulta em 15/01/2030, das 14:00 às 14:30");
 		verify(repository, never()).save(any());
 	}
 
@@ -214,7 +220,7 @@ class ConsultaServiceTest {
 	@ParameterizedTest(name = "{0}: livre = {1}")
 	@CsvSource({ "13:30, true", "13:31, false", "14:00, false", "14:29, false", "14:30, true" })
 	void limitesDaSobreposicao(String horario, boolean livre) {
-		lenient().when(repository.findAtivasDoProfissionalNaData(2L, DIA))
+		when(repository.findAtivasDoProfissionalProximasDe(eq(2L), any()))
 				.thenReturn(List.of(existente(drJoao, maria, DIA, "14:00", SituacaoConsulta.AGENDADA)));
 
 		if (livre) {
@@ -228,32 +234,34 @@ class ConsultaServiceTest {
 	@Test
 	void usaADuracaoConfigurada() {
 		ConsultaService comUmaHora = criarService(60);
-		when(repository.findAtivasDoProfissionalNaData(2L, DIA))
+		when(repository.findAtivasDoProfissionalProximasDe(eq(2L), any()))
 				.thenReturn(List.of(existente(drJoao, maria, DIA, "14:00", SituacaoConsulta.AGENDADA)));
 
 		assertThatThrownBy(() -> comUmaHora.agendarRotina(rotina(DIA, "14:45")))
-				.hasMessageEndingWith("(cada consulta dura 60 minutos).");
+				.hasMessage("O profissional Dr. João Souza já tem consulta em 15/01/2030, das 14:00 às 15:00, que se "
+						+ "sobrepõe ao período pedido (15/01/2030, das 14:45 às 15:45).");
 	}
 
 	@Test
 	void consideraConsultaDoDiaSeguinteQuandoOHorarioCruzaAMeiaNoite() {
-		// lenient: o service consulta também o próprio dia, com outro argumento, antes do dia seguinte.
-		lenient().when(repository.findAtivasDoProfissionalNaData(2L, DIA.plusDays(1)))
+		when(repository.findAtivasDoProfissionalProximasDe(eq(2L), any()))
 				.thenReturn(List.of(existente(drJoao, maria, DIA.plusDays(1), "00:10", SituacaoConsulta.AGENDADA)));
 
 		assertThatThrownBy(() -> service.agendarRotina(rotina(DIA, "23:50")))
 				.isInstanceOf(AtendimentoIndisponivelException.class)
-				.hasMessageStartingWith("O profissional Dr. João Souza já tem consulta em 16/01/2030 às 00:10");
+				.hasMessage("O profissional Dr. João Souza já tem consulta em 16/01/2030, das 00:10 às 00:40, que se "
+						+ "sobrepõe ao período pedido (15/01/2030 às 23:50 até 16/01/2030 às 00:20).");
 	}
 
 	@Test
 	void consideraConsultaDoDiaAnteriorQuandoOHorarioEhLogoAposAMeiaNoite() {
-		when(repository.findAtivasDoPacienteNaData(1L, DIA.minusDays(1)))
+		when(repository.findAtivasDoPacienteProximasDe(eq(1L), any()))
 				.thenReturn(List.of(existente(cardiologista, maria, DIA.minusDays(1), "23:45", SituacaoConsulta.CONFIRMADA)));
 
 		assertThatThrownBy(() -> service.agendarRotina(rotina(DIA, "00:05")))
 				.isInstanceOf(AtendimentoIndisponivelException.class)
-				.hasMessageStartingWith("O paciente Maria Silva já tem consulta em 14/01/2030 às 23:45");
+				.hasMessageStartingWith("O paciente Maria Silva já tem consulta em 14/01/2030 às 23:45 até 15/01/2030 "
+						+ "às 00:15");
 	}
 
 	// Mudanças de situação -----------------------------------------------------------------------------
@@ -270,6 +278,16 @@ class ConsultaServiceTest {
 
 		assertThat(service.confirmar(10L).situacao().codigo()).isEqualTo("CONFIRMADA");
 		assertThat(consulta.getSituacao()).isEqualTo(SituacaoConsulta.CONFIRMADA);
+	}
+
+	@Test
+	void disponibilidadeSoEVerificadaNoAgendamento() {
+		consultaSalva(SituacaoConsulta.CONFIRMADA);
+
+		service.iniciarAtendimento(10L);
+
+		verify(repository, never()).findAtivasDoProfissionalProximasDe(any(), any());
+		verify(procedimentoRepository, never()).findAtivosDoPacienteProximosDe(any(), any());
 	}
 
 	@Test

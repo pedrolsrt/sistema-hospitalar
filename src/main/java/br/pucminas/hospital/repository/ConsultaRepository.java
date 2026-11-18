@@ -1,6 +1,7 @@
 package br.pucminas.hospital.repository;
 
 import br.pucminas.hospital.model.Consulta;
+import br.pucminas.hospital.model.Periodo;
 import br.pucminas.hospital.model.SituacaoConsulta;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -12,17 +13,27 @@ import org.springframework.data.repository.query.Param;
 public interface ConsultaRepository extends JpaRepository<Consulta, Long> {
 
 	/**
-	 * Consultas ativas (que ocupam horário) do profissional na data, para a regra de horários sobrepostos.
+	 * Consultas ativas do profissional que podem se sobrepor ao período. A sobreposição exata é decidida
+	 * depois, com {@link Periodo#sobrepoe}.
 	 */
-	default List<Consulta> findAtivasDoProfissionalNaData(Long profissionalId, LocalDate data) {
-		return findByProfissionalResponsavelIdAndDataAndSituacaoIn(profissionalId, data, SituacaoConsulta.ativas());
+	default List<Consulta> findAtivasDoProfissionalProximasDe(Long profissionalId, Periodo periodo) {
+		return findByProfissionalResponsavelIdAndDataBetweenAndSituacaoIn(profissionalId, primeiraData(periodo),
+				periodo.fim().toLocalDate(), SituacaoConsulta.ativas());
 	}
 
 	/**
-	 * Consultas ativas (que ocupam horário) do paciente na data, para a regra de horários sobrepostos.
+	 * Consultas ativas do paciente que podem se sobrepor ao período. A sobreposição exata é decidida
+	 * depois, com {@link Periodo#sobrepoe}.
 	 */
-	default List<Consulta> findAtivasDoPacienteNaData(Long pacienteId, LocalDate data) {
-		return findByPacienteIdAndDataAndSituacaoIn(pacienteId, data, SituacaoConsulta.ativas());
+	default List<Consulta> findAtivasDoPacienteProximasDe(Long pacienteId, Periodo periodo) {
+		return findByPacienteIdAndDataBetweenAndSituacaoIn(pacienteId, primeiraData(periodo),
+				periodo.fim().toLocalDate(), SituacaoConsulta.ativas());
+	}
+
+	// A consulta é gravada por data e horário e dura menos de um dia: além das datas do período, só uma
+	// consulta do dia anterior, que passe da meia-noite, pode alcançá-lo.
+	private static LocalDate primeiraData(Periodo periodo) {
+		return periodo.inicio().toLocalDate().minusDays(1);
 	}
 
 	default boolean existeAtivaDoPaciente(Long pacienteId) {
@@ -37,10 +48,10 @@ public interface ConsultaRepository extends JpaRepository<Consulta, Long> {
 
 	boolean existsByProfissionalResponsavelIdAndSituacaoIn(Long profissionalId, Collection<SituacaoConsulta> situacoes);
 
-	List<Consulta> findByProfissionalResponsavelIdAndDataAndSituacaoIn(Long profissionalId, LocalDate data,
-			Collection<SituacaoConsulta> situacoes);
+	List<Consulta> findByProfissionalResponsavelIdAndDataBetweenAndSituacaoIn(Long profissionalId, LocalDate de,
+			LocalDate ate, Collection<SituacaoConsulta> situacoes);
 
-	List<Consulta> findByPacienteIdAndDataAndSituacaoIn(Long pacienteId, LocalDate data,
+	List<Consulta> findByPacienteIdAndDataBetweenAndSituacaoIn(Long pacienteId, LocalDate de, LocalDate ate,
 			Collection<SituacaoConsulta> situacoes);
 
 	/**

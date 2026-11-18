@@ -56,8 +56,8 @@ class TratadorDeErrosTest {
 
 		@GetMapping("/indisponivel")
 		void indisponivel() {
-			throw new AtendimentoIndisponivelException("O profissional Dr. João Souza já tem consulta em 15/01/2030 "
-					+ "às 14:00, que se sobrepõe ao horário pedido (cada consulta dura 30 minutos).");
+			throw new AtendimentoIndisponivelException("O profissional Dr. João Souza já tem consulta em 15/01/2030, "
+					+ "das 14:00 às 14:30, que se sobrepõe ao período pedido (15/01/2030, das 14:15 às 14:45).");
 		}
 
 		@GetMapping("/sem-vagas")
@@ -147,7 +147,7 @@ class TratadorDeErrosTest {
 				.andExpect(status().isConflict())
 				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
 				.andExpect(jsonPath("$.title").value("Horário indisponível"))
-				.andExpect(jsonPath("$.detail", containsString("já tem consulta em 15/01/2030 às 14:00")));
+				.andExpect(jsonPath("$.detail", containsString("já tem consulta em 15/01/2030, das 14:00 às 14:30")));
 	}
 
 	@Test

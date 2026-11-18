@@ -81,8 +81,8 @@ class ConsultaControllerTest {
 	@Test
 	void horarioOcupadoResponde409() throws Exception {
 		when(service.agendarRotina(any(ConsultaRotinaRequest.class))).thenThrow(new AtendimentoIndisponivelException(
-				"O profissional Dr. João Souza já tem consulta em 15/01/2030 às 14:00, que se sobrepõe ao horário pedido "
-						+ "(cada consulta dura 30 minutos)."));
+				"O profissional Dr. João Souza já tem consulta em 15/01/2030, das 14:00 às 14:30, que se sobrepõe ao "
+						+ "período pedido (15/01/2030, das 14:15 às 14:45)."));
 
 		mvc.perform(post("/consultas/rotina").contentType(MediaType.APPLICATION_JSON).content(ROTINA))
 				.andExpect(status().isConflict())

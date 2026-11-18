@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -135,6 +136,14 @@ public abstract class Consulta extends Atendimento {
 	@Override
 	public LocalDateTime getDataHoraReferencia() {
 		return data.atTime(horario);
+	}
+
+	/**
+	 * Da data e horário da consulta até o fim da duração informada. A duração não fica na consulta porque
+	 * é a mesma para todas e configurável.
+	 */
+	public Periodo getPeriodoPrevisto(Duration duracao) {
+		return Periodo.de(getDataHoraReferencia(), duracao);
 	}
 
 	public LocalDate getData() {

@@ -5,6 +5,7 @@ import br.pucminas.hospital.dto.InicioProcedimentoRequest;
 import br.pucminas.hospital.dto.ObservacoesRequest;
 import br.pucminas.hospital.dto.ProcedimentoCirurgicoRequest;
 import br.pucminas.hospital.dto.ProcedimentoCirurgicoResponse;
+import br.pucminas.hospital.exception.AtendimentoIndisponivelException;
 import br.pucminas.hospital.exception.DataInvalidaException;
 import br.pucminas.hospital.exception.ProfissionalIncompativelException;
 import br.pucminas.hospital.exception.RecursoNaoEncontradoException;
@@ -15,6 +16,7 @@ import br.pucminas.hospital.model.ProcedimentoCirurgico;
 import br.pucminas.hospital.repository.PacienteRepository;
 import br.pucminas.hospital.repository.ProcedimentoCirurgicoRepository;
 import br.pucminas.hospital.repository.ProfissionalSaudeRepository;
+import br.pucminas.hospital.repository.SalaCirurgicaRepository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.function.Consumer;
@@ -32,29 +34,39 @@ public class ProcedimentoCirurgicoService {
 	private final ProcedimentoCirurgicoRepository repository;
 	private final PacienteRepository pacienteRepository;
 	private final ProfissionalSaudeRepository profissionalRepository;
+	private final SalaCirurgicaRepository salaRepository;
 	private final ProcedimentoCirurgicoMapper mapper;
+	private final VerificadorDeDisponibilidade disponibilidade;
 
 	public ProcedimentoCirurgicoService(ProcedimentoCirurgicoRepository repository,
 			PacienteRepository pacienteRepository, ProfissionalSaudeRepository profissionalRepository,
-			ProcedimentoCirurgicoMapper mapper) {
+			SalaCirurgicaRepository salaRepository, ProcedimentoCirurgicoMapper mapper,
+			VerificadorDeDisponibilidade disponibilidade) {
 		this.repository = repository;
 		this.pacienteRepository = pacienteRepository;
 		this.profissionalRepository = profissionalRepository;
+		this.salaRepository = salaRepository;
 		this.mapper = mapper;
+		this.disponibilidade = disponibilidade;
 	}
 
 	/**
-	 * Agenda o procedimento.
+	 * Agenda o procedimento numa sala ativa, sem sobreposição com consultas ou procedimentos ativos do
+	 * cirurgião ou do paciente nem com outro procedimento ativo na sala.
 	 *
 	 * @throws ProfissionalIncompativelException se o profissional não for cirurgião
-	 * @throws RegraNegocioException se o paciente ou o cirurgião estiver inativo
+	 * @throws AtendimentoIndisponivelException se o cirurgião, o paciente ou a sala estiver ocupado no período
+	 * @throws RegraNegocioException se o paciente ou o cirurgião estiver inativo, a sala estiver inativa ou a
+	 *         duração estiver fora dos limites
 	 */
 	@Transactional
 	public ProcedimentoCirurgicoResponse agendar(ProcedimentoCirurgicoRequest request) {
 		ProcedimentoCirurgico procedimento = new ProcedimentoCirurgico(
 				Busca.paciente(pacienteRepository, request.pacienteId()),
 				Busca.profissional(profissionalRepository, request.cirurgiaoId()), request.descricao().strip(),
-				request.tipoCirurgia(), request.dataHoraPrevista());
+				request.tipoCirurgia(), Busca.salaCirurgica(salaRepository, request.salaCirurgicaId()),
+				request.dataHoraPrevista(), request.duracaoPrevistaMinutos());
+		disponibilidade.exigirHorarioLivre(procedimento);
 		if (request.observacoesPreOperatorias() != null && !request.observacoesPreOperatorias().isBlank()) {
 			procedimento.registrarObservacoesPreOperatorias(request.observacoesPreOperatorias().strip());
 		}

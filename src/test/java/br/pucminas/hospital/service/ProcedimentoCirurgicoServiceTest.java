@@ -13,6 +13,7 @@ import br.pucminas.hospital.dto.InicioProcedimentoRequest;
 import br.pucminas.hospital.dto.ObservacoesRequest;
 import br.pucminas.hospital.dto.ProcedimentoCirurgicoRequest;
 import br.pucminas.hospital.dto.ProcedimentoCirurgicoResponse;
+import br.pucminas.hospital.exception.AtendimentoIndisponivelException;
 import br.pucminas.hospital.exception.DataInvalidaException;
 import br.pucminas.hospital.exception.ProfissionalIncompativelException;
 import br.pucminas.hospital.exception.RecursoNaoEncontradoException;
@@ -25,11 +26,14 @@ import br.pucminas.hospital.model.ClinicoGeral;
 import br.pucminas.hospital.model.MedicoEspecialista;
 import br.pucminas.hospital.model.Paciente;
 import br.pucminas.hospital.model.ProcedimentoCirurgico;
+import br.pucminas.hospital.model.SalaCirurgica;
 import br.pucminas.hospital.model.SituacaoProcedimento;
 import br.pucminas.hospital.model.TipoCirurgia;
+import br.pucminas.hospital.repository.ConsultaRepository;
 import br.pucminas.hospital.repository.PacienteRepository;
 import br.pucminas.hospital.repository.ProcedimentoCirurgicoRepository;
 import br.pucminas.hospital.repository.ProfissionalSaudeRepository;
+import br.pucminas.hospital.repository.SalaCirurgicaRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -54,31 +58,41 @@ class ProcedimentoCirurgicoServiceTest {
 	@Mock
 	private ProfissionalSaudeRepository profissionalRepository;
 
+	@Mock
+	private SalaCirurgicaRepository salaRepository;
+
+	@Mock
+	private ConsultaRepository consultaRepository;
+
 	private ProcedimentoCirurgicoService service;
 
 	private Paciente maria;
 	private Cirurgiao cirurgiao;
+	private SalaCirurgica sala;
 
 	@BeforeEach
 	void configurar() {
 		service = new ProcedimentoCirurgicoService(repository, pacienteRepository, profissionalRepository,
-				new ProcedimentoCirurgicoMapper());
+				salaRepository, new ProcedimentoCirurgicoMapper(),
+				new VerificadorDeDisponibilidade(consultaRepository, repository, 30));
 		maria = new Paciente("Maria Silva", "52998224725", LocalDate.of(1990, 5, 10));
 		cirurgiao = new Cirurgiao("Dra. Carla Mendes", "CRM-MG 3", AreaAtuacao.CIRURGIA_GERAL);
+		sala = new SalaCirurgica("Sala 1");
 		lenient().when(pacienteRepository.findById(1L)).thenReturn(Optional.of(maria));
 		lenient().when(profissionalRepository.findById(3L)).thenReturn(Optional.of(cirurgiao));
+		lenient().when(salaRepository.findById(5L)).thenReturn(Optional.of(sala));
 		lenient().when(repository.save(any(ProcedimentoCirurgico.class)))
 				.thenAnswer(invocacao -> invocacao.getArgument(0));
 	}
 
 	private static ProcedimentoCirurgicoRequest request(Long cirurgiaoId, String observacoesPre) {
-		return new ProcedimentoCirurgicoRequest(1L, cirurgiaoId, "Apendicectomia", TipoCirurgia.URGENCIA, PREVISTA,
-				observacoesPre);
+		return new ProcedimentoCirurgicoRequest(1L, cirurgiaoId, "Apendicectomia", TipoCirurgia.URGENCIA, 5L, PREVISTA,
+				90, observacoesPre);
 	}
 
 	private ProcedimentoCirurgico salvo() {
 		ProcedimentoCirurgico procedimento = new ProcedimentoCirurgico(maria, cirurgiao, "Apendicectomia",
-				TipoCirurgia.URGENCIA, PREVISTA);
+				TipoCirurgia.URGENCIA, sala, PREVISTA, 60);
 		when(repository.findById(10L)).thenReturn(Optional.of(procedimento));
 		return procedimento;
 	}
@@ -91,6 +105,43 @@ class ProcedimentoCirurgicoServiceTest {
 		assertThat(resposta.situacao().codigo()).isEqualTo("AGENDADO");
 		assertThat(resposta.tipoCirurgia().descricao()).isEqualTo("Urgência");
 		assertThat(resposta.observacoesPreOperatorias()).isEqualTo("Jejum de 8 horas.");
+		assertThat(resposta.salaCirurgica().identificacao()).isEqualTo("Sala 1");
+		assertThat(resposta.duracaoPrevistaMinutos()).isEqualTo(90);
+		assertThat(resposta.dataHoraFimPrevista()).isEqualTo(PREVISTA.plusMinutes(90));
+	}
+
+	@Test
+	void naoAgendaEmSalaInativa() {
+		sala.inativar();
+
+		assertThatThrownBy(() -> service.agendar(request(3L, null)))
+				.isInstanceOf(RegraNegocioException.class)
+				.hasMessage("A sala cirúrgica Sala 1 está inativa e não pode receber procedimentos.");
+		verify(repository, never()).save(any());
+	}
+
+	@Test
+	void naoAgendaEmSalaInexistente() {
+		when(salaRepository.findById(5L)).thenReturn(Optional.empty());
+
+		assertThatThrownBy(() -> service.agendar(request(3L, null)))
+				.isInstanceOf(RecursoNaoEncontradoException.class)
+				.hasMessage("Sala cirúrgica não encontrada (id 5).");
+	}
+
+	@Test
+	void naoAgendaComASalaOcupadaNoPeriodo() {
+		ProcedimentoCirurgico outro = new ProcedimentoCirurgico(
+				new Paciente("José Lima", "11144477735", LocalDate.of(1985, 2, 1)),
+				new Cirurgiao("Dr. Paulo Reis", "CRM-MG 4", AreaAtuacao.ORTOPEDIA), "Artroscopia", TipoCirurgia.ELETIVA,
+				sala, PREVISTA.plusMinutes(60), 60);
+		when(repository.findAtivosDaSalaProximosDe(any(), any())).thenReturn(List.of(outro));
+
+		assertThatThrownBy(() -> service.agendar(request(3L, null)))
+				.isInstanceOf(AtendimentoIndisponivelException.class)
+				.hasMessage("A sala cirúrgica Sala 1 já tem procedimento cirúrgico em 10/03/2030, das 09:00 às 10:00, "
+						+ "que se sobrepõe ao período pedido (10/03/2030, das 08:00 às 09:30).");
+		verify(repository, never()).save(any());
 	}
 
 	@Test
@@ -137,6 +188,16 @@ class ProcedimentoCirurgicoServiceTest {
 		assertThat(iniciado.situacao().codigo()).isEqualTo("EM_ANDAMENTO");
 		assertThat(concluido.situacao().codigo()).isEqualTo("CONCLUIDO");
 		assertThat(concluido.dataHoraFim()).isEqualTo(PREVISTA.plusHours(2));
+	}
+
+	@Test
+	void disponibilidadeSoEVerificadaNoAgendamento() {
+		salvo();
+
+		service.iniciar(10L, new InicioProcedimentoRequest(PREVISTA));
+
+		verify(repository, never()).findAtivosDaSalaProximosDe(any(), any());
+		verify(repository, never()).findAtivosDoProfissionalProximosDe(any(), any());
 	}
 
 	@Test
@@ -209,7 +270,7 @@ class ProcedimentoCirurgicoServiceTest {
 	@Test
 	void listaPorDataERealizadosPorCirurgiao() {
 		ProcedimentoCirurgico procedimento = new ProcedimentoCirurgico(maria, cirurgiao, "Apendicectomia",
-				TipoCirurgia.URGENCIA, PREVISTA);
+				TipoCirurgia.URGENCIA, sala, PREVISTA, 60);
 		when(repository.findPrevistosNaData(PREVISTA.toLocalDate())).thenReturn(List.of(procedimento));
 		when(repository.findConcluidosDoCirurgiao(3L)).thenReturn(List.of(procedimento));
 

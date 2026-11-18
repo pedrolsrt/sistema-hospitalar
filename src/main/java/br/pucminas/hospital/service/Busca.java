@@ -4,9 +4,11 @@ import br.pucminas.hospital.exception.RecursoNaoEncontradoException;
 import br.pucminas.hospital.model.Paciente;
 import br.pucminas.hospital.model.ProfissionalSaude;
 import br.pucminas.hospital.model.Quarto;
+import br.pucminas.hospital.model.SalaCirurgica;
 import br.pucminas.hospital.repository.PacienteRepository;
 import br.pucminas.hospital.repository.ProfissionalSaudeRepository;
 import br.pucminas.hospital.repository.QuartoRepository;
+import br.pucminas.hospital.repository.SalaCirurgicaRepository;
 
 /**
  * Busca por id das entidades usadas por mais de um service, com a mesma mensagem de "não encontrado".
@@ -29,6 +31,11 @@ final class Busca {
 	static Quarto quarto(QuartoRepository repository, Long id) {
 		return repository.findById(id)
 				.orElseThrow(() -> new RecursoNaoEncontradoException("Quarto não encontrado (id " + id + ")."));
+	}
+
+	static SalaCirurgica salaCirurgica(SalaCirurgicaRepository repository, Long id) {
+		return repository.findById(id)
+				.orElseThrow(() -> new RecursoNaoEncontradoException("Sala cirúrgica não encontrada (id " + id + ")."));
 	}
 
 }

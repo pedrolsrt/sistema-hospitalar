@@ -38,11 +38,15 @@ public class ProcedimentoCirurgicoController {
 
 	@PostMapping
 	@Operation(summary = "Agenda um procedimento", description = "Exige um cirurgião ativo, paciente ativo, "
-			+ "descrição, tipo de cirurgia e data e hora prevista.")
+			+ "descrição, tipo de cirurgia, sala cirúrgica ativa, data e hora prevista e duração prevista de 15 a 720 "
+			+ "minutos. No período previsto, o cirurgião e o paciente não podem ter consulta nem procedimento ativos, "
+			+ "e a sala não pode ter outro procedimento ativo.")
 	@ApiResponse(responseCode = "201", description = "Procedimento agendado; o cabeçalho Location aponta para ele")
-	@ApiResponse(responseCode = "400", description = "Dados inválidos")
-	@ApiResponse(responseCode = "404", description = "Paciente ou profissional não encontrado")
-	@ApiResponse(responseCode = "422", description = "O profissional não é cirurgião ou há participante inativo")
+	@ApiResponse(responseCode = "400", description = "Dados inválidos (por exemplo, duração fora dos limites)")
+	@ApiResponse(responseCode = "404", description = "Paciente, profissional ou sala cirúrgica não encontrado")
+	@ApiResponse(responseCode = "409", description = "Período ocupado pelo cirurgião, pelo paciente ou pela sala")
+	@ApiResponse(responseCode = "422", description = "O profissional não é cirurgião, há participante inativo ou a "
+			+ "sala está inativa")
 	public ResponseEntity<ProcedimentoCirurgicoResponse> agendar(
 			@Valid @RequestBody ProcedimentoCirurgicoRequest request) {
 		ProcedimentoCirurgicoResponse resposta = service.agendar(request);

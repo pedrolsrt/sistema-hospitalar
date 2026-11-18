@@ -28,6 +28,7 @@ import br.pucminas.hospital.model.Paciente;
 import br.pucminas.hospital.model.PrioridadeEmergencia;
 import br.pucminas.hospital.model.ProcedimentoCirurgico;
 import br.pucminas.hospital.model.Quarto;
+import br.pucminas.hospital.model.SalaCirurgica;
 import br.pucminas.hospital.model.TipoCirurgia;
 import br.pucminas.hospital.model.TipoQuarto;
 import br.pucminas.hospital.repository.AtendimentoRepository;
@@ -74,8 +75,9 @@ class HistoricoMedicoServiceTest {
 				DIA.minusDays(1).atTime(22, 0));
 		Internacao internacao = new Internacao(maria, clinico, new Quarto("101", 1, TipoQuarto.ENFERMARIA, 4), DIA,
 				DIA.plusDays(4));
+		SalaCirurgica sala = new SalaCirurgica("Sala 1");
 		ProcedimentoCirurgico cirurgia = new ProcedimentoCirurgico(maria, cirurgiao, "Apendicectomia",
-				TipoCirurgia.URGENCIA, DIA.plusDays(1).atTime(8, 0));
+				TipoCirurgia.URGENCIA, sala, DIA.plusDays(1).atTime(8, 0), 60);
 		ConsultaRotina rotina = new ConsultaRotina(maria, clinico, DIA.plusDays(2), LocalTime.of(9, 0), "Retorno");
 		ConsultaEspecializada especializada = new ConsultaEspecializada(maria, cardiologista, DIA.plusDays(3),
 				LocalTime.of(10, 0), "Avaliação", AreaAtuacao.CARDIOLOGIA);

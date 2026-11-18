@@ -8,7 +8,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -18,6 +22,9 @@ import java.time.format.DateTimeFormatter;
 @Entity
 @Table(name = "procedimento_cirurgico")
 public class ProcedimentoCirurgico extends Atendimento {
+
+	public static final int DURACAO_MINIMA_MINUTOS = 15;
+	public static final int DURACAO_MAXIMA_MINUTOS = 720;
 
 	private static final DateTimeFormatter FORMATO_DATA_HORA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
@@ -32,8 +39,15 @@ public class ProcedimentoCirurgico extends Atendimento {
 
 	private String observacoesPosOperatorias;
 
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "sala_cirurgica_id", nullable = false)
+	private SalaCirurgica salaCirurgica;
+
 	@Column(nullable = false)
 	private LocalDateTime dataHoraPrevista;
+
+	@Column(name = "duracao_prevista_minutos", nullable = false)
+	private int duracaoPrevistaMinutos;
 
 	private LocalDateTime dataHoraInicio;
 
@@ -52,11 +66,14 @@ public class ProcedimentoCirurgico extends Atendimento {
 	 * @throws RegraNegocioException se o procedimento não puder ser realizado (ver {@link #validarCondicoesEspecificas()})
 	 */
 	public ProcedimentoCirurgico(Paciente paciente, ProfissionalSaude profissionalResponsavel, String descricao,
-			TipoCirurgia tipoCirurgia, LocalDateTime dataHoraPrevista) {
+			TipoCirurgia tipoCirurgia, SalaCirurgica salaCirurgica, LocalDateTime dataHoraPrevista,
+			int duracaoPrevistaMinutos) {
 		super(paciente, profissionalResponsavel);
 		this.descricao = descricao;
 		this.tipoCirurgia = tipoCirurgia;
+		this.salaCirurgica = salaCirurgica;
 		this.dataHoraPrevista = dataHoraPrevista;
+		this.duracaoPrevistaMinutos = duracaoPrevistaMinutos;
 		this.situacao = SituacaoProcedimento.AGENDADO;
 		validarRealizacao();
 	}
@@ -120,11 +137,12 @@ public class ProcedimentoCirurgico extends Atendimento {
 	}
 
 	/**
-	 * Exige um profissional que possa realizar procedimentos (cirurgião), a descrição, o tipo de cirurgia
-	 * e a data e hora prevista.
+	 * Exige um profissional que possa realizar procedimentos (cirurgião), a descrição, o tipo de cirurgia,
+	 * uma sala cirúrgica ativa, a data e hora prevista e a duração prevista dentro dos limites.
 	 *
 	 * @throws ProfissionalIncompativelException se o profissional não puder realizar procedimentos
-	 * @throws RegraNegocioException se faltar a descrição, o tipo de cirurgia ou a data e hora prevista
+	 * @throws RegraNegocioException se faltar algum dado, a sala estiver inativa ou a duração estiver fora
+	 *         dos limites
 	 */
 	@Override
 	protected void validarCondicoesEspecificas() {
@@ -139,9 +157,29 @@ public class ProcedimentoCirurgico extends Atendimento {
 		if (tipoCirurgia == null) {
 			throw new RegraNegocioException("O tipo de cirurgia é obrigatório.");
 		}
+		if (salaCirurgica == null) {
+			throw new RegraNegocioException("A sala cirúrgica do procedimento é obrigatória.");
+		}
+		if (!salaCirurgica.isAtiva()) {
+			throw new RegraNegocioException("A sala cirúrgica " + salaCirurgica.getIdentificacao()
+					+ " está inativa e não pode receber procedimentos.");
+		}
 		if (dataHoraPrevista == null) {
 			throw new RegraNegocioException("A data e hora prevista do procedimento são obrigatórias.");
 		}
+		if (duracaoPrevistaMinutos < DURACAO_MINIMA_MINUTOS || duracaoPrevistaMinutos > DURACAO_MAXIMA_MINUTOS) {
+			throw new RegraNegocioException("A duração prevista do procedimento deve ser de " + DURACAO_MINIMA_MINUTOS
+					+ " a " + DURACAO_MAXIMA_MINUTOS + " minutos; a duração informada foi de " + duracaoPrevistaMinutos
+					+ " minutos.");
+		}
+	}
+
+	/**
+	 * Da data e hora prevista até o fim da duração prevista. É o período usado na verificação de
+	 * disponibilidade, mesmo depois de o procedimento ter começado.
+	 */
+	public Periodo getPeriodoPrevisto() {
+		return Periodo.de(dataHoraPrevista, Duration.ofMinutes(duracaoPrevistaMinutos));
 	}
 
 	@Override
@@ -178,8 +216,16 @@ public class ProcedimentoCirurgico extends Atendimento {
 		return observacoesPosOperatorias;
 	}
 
+	public SalaCirurgica getSalaCirurgica() {
+		return salaCirurgica;
+	}
+
 	public LocalDateTime getDataHoraPrevista() {
 		return dataHoraPrevista;
+	}
+
+	public int getDuracaoPrevistaMinutos() {
+		return duracaoPrevistaMinutos;
 	}
 
 	public LocalDateTime getDataHoraInicio() {

@@ -40,12 +40,13 @@ public class ConsultaController {
 
 	@PostMapping("/rotina")
 	@Operation(summary = "Agenda uma consulta de rotina", description = "Exige paciente e profissional ativos, data e "
-			+ "horário futuros e nenhuma sobreposição com consultas ativas do profissional ou do paciente.")
+			+ "horário futuros e nenhuma sobreposição com consultas ou procedimentos ativos do profissional ou do "
+			+ "paciente.")
 	@ApiResponse(responseCode = "201", description = "Consulta agendada; o cabeçalho Location aponta para ela")
 	@ApiResponse(responseCode = "400", description = "Dados inválidos")
 	@ApiResponse(responseCode = "404", description = "Paciente ou profissional não encontrado")
-	@ApiResponse(responseCode = "409", description = "Horário já ocupado por consulta ativa do profissional ou do "
-			+ "paciente")
+	@ApiResponse(responseCode = "409", description = "Horário ocupado por consulta ou procedimento ativo do "
+			+ "profissional ou do paciente")
 	@ApiResponse(responseCode = "422", description = "Data no passado ou participante inativo")
 	public ResponseEntity<ConsultaResponse> agendarRotina(@Valid @RequestBody ConsultaRotinaRequest request) {
 		ConsultaResponse resposta = service.agendarRotina(request);
@@ -58,8 +59,8 @@ public class ConsultaController {
 	@ApiResponse(responseCode = "201", description = "Consulta agendada; o cabeçalho Location aponta para ela")
 	@ApiResponse(responseCode = "400", description = "Dados inválidos")
 	@ApiResponse(responseCode = "404", description = "Paciente ou profissional não encontrado")
-	@ApiResponse(responseCode = "409", description = "Horário já ocupado por consulta ativa do profissional ou do "
-			+ "paciente")
+	@ApiResponse(responseCode = "409", description = "Horário ocupado por consulta ou procedimento ativo do "
+			+ "profissional ou do paciente")
 	@ApiResponse(responseCode = "422", description = "Profissional não é especialista da área, data no passado ou "
 			+ "participante inativo")
 	public ResponseEntity<ConsultaResponse> agendarEspecializada(

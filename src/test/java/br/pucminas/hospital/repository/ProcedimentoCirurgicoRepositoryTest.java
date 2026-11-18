@@ -5,7 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import br.pucminas.hospital.model.AreaAtuacao;
 import br.pucminas.hospital.model.Cirurgiao;
 import br.pucminas.hospital.model.Paciente;
+import br.pucminas.hospital.model.Periodo;
 import br.pucminas.hospital.model.ProcedimentoCirurgico;
+import br.pucminas.hospital.model.SalaCirurgica;
 import br.pucminas.hospital.model.TipoCirurgia;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -34,16 +36,18 @@ class ProcedimentoCirurgicoRepositoryTest {
 	private Paciente paciente;
 	private Cirurgiao draCarla;
 	private Cirurgiao drPaulo;
+	private SalaCirurgica sala;
 
 	@BeforeEach
 	void cadastrar() {
 		paciente = em.persist(new Paciente("Maria Silva", "52998224725", LocalDate.of(1990, 5, 10)));
 		draCarla = em.persist(new Cirurgiao("Dra. Carla Mendes", "CRM-MG 1", AreaAtuacao.CIRURGIA_GERAL));
 		drPaulo = em.persist(new Cirurgiao("Dr. Paulo Reis", "CRM-MG 2", AreaAtuacao.ORTOPEDIA));
+		sala = em.persist(new SalaCirurgica("Sala 1"));
 	}
 
 	private ProcedimentoCirurgico agendar(Cirurgiao cirurgiao, String descricao, LocalDateTime prevista) {
-		return new ProcedimentoCirurgico(paciente, cirurgiao, descricao, TipoCirurgia.ELETIVA, prevista);
+		return new ProcedimentoCirurgico(paciente, cirurgiao, descricao, TipoCirurgia.ELETIVA, sala, prevista, 60);
 	}
 
 	private void concluido(Cirurgiao cirurgiao, String descricao, LocalDateTime inicio) {
@@ -110,5 +114,46 @@ class ProcedimentoCirurgicoRepositoryTest {
 		salvarERecarregar();
 		assertThat(repository.existeAtivoDoProfissional(draCarla.getId())).isTrue();
 		assertThat(repository.existeAtivoDoPaciente(paciente.getId())).isTrue();
+	}
+
+	@Test
+	void verificaProcedimentoAtivoNaSala() {
+		SalaCirurgica sala2 = em.persist(new SalaCirurgica("Sala 2"));
+		concluido(draCarla, "Colecistectomia", DIA.atTime(8, 0));
+		salvarERecarregar();
+		assertThat(repository.existeAtivoNaSala(sala.getId())).isFalse();
+
+		em.persist(agendar(draCarla, "Herniorrafia", DIA.plusDays(1).atTime(8, 0)));
+		salvarERecarregar();
+		assertThat(repository.existeAtivoNaSala(sala.getId())).isTrue();
+		assertThat(repository.existeAtivoNaSala(sala2.getId())).isFalse();
+	}
+
+	// Procedimentos de 60 minutos; a busca traz os ativos que começam até uma duração máxima (12 horas)
+	// antes do período, e a sobreposição exata é decidida depois, por Periodo.sobrepoe.
+	@Test
+	void procedimentosAtivosProximosDoPeriodo() {
+		Periodo tarde = new Periodo(DIA.atTime(14, 0), DIA.atTime(16, 0));
+		em.persist(agendar(draCarla, "Doze horas antes", DIA.atTime(2, 0)));
+		em.persist(agendar(draCarla, "Manhã", DIA.atTime(9, 0)));
+		em.persist(agendar(draCarla, "Tarde", DIA.atTime(15, 0)));
+		em.persist(agendar(draCarla, "No fim do período", DIA.atTime(16, 0)));
+		em.persist(agendar(draCarla, "Depois", DIA.atTime(17, 0)));
+		em.persist(agendar(draCarla, "Muito antes", DIA.atTime(1, 59)));
+		ProcedimentoCirurgico cancelado = agendar(draCarla, "Cancelado", DIA.atTime(14, 30));
+		cancelado.cancelar();
+		em.persist(cancelado);
+		concluido(draCarla, "Concluído", DIA.atTime(15, 30));
+		em.persist(agendar(drPaulo, "Outro cirurgião", DIA.atTime(15, 0)));
+		salvarERecarregar();
+
+		assertThat(repository.findAtivosDoProfissionalProximosDe(draCarla.getId(), tarde))
+				.extracting(ProcedimentoCirurgico::getDescricao)
+				.containsExactlyInAnyOrder("Doze horas antes", "Manhã", "Tarde", "No fim do período");
+		assertThat(repository.findAtivosDoPacienteProximosDe(paciente.getId(), tarde))
+				.extracting(ProcedimentoCirurgico::getDescricao)
+				.contains("Tarde", "Outro cirurgião")
+				.doesNotContain("Cancelado", "Concluído", "Depois");
+		assertThat(repository.findAtivosDaSalaProximosDe(sala.getId(), tarde)).hasSize(5);
 	}
 }

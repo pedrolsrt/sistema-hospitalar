@@ -6,7 +6,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import br.pucminas.hospital.exception.ProfissionalIncompativelException;
 import br.pucminas.hospital.exception.RegraNegocioException;
 import br.pucminas.hospital.exception.TransicaoSituacaoInvalidaException;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.function.Consumer;
@@ -24,6 +26,12 @@ class ConsultaTest {
 
 	private Consulta novaConsulta() {
 		return new ConsultaRotina(paciente, medico, LocalDate.of(2030, 1, 15), LocalTime.of(14, 0), "Dor no peito");
+	}
+
+	@Test
+	void periodoPrevistoVaiDoHorarioAteOFimDaDuracao() {
+		assertThat(novaConsulta().getPeriodoPrevisto(Duration.ofMinutes(30)))
+				.isEqualTo(new Periodo(LocalDateTime.of(2030, 1, 15, 14, 0), LocalDateTime.of(2030, 1, 15, 14, 30)));
 	}
 
 	// Leva uma consulta nova até a situação pedida pelo caminho válido mais curto.

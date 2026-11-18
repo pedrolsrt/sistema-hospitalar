@@ -24,9 +24,11 @@ class ProcedimentoCirurgicoTest {
 
 	private final Paciente paciente = new Paciente("Maria Silva", "52998224725", LocalDate.of(1990, 5, 10));
 	private final Cirurgiao cirurgiao = new Cirurgiao("Dra. Carla Mendes", "CRM-MG 33333", AreaAtuacao.CIRURGIA_GERAL);
+	private final SalaCirurgica sala = new SalaCirurgica("Sala 1");
 
 	private ProcedimentoCirurgico agendar() {
-		return new ProcedimentoCirurgico(paciente, cirurgiao, "Apendicectomia", TipoCirurgia.URGENCIA, PREVISTA);
+		return new ProcedimentoCirurgico(paciente, cirurgiao, "Apendicectomia", TipoCirurgia.URGENCIA, sala, PREVISTA,
+				60);
 	}
 
 	private ProcedimentoCirurgico procedimentoEm(SituacaoProcedimento situacao) {
@@ -63,7 +65,7 @@ class ProcedimentoCirurgicoTest {
 	@MethodSource("profissionaisQueNaoSaoCirurgioes")
 	void naoAgendaComProfissionalQueNaoECirurgiao(ProfissionalSaude profissional) {
 		assertThatThrownBy(() -> new ProcedimentoCirurgico(paciente, profissional, "Apendicectomia",
-				TipoCirurgia.URGENCIA, PREVISTA))
+				TipoCirurgia.URGENCIA, sala, PREVISTA, 60))
 				.isInstanceOf(ProfissionalIncompativelException.class)
 				.hasMessage("O profissional " + profissional.getNome()
 						+ " não pode realizar procedimentos cirúrgicos: é necessário um cirurgião.");
@@ -73,14 +75,16 @@ class ProcedimentoCirurgicoTest {
 	@NullAndEmptySource
 	@ValueSource(strings = "   ")
 	void exigeDescricao(String descricao) {
-		assertThatThrownBy(() -> new ProcedimentoCirurgico(paciente, cirurgiao, descricao, TipoCirurgia.ELETIVA, PREVISTA))
+		assertThatThrownBy(() -> new ProcedimentoCirurgico(paciente, cirurgiao, descricao, TipoCirurgia.ELETIVA, sala,
+				PREVISTA, 60))
 				.isInstanceOf(RegraNegocioException.class)
 				.hasMessage("A descrição do procedimento cirúrgico é obrigatória.");
 	}
 
 	@Test
 	void exigeTipoDeCirurgia() {
-		assertThatThrownBy(() -> new ProcedimentoCirurgico(paciente, cirurgiao, "Apendicectomia", null, PREVISTA))
+		assertThatThrownBy(() -> new ProcedimentoCirurgico(paciente, cirurgiao, "Apendicectomia", null, sala,
+				PREVISTA, 60))
 				.isInstanceOf(RegraNegocioException.class)
 				.hasMessage("O tipo de cirurgia é obrigatório.");
 	}
@@ -88,8 +92,53 @@ class ProcedimentoCirurgicoTest {
 	@Test
 	void exigeDataHoraPrevista() {
 		assertThatThrownBy(() -> new ProcedimentoCirurgico(paciente, cirurgiao, "Apendicectomia",
-				TipoCirurgia.ELETIVA, null))
+				TipoCirurgia.ELETIVA, sala, null, 60))
 				.isInstanceOf(RegraNegocioException.class);
+	}
+
+	@Test
+	void exigeSalaCirurgica() {
+		assertThatThrownBy(() -> new ProcedimentoCirurgico(paciente, cirurgiao, "Apendicectomia",
+				TipoCirurgia.ELETIVA, null, PREVISTA, 60))
+				.isInstanceOf(RegraNegocioException.class)
+				.hasMessage("A sala cirúrgica do procedimento é obrigatória.");
+	}
+
+	@Test
+	void naoAgendaEmSalaInativa() {
+		sala.inativar();
+
+		assertThatThrownBy(this::agendar)
+				.isInstanceOf(RegraNegocioException.class)
+				.hasMessage("A sala cirúrgica Sala 1 está inativa e não pode receber procedimentos.");
+	}
+
+	@ParameterizedTest
+	@ValueSource(ints = { 15, 60, 720 })
+	void aceitaDuracaoDentroDosLimites(int minutos) {
+		ProcedimentoCirurgico procedimento = new ProcedimentoCirurgico(paciente, cirurgiao, "Apendicectomia",
+				TipoCirurgia.ELETIVA, sala, PREVISTA, minutos);
+
+		assertThat(procedimento.getPeriodoPrevisto()).isEqualTo(new Periodo(PREVISTA, PREVISTA.plusMinutes(minutos)));
+	}
+
+	@ParameterizedTest
+	@ValueSource(ints = { 0, 14, 721 })
+	void recusaDuracaoForaDosLimites(int minutos) {
+		assertThatThrownBy(() -> new ProcedimentoCirurgico(paciente, cirurgiao, "Apendicectomia",
+				TipoCirurgia.ELETIVA, sala, PREVISTA, minutos))
+				.isInstanceOf(RegraNegocioException.class)
+				.hasMessage("A duração prevista do procedimento deve ser de 15 a 720 minutos; a duração informada foi "
+						+ "de " + minutos + " minutos.");
+	}
+
+	@Test
+	void periodoPrevistoNaoMudaQuandoOProcedimentoComeca() {
+		ProcedimentoCirurgico procedimento = agendar();
+
+		procedimento.iniciar(INICIO);
+
+		assertThat(procedimento.getPeriodoPrevisto()).isEqualTo(new Periodo(PREVISTA, PREVISTA.plusMinutes(60)));
 	}
 
 	@Test

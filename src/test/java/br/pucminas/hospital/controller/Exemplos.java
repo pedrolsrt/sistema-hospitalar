@@ -10,6 +10,8 @@ import br.pucminas.hospital.dto.ProcedimentoCirurgicoResponse;
 import br.pucminas.hospital.dto.ProfissionalSaudeResponse;
 import br.pucminas.hospital.dto.QuartoResponse;
 import br.pucminas.hospital.dto.QuartoResumo;
+import br.pucminas.hospital.dto.SalaCirurgicaResponse;
+import br.pucminas.hospital.dto.SalaCirurgicaResumo;
 import br.pucminas.hospital.model.SituacaoQuarto;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -59,8 +61,13 @@ final class Exemplos {
 
 	static ProcedimentoCirurgicoResponse procedimento(String situacao) {
 		return new ProcedimentoCirurgicoResponse(40L, MARIA, DR_JOAO, "Apendicectomia",
-				new CodigoDescricao("URGENCIA", "Urgência"), LocalDateTime.of(2030, 3, 10, 8, 0), null, null,
+				new CodigoDescricao("URGENCIA", "Urgência"), new SalaCirurgicaResumo(5L, "Sala 1"),
+				LocalDateTime.of(2030, 3, 10, 8, 0), 90, LocalDateTime.of(2030, 3, 10, 9, 30), null, null,
 				new CodigoDescricao(situacao, situacao), null, null, null);
+	}
+
+	static SalaCirurgicaResponse sala(boolean ativa) {
+		return new SalaCirurgicaResponse(5L, "Sala 1", ativa);
 	}
 
 }

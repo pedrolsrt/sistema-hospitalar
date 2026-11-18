@@ -1,6 +1,9 @@
 package br.pucminas.hospital.dto;
 
+import br.pucminas.hospital.model.ProcedimentoCirurgico;
 import br.pucminas.hospital.model.TipoCirurgia;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -20,8 +23,18 @@ public record ProcedimentoCirurgicoRequest(
 		@NotNull(message = "O tipo de cirurgia é obrigatório.")
 		TipoCirurgia tipoCirurgia,
 
+		@NotNull(message = "A sala cirúrgica é obrigatória.")
+		Long salaCirurgicaId,
+
 		@NotNull(message = "A data e hora prevista é obrigatória.")
 		LocalDateTime dataHoraPrevista,
+
+		@NotNull(message = "A duração prevista é obrigatória.")
+		@Min(value = ProcedimentoCirurgico.DURACAO_MINIMA_MINUTOS,
+				message = "A duração prevista deve ser de no mínimo 15 minutos.")
+		@Max(value = ProcedimentoCirurgico.DURACAO_MAXIMA_MINUTOS,
+				message = "A duração prevista deve ser de no máximo 720 minutos.")
+		Integer duracaoPrevistaMinutos,
 
 		@Size(max = 1000, message = "As observações pré-operatórias devem ter no máximo 1000 caracteres.")
 		String observacoesPreOperatorias) {

@@ -27,7 +27,8 @@ public class OpenApiConfig {
 				.title("Sistema de Informação Hospitalar")
 				.version("0.0.1")
 				.description("API REST para gestão hospitalar: pacientes, profissionais de saúde, quartos, "
-						+ "consultas, internações, emergências, procedimentos cirúrgicos e histórico médico. "
+						+ "salas cirúrgicas, consultas, internações, emergências, procedimentos cirúrgicos e histórico "
+						+ "médico. "
 						+ "Os erros seguem o formato ProblemDetail (RFC 9457), com mensagens em português."));
 	}
 

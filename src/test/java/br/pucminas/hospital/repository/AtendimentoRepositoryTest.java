@@ -14,6 +14,7 @@ import br.pucminas.hospital.model.PrioridadeEmergencia;
 import br.pucminas.hospital.model.ProcedimentoCirurgico;
 import br.pucminas.hospital.model.ProfissionalSaude;
 import br.pucminas.hospital.model.Quarto;
+import br.pucminas.hospital.model.SalaCirurgica;
 import br.pucminas.hospital.model.TipoCirurgia;
 import br.pucminas.hospital.model.TipoQuarto;
 import java.time.LocalDate;
@@ -46,11 +47,12 @@ class AtendimentoRepositoryTest {
 		ProfissionalSaude clinico = em.persist(new ClinicoGeral("Dra. Ana Lima", "CRM-MG 1"));
 		Cirurgiao cirurgiao = em.persist(new Cirurgiao("Dra. Carla Mendes", "CRM-MG 2", AreaAtuacao.CIRURGIA_GERAL));
 		Quarto quarto = em.persist(new Quarto("101", 1, TipoQuarto.ENFERMARIA, 4));
+		SalaCirurgica sala = em.persist(new SalaCirurgica("Sala 1"));
 
 		// Cadastrados fora da ordem cronológica, para que a ordem por id não coincida com a esperada.
 		em.persist(new ConsultaRotina(maria, clinico, DIA.plusDays(2), LocalTime.of(10, 0), "Retorno"));
 		ProcedimentoCirurgico cirurgia = new ProcedimentoCirurgico(maria, cirurgiao, "Apendicectomia",
-				TipoCirurgia.URGENCIA, DIA.plusDays(1).atTime(8, 0));
+				TipoCirurgia.URGENCIA, sala, DIA.plusDays(1).atTime(8, 0), 60);
 		cirurgia.iniciar(DIA.plusDays(1).atTime(7, 30));
 		em.persist(cirurgia);
 		em.persist(new Internacao(maria, clinico, quarto, DIA, DIA.plusDays(4)));

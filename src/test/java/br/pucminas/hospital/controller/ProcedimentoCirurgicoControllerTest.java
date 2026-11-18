@@ -1,5 +1,6 @@
 package br.pucminas.hospital.controller;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -16,6 +17,7 @@ import br.pucminas.hospital.dto.ConclusaoProcedimentoRequest;
 import br.pucminas.hospital.dto.InicioProcedimentoRequest;
 import br.pucminas.hospital.dto.ObservacoesRequest;
 import br.pucminas.hospital.dto.ProcedimentoCirurgicoRequest;
+import br.pucminas.hospital.exception.AtendimentoIndisponivelException;
 import br.pucminas.hospital.exception.ProfissionalIncompativelException;
 import br.pucminas.hospital.exception.TransicaoSituacaoInvalidaException;
 import br.pucminas.hospital.service.ProcedimentoCirurgicoService;
@@ -23,6 +25,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -34,7 +38,7 @@ class ProcedimentoCirurgicoControllerTest {
 
 	private static final String PROCEDIMENTO = """
 			{"pacienteId": 1, "cirurgiaoId": 2, "descricao": "Apendicectomia", "tipoCirurgia": "URGENCIA",
-			 "dataHoraPrevista": "2030-03-10T08:00:00"}
+			 "salaCirurgicaId": 5, "dataHoraPrevista": "2030-03-10T08:00:00", "duracaoPrevistaMinutos": 90}
 			""";
 
 	@Autowired
@@ -50,7 +54,44 @@ class ProcedimentoCirurgicoControllerTest {
 		mvc.perform(post("/procedimentos").contentType(MediaType.APPLICATION_JSON).content(PROCEDIMENTO))
 				.andExpect(status().isCreated())
 				.andExpect(header().string("Location", "http://localhost/procedimentos/40"))
-				.andExpect(jsonPath("$.tipoCirurgia.descricao").value("Urgência"));
+				.andExpect(jsonPath("$.tipoCirurgia.descricao").value("Urgência"))
+				.andExpect(jsonPath("$.salaCirurgica.identificacao").value("Sala 1"))
+				.andExpect(jsonPath("$.duracaoPrevistaMinutos").value(90))
+				.andExpect(jsonPath("$.dataHoraFimPrevista").value("2030-03-10T09:30:00"));
+	}
+
+	@ParameterizedTest
+	@ValueSource(ints = { 14, 721 })
+	void duracaoForaDosLimitesResponde400(int minutos) throws Exception {
+		mvc.perform(post("/procedimentos").contentType(MediaType.APPLICATION_JSON)
+				.content(PROCEDIMENTO.replace("\"duracaoPrevistaMinutos\": 90",
+						"\"duracaoPrevistaMinutos\": " + minutos)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.campos[0].campo").value("duracaoPrevistaMinutos"));
+		verify(service, never()).agendar(any());
+	}
+
+	@Test
+	void salaEDuracaoSaoObrigatorias() throws Exception {
+		mvc.perform(post("/procedimentos").contentType(MediaType.APPLICATION_JSON).content("""
+				{"pacienteId": 1, "cirurgiaoId": 2, "descricao": "Apendicectomia", "tipoCirurgia": "URGENCIA",
+				 "dataHoraPrevista": "2030-03-10T08:00:00"}
+				"""))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.campos[*].campo").value(containsInAnyOrder("duracaoPrevistaMinutos",
+						"salaCirurgicaId")));
+		verify(service, never()).agendar(any());
+	}
+
+	@Test
+	void periodoOcupadoResponde409() throws Exception {
+		when(service.agendar(any(ProcedimentoCirurgicoRequest.class))).thenThrow(new AtendimentoIndisponivelException(
+				"A sala cirúrgica Sala 1 já tem procedimento cirúrgico em 10/03/2030, das 09:00 às 10:00, que se "
+						+ "sobrepõe ao período pedido (10/03/2030, das 08:00 às 09:30)."));
+
+		mvc.perform(post("/procedimentos").contentType(MediaType.APPLICATION_JSON).content(PROCEDIMENTO))
+				.andExpect(status().isConflict())
+				.andExpect(jsonPath("$.title").value("Horário indisponível"));
 	}
 
 	@Test

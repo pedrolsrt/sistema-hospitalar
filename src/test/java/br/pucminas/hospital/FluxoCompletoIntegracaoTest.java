@@ -118,7 +118,8 @@ class FluxoCompletoIntegracaoTest {
 				{"pacienteId": %d, "profissionalId": %d, "data": "2099-01-16", "horario": "10:15", "motivo": "Exames"}
 				""".formatted(maria, clinico), 409);
 		assertThat(campo(sobreposta, "$.title")).isEqualTo("Horário indisponível");
-		assertThat(campo(sobreposta, "$.detail")).startsWith("O profissional Dra. Ana Lima já tem consulta em 16/01/2099 às 10:00");
+		assertThat(campo(sobreposta, "$.detail"))
+				.startsWith("O profissional Dra. Ana Lima já tem consulta em 16/01/2099, das 10:00 às 10:30");
 		String agenda = chamar(get("/profissionais/" + clinico + "/agenda").param("data", "2099-01-16"), null, 200);
 		assertThat(JsonPath.<List<Integer>>read(agenda, "$[*].id")).containsExactly((int) retorno);
 
@@ -162,15 +163,57 @@ class FluxoCompletoIntegracaoTest {
 		chamar(patch("/emergencias/" + emergencia + "/concluir"), null, 200);
 		assertThat(JsonPath.<List<Object>>read(chamar(get("/emergencias/fila"), null, 200), "$")).isEmpty();
 
+		// Salas cirúrgicas --------------------------------------------------------------------------------
+		long sala1 = criar("/salas-cirurgicas", "{\"identificacao\": \"Sala 1\"}");
+		chamar(post("/salas-cirurgicas"), "{\"identificacao\": \"Sala 1\"}", 409);
+		long sala2 = criar("/salas-cirurgicas", "{\"identificacao\": \"Sala 2\"}");
+		chamar(patch("/salas-cirurgicas/" + sala2 + "/inativar"), null, 200);
+		String ativas = chamar(get("/salas-cirurgicas").param("ativas", "true"), null, 200);
+		assertThat(JsonPath.<List<String>>read(ativas, "$[*].identificacao")).containsExactly("Sala 1");
+
 		// Procedimento até concluído ----------------------------------------------------------------------
 		chamar(post("/procedimentos"), """
 				{"pacienteId": %d, "cirurgiaoId": %d, "descricao": "Apendicectomia", "tipoCirurgia": "URGENCIA",
-				 "dataHoraPrevista": "2099-02-01T08:00:00"}
-				""".formatted(maria, clinico), 422);
+				 "salaCirurgicaId": %d, "dataHoraPrevista": "2099-02-01T08:00:00", "duracaoPrevistaMinutos": 120}
+				""".formatted(maria, clinico, sala1), 422);
+		chamar(post("/procedimentos"), """
+				{"pacienteId": %d, "cirurgiaoId": %d, "descricao": "Apendicectomia", "tipoCirurgia": "URGENCIA",
+				 "salaCirurgicaId": %d, "dataHoraPrevista": "2099-02-01T08:00:00", "duracaoPrevistaMinutos": 120}
+				""".formatted(maria, cirurgiao, sala2), 422);
 		long procedimento = criar("/procedimentos", """
 				{"pacienteId": %d, "cirurgiaoId": %d, "descricao": "Apendicectomia", "tipoCirurgia": "URGENCIA",
-				 "dataHoraPrevista": "2099-02-01T08:00:00", "observacoesPreOperatorias": "Jejum de 8 horas."}
-				""".formatted(maria, cirurgiao));
+				 "salaCirurgicaId": %d, "dataHoraPrevista": "2099-02-01T08:00:00", "duracaoPrevistaMinutos": 120,
+				 "observacoesPreOperatorias": "Jejum de 8 horas."}
+				""".formatted(maria, cirurgiao, sala1));
+		assertThat(campo(chamar(get("/procedimentos/" + procedimento), null, 200), "$.dataHoraFimPrevista"))
+				.isEqualTo("2099-02-01T10:00:00");
+
+		// Disponibilidade: a sala, o cirurgião e o paciente ficam ocupados das 08:00 às 10:00.
+		long jose = criar("/pacientes", """
+				{"nome": "José Lima", "cpf": "111.444.777-35", "dataNascimento": "1985-02-01"}
+				""");
+		long ortopedista = criar("/profissionais", """
+				{"nome": "Dr. Paulo Reis", "registroProfissional": "CRM-MG 4", "categoria": "CIRURGIAO",
+				 "areaAtuacao": "ORTOPEDIA"}
+				""");
+		String salaOcupada = chamar(post("/procedimentos"), """
+				{"pacienteId": %d, "cirurgiaoId": %d, "descricao": "Artroscopia", "tipoCirurgia": "ELETIVA",
+				 "salaCirurgicaId": %d, "dataHoraPrevista": "2099-02-01T09:00:00", "duracaoPrevistaMinutos": 60}
+				""".formatted(jose, ortopedista, sala1), 409);
+		assertThat(campo(salaOcupada, "$.detail")).isEqualTo("A sala cirúrgica Sala 1 já tem procedimento cirúrgico "
+				+ "em 01/02/2099, das 08:00 às 10:00, que se sobrepõe ao período pedido "
+				+ "(01/02/2099, das 09:00 às 10:00).");
+		String cirurgiaoOcupado = chamar(post("/consultas/rotina"), """
+				{"pacienteId": %d, "profissionalId": %d, "data": "2099-02-01", "horario": "09:30",
+				 "motivo": "Avaliação"}
+				""".formatted(jose, cirurgiao), 409);
+		assertThat(campo(cirurgiaoOcupado, "$.detail"))
+				.startsWith("O profissional Dra. Carla Mendes já tem procedimento cirúrgico em 01/02/2099");
+		criar("/procedimentos", """
+				{"pacienteId": %d, "cirurgiaoId": %d, "descricao": "Artroscopia", "tipoCirurgia": "ELETIVA",
+				 "salaCirurgicaId": %d, "dataHoraPrevista": "2099-02-01T10:00:00", "duracaoPrevistaMinutos": 60}
+				""".formatted(jose, ortopedista, sala1));
+		chamar(patch("/salas-cirurgicas/" + sala1 + "/inativar"), null, 422);
 		chamar(patch("/procedimentos/" + procedimento + "/concluir"), "{\"dataHoraFim\": \"2099-02-01T10:00:00\"}", 409);
 		chamar(patch("/procedimentos/" + procedimento + "/iniciar"), "{\"dataHoraInicio\": \"2099-02-01T08:10:00\"}", 200);
 		chamar(patch("/procedimentos/" + procedimento + "/registrar-observacoes-pos-operatorias"),

@@ -6,6 +6,7 @@ import br.pucminas.hospital.model.ClinicoGeral;
 import br.pucminas.hospital.model.Consulta;
 import br.pucminas.hospital.model.ConsultaRotina;
 import br.pucminas.hospital.model.Paciente;
+import br.pucminas.hospital.model.Periodo;
 import br.pucminas.hospital.model.ProfissionalSaude;
 import br.pucminas.hospital.model.SituacaoConsulta;
 import java.time.LocalDate;
@@ -24,6 +25,9 @@ import org.springframework.test.context.ActiveProfiles;
 class ConsultaRepositoryTest {
 
 	private static final LocalDate DIA = LocalDate.of(2030, 1, 15);
+
+	// Período dentro do DIA: a busca cobre o próprio dia e o anterior, mas não o seguinte.
+	private static final Periodo TARDE_DO_DIA = new Periodo(DIA.atTime(13, 0), DIA.atTime(18, 0));
 
 	@Autowired
 	private TestEntityManager em;
@@ -80,22 +84,31 @@ class ConsultaRepositoryTest {
 	}
 
 	@Test
-	void consultasAtivasDoProfissionalNaData() {
-		assertThat(repository.findAtivasDoProfissionalNaData(drJoao.getId(), DIA))
+	void consultasAtivasDoProfissionalProximasDoPeriodo() {
+		assertThat(repository.findAtivasDoProfissionalProximasDe(drJoao.getId(), TARDE_DO_DIA))
 				.extracting(Consulta::getHorario)
 				.containsExactlyInAnyOrder(LocalTime.of(9, 0), LocalTime.of(10, 0), LocalTime.of(11, 0));
 	}
 
 	@Test
-	void consultasAtivasDoPacienteNaData() {
-		assertThat(repository.findAtivasDoPacienteNaData(maria.getId(), DIA))
+	void consultasAtivasDoPacienteProximasDoPeriodo() {
+		assertThat(repository.findAtivasDoPacienteProximasDe(maria.getId(), TARDE_DO_DIA))
 				.extracting(Consulta::getHorario)
 				.containsExactlyInAnyOrder(LocalTime.of(8, 0), LocalTime.of(9, 0), LocalTime.of(11, 0));
 	}
 
 	@Test
+	void consultasDoDiaAnteriorEntramNaBuscaPorquePodemPassarDaMeiaNoite() {
+		Periodo inicioDoDiaSeguinte = new Periodo(DIA.plusDays(1).atStartOfDay(), DIA.plusDays(1).atTime(0, 30));
+
+		assertThat(repository.findAtivasDoProfissionalProximasDe(drJoao.getId(), inicioDoDiaSeguinte))
+				.extracting(Consulta::getData)
+				.containsOnly(DIA, DIA.plusDays(1));
+	}
+
+	@Test
 	void consultasAtivasSoContamSituacoesQueOcupamHorario() {
-		assertThat(repository.findAtivasDoProfissionalNaData(drJoao.getId(), DIA))
+		assertThat(repository.findAtivasDoProfissionalProximasDe(drJoao.getId(), TARDE_DO_DIA))
 				.extracting(Consulta::getSituacao)
 				.allMatch(SituacaoConsulta::isAtiva);
 	}

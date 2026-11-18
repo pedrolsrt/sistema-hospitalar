@@ -15,6 +15,7 @@ class DataHoraReferenciaTest {
 	private final Paciente paciente = new Paciente("Maria Silva", "52998224725", LocalDate.of(1990, 5, 10));
 	private final ProfissionalSaude clinico = new ClinicoGeral("Dra. Ana Lima", "CRM-MG 1");
 	private final Cirurgiao cirurgiao = new Cirurgiao("Dra. Carla Mendes", "CRM-MG 2", AreaAtuacao.CIRURGIA_GERAL);
+	private final SalaCirurgica sala = new SalaCirurgica("Sala 1");
 
 	@Test
 	void consultaUsaDataEHorario() {
@@ -43,7 +44,7 @@ class DataHoraReferenciaTest {
 	void procedimentoUsaAPrevisaoAteSerIniciadoEDepoisOInicioReal() {
 		LocalDateTime prevista = LocalDateTime.of(2030, 3, 10, 8, 0);
 		ProcedimentoCirurgico procedimento = new ProcedimentoCirurgico(paciente, cirurgiao, "Apendicectomia",
-				TipoCirurgia.ELETIVA, prevista);
+				TipoCirurgia.ELETIVA, sala, prevista, 60);
 		assertThat(procedimento.getDataHoraReferencia()).isEqualTo(prevista);
 
 		procedimento.iniciar(prevista.plusMinutes(40));

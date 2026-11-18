@@ -22,14 +22,11 @@ import br.pucminas.hospital.repository.ConsultaRepository;
 import br.pucminas.hospital.repository.PacienteRepository;
 import br.pucminas.hospital.repository.ProfissionalSaudeRepository;
 import java.time.Clock;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,17 +45,17 @@ public class ConsultaService {
 	private final ProfissionalSaudeRepository profissionalRepository;
 	private final ConsultaMapper mapper;
 	private final Clock relogio;
-	private final Duration duracao;
+	private final VerificadorDeDisponibilidade disponibilidade;
 
 	public ConsultaService(ConsultaRepository repository, PacienteRepository pacienteRepository,
 			ProfissionalSaudeRepository profissionalRepository, ConsultaMapper mapper, Clock relogio,
-			@Value("${hospital.consulta.duracao-minutos}") long duracaoMinutos) {
+			VerificadorDeDisponibilidade disponibilidade) {
 		this.repository = repository;
 		this.pacienteRepository = pacienteRepository;
 		this.profissionalRepository = profissionalRepository;
 		this.mapper = mapper;
 		this.relogio = relogio;
-		this.duracao = Duration.ofMinutes(duracaoMinutos);
+		this.disponibilidade = disponibilidade;
 	}
 
 	/**
@@ -86,8 +83,8 @@ public class ConsultaService {
 
 	/**
 	 * Regras do agendamento: data e horário no futuro; as condições de realização da modalidade (paciente
-	 * e profissional ativos e, na especializada, especialista da área); e nenhuma sobreposição com
-	 * consultas ativas do profissional ou do paciente, considerando a duração configurada.
+	 * e profissional ativos e, na especializada, especialista da área); e nenhuma sobreposição com consultas
+	 * ou procedimentos ativos do profissional ou do paciente.
 	 *
 	 * @throws DataInvalidaException se a data e o horário não estiverem no futuro
 	 * @throws ProfissionalIncompativelException se, na consulta especializada, o profissional não for especialista
@@ -102,44 +99,8 @@ public class ConsultaService {
 					+ FORMATO_DATA_HORA.format(inicio) + ".");
 		}
 		consulta.validarRealizacao();
-		exigirHorarioLivre(consulta);
+		disponibilidade.exigirHorarioLivre(consulta);
 		return mapper.paraResponse(repository.save(consulta));
-	}
-
-	// As consultas que podem se sobrepor começam a menos de uma duração antes ou depois do início pedido;
-	// por isso a busca cobre também o dia anterior ou o seguinte quando esse intervalo cruza a meia-noite.
-	private void exigirHorarioLivre(Consulta consulta) {
-		LocalDateTime inicio = consulta.getDataHoraReferencia();
-		LocalDate ultimoDia = inicio.plus(duracao).toLocalDate();
-		for (LocalDate dia = inicio.minus(duracao).toLocalDate(); !dia.isAfter(ultimoDia); dia = dia.plusDays(1)) {
-			ProfissionalSaude profissional = consulta.getProfissionalResponsavel();
-			Optional<Consulta> doProfissional = sobreposta(
-					repository.findAtivasDoProfissionalNaData(profissional.getId(), dia), inicio);
-			if (doProfissional.isPresent()) {
-				throw horarioOcupado("O profissional " + profissional.getNome(), doProfissional.get());
-			}
-			Paciente paciente = consulta.getPaciente();
-			Optional<Consulta> doPaciente = sobreposta(repository.findAtivasDoPacienteNaData(paciente.getId(), dia),
-					inicio);
-			if (doPaciente.isPresent()) {
-				throw horarioOcupado("O paciente " + paciente.getNome(), doPaciente.get());
-			}
-		}
-	}
-
-	// Duas consultas de mesma duração se sobrepõem se cada uma começa antes do fim da outra.
-	private Optional<Consulta> sobreposta(List<Consulta> consultas, LocalDateTime inicio) {
-		LocalDateTime fim = inicio.plus(duracao);
-		return consultas.stream().filter(outra -> {
-			LocalDateTime inicioOutra = outra.getDataHoraReferencia();
-			return inicio.isBefore(inicioOutra.plus(duracao)) && inicioOutra.isBefore(fim);
-		}).findFirst();
-	}
-
-	private AtendimentoIndisponivelException horarioOcupado(String quem, Consulta existente) {
-		return new AtendimentoIndisponivelException(quem + " já tem consulta em "
-				+ FORMATO_DATA_HORA.format(existente.getDataHoraReferencia()) + ", que se sobrepõe ao horário pedido "
-				+ "(cada consulta dura " + duracao.toMinutes() + " minutos).");
 	}
 
 	/**
