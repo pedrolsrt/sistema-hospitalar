@@ -17,7 +17,9 @@ import br.pucminas.hospital.repository.PacienteRepository;
 import br.pucminas.hospital.repository.ProfissionalSaudeRepository;
 import br.pucminas.hospital.repository.QuartoRepository;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
+import java.util.function.Predicate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class InternacaoService {
 
 	private static final DateTimeFormatter FORMATO_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+	private static final Predicate<Internacao> ATIVA = Internacao::isAtiva;
 
 	private final InternacaoRepository repository;
 	private final PacienteRepository pacienteRepository;
@@ -93,15 +96,18 @@ public class InternacaoService {
 	 * Internações sem alta, em ordem de entrada.
 	 */
 	public List<InternacaoResponse> listarAtivas() {
-		return repository.findByDataEfetivaAltaIsNullOrderByDataEntradaAsc().stream().map(mapper::paraResponse).toList();
+		return listar(ATIVA, Comparator.comparing(Internacao::getDataEntrada));
 	}
 
 	/**
 	 * Internações com alta, da alta mais recente para a mais antiga.
 	 */
 	public List<InternacaoResponse> listarEncerradas() {
-		return repository.findByDataEfetivaAltaIsNotNullOrderByDataEfetivaAltaDesc().stream()
-				.map(mapper::paraResponse).toList();
+		return listar(ATIVA.negate(), Comparator.comparing(Internacao::getDataEfetivaAlta).reversed());
+	}
+
+	private List<InternacaoResponse> listar(Predicate<Internacao> filtro, Comparator<Internacao> ordem) {
+		return repository.findAll().stream().filter(filtro).sorted(ordem).map(mapper::paraResponse).toList();
 	}
 
 	private Internacao buscar(Long id) {

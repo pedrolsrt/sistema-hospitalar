@@ -10,8 +10,6 @@ import br.pucminas.hospital.model.ProfissionalSaude;
 import br.pucminas.hospital.model.SituacaoEmergencia;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +39,7 @@ class AtendimentoEmergenciaRepositoryTest {
 		paciente = em.persist(new Paciente("Maria Silva", "52998224725", LocalDate.of(1990, 5, 10)));
 		plantonista = em.persist(new ClinicoGeral("Dra. Ana Lima", "CRM-MG 1"));
 
-		// Aguardando avaliação, cadastrados fora de ordem.
+		// Aguardando avaliação, cadastrados fora de ordem de chegada.
 		aguardando(PrioridadeEmergencia.BAIXA, 30);
 		aguardando(PrioridadeEmergencia.CRITICA, 50);
 		aguardando(null, 0);
@@ -73,36 +71,9 @@ class AtendimentoEmergenciaRepositoryTest {
 	}
 
 	@Test
-	void filaOrdenaPorPrioridadeMaisGraveEDepoisPorChegada() {
-		List<AtendimentoEmergencia> fila = repository.findFilaDeAvaliacao();
-
-		assertThat(fila).extracting(AtendimentoEmergencia::getPrioridade).containsExactly(
-				PrioridadeEmergencia.CRITICA, PrioridadeEmergencia.CRITICA,
-				PrioridadeEmergencia.ALTA, PrioridadeEmergencia.ALTA,
-				PrioridadeEmergencia.MODERADA, PrioridadeEmergencia.BAIXA,
-				null, null);
-		assertThat(fila).extracting(AtendimentoEmergencia::getDataHoraChegada).containsExactly(
-				NOITE.plusMinutes(45), NOITE.plusMinutes(50),
-				NOITE.plusMinutes(20), NOITE.plusMinutes(40),
-				NOITE.plusMinutes(10), NOITE.plusMinutes(30),
-				NOITE.plusMinutes(0), NOITE.plusMinutes(5));
-	}
-
-	// Garante que os pesos do CASE na consulta continuam iguais aos níveis do enum.
-	@Test
-	void ordemDaFilaSegueOsNiveisDoEnum() {
-		Comparator<AtendimentoEmergencia> porNivel = Comparator.comparing(
-				(AtendimentoEmergencia e) -> e.getPrioridade() == null ? 0 : e.getPrioridade().getNivel()).reversed();
-		Comparator<AtendimentoEmergencia> esperada =
-				porNivel.thenComparing(AtendimentoEmergencia::getDataHoraChegada);
-		List<AtendimentoEmergencia> fila = repository.findFilaDeAvaliacao();
-
-		assertThat(fila).isSortedAccordingTo(esperada);
-	}
-
-	@Test
-	void filaTemApenasQuemAguardaAvaliacao() {
-		assertThat(repository.findFilaDeAvaliacao()).hasSize(8)
+	void aguardandoAvaliacaoSaoSoOsQueAindaNaoForamIniciados() {
+		assertThat(repository.findBySituacaoOrderByDataHoraChegadaAsc(SituacaoEmergencia.AGUARDANDO_AVALIACAO))
+				.hasSize(8)
 				.extracting(AtendimentoEmergencia::getSituacao)
 				.containsOnly(SituacaoEmergencia.AGUARDANDO_AVALIACAO);
 	}

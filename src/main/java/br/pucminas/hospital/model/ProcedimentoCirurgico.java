@@ -236,6 +236,7 @@ public class ProcedimentoCirurgico extends Atendimento {
 		return dataHoraFim;
 	}
 
+	@Override
 	public SituacaoProcedimento getSituacao() {
 		return situacao;
 	}

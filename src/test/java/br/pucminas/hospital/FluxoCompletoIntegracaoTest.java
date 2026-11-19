@@ -236,6 +236,26 @@ class FluxoCompletoIntegracaoTest {
 		assertThat(campo(historico, "$.atendimentos[5].detalhes.observacoesPosOperatorias"))
 				.isEqualTo("Sem intercorrências.");
 
+		// Busca de atendimentos com filtros e ordenação ------------------------------------------------------
+		String procedimentosDaMaria = chamar(get("/atendimentos").param("pacienteId", String.valueOf(maria))
+				.param("modalidade", "PROCEDIMENTO_CIRURGICO"), null, 200);
+		assertThat(JsonPath.<List<Integer>>read(procedimentosDaMaria, "$[*].detalhes.id"))
+				.containsExactly((int) procedimento);
+		assertThat(campo(procedimentosDaMaria, "$[0].situacao.codigo")).isEqualTo("CONCLUIDO");
+		String encerradas = chamar(get("/atendimentos").param("situacao", "ENCERRADA"), null, 200);
+		assertThat(JsonPath.<List<Integer>>read(encerradas, "$[*].detalhes.id")).containsExactly((int) internacao);
+		String maisRecentes = chamar(get("/atendimentos").param("pacienteId", String.valueOf(maria))
+				.param("ordem", "DATA_DECRESCENTE"), null, 200);
+		assertThat(JsonPath.<List<String>>read(maisRecentes, "$[*].modalidade.codigo")).containsExactly(
+				"PROCEDIMENTO_CIRURGICO", "CONSULTA_ESPECIALIZADA", "CONSULTA_ROTINA", "CONSULTA_ROTINA", "EMERGENCIA",
+				"INTERNACAO");
+		String concluidas = chamar(get("/consultas").param("situacao", "CONCLUIDA"), null, 200);
+		assertThat(JsonPath.<List<Integer>>read(concluidas, "$[*].id")).containsExactly((int) consulta);
+		chamar(get("/atendimentos").param("inicio", "2099-02-01").param("fim", "2099-01-31"), null, 422);
+		String situacaoDesconhecida = chamar(get("/atendimentos").param("situacao", "FINALIZADA"), null, 400);
+		assertThat(campo(situacaoDesconhecida, "$.campos[0].mensagem"))
+				.startsWith("A situação informada não foi reconhecida. Use um destes códigos: AGENDADA");
+
 		// Com a consulta de retorno ainda agendada, o paciente não pode ser inativado; depois de cancelá-la, pode.
 		String impedido = chamar(patch("/pacientes/" + maria + "/inativar"), null, 422);
 		assertThat(campo(impedido, "$.detail")).isEqualTo("O paciente Maria Silva não pode ser inativado porque tem: "

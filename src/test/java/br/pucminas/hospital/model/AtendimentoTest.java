@@ -34,6 +34,11 @@ class AtendimentoTest {
 		}
 
 		@Override
+		public SituacaoConsulta getSituacao() {
+			return SituacaoConsulta.AGENDADA;
+		}
+
+		@Override
 		public <R> R aceitar(VisitanteAtendimento<R> visitante) {
 			throw new UnsupportedOperationException();
 		}

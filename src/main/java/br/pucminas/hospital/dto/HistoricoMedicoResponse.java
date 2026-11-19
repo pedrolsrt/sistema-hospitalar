@@ -7,5 +7,5 @@ import java.util.List;
  */
 public record HistoricoMedicoResponse(
 		PessoaResumo paciente,
-		List<HistoricoItemResponse> atendimentos) {
+		List<AtendimentoItemResponse> atendimentos) {
 }

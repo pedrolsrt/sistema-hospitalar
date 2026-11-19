@@ -406,12 +406,24 @@ class ConsultaServiceTest {
 		assertThat(service.buscarPorId(10L).motivo()).isEqualTo("Retorno");
 	}
 
+	// Consultas do Dr. João (id 2) e da cardiologista (id 3); a listagem usa o mesmo filtro da busca de
+	// atendimentos e devolve em ordem de data e horário.
 	@Test
-	void listaComOsFiltrosInformados() {
-		when(repository.findComFiltros(SituacaoConsulta.CONFIRMADA, 2L, DIA))
-				.thenReturn(List.of(existente(drJoao, maria, DIA, "14:00", SituacaoConsulta.CONFIRMADA)));
+	void listaComOsFiltrosInformadosEmOrdemDeDataEHorario() {
+		when(repository.findAll()).thenReturn(List.of(
+				existente(drJoao, maria, DIA, "16:00", SituacaoConsulta.CONFIRMADA),
+				existente(drJoao, maria, DIA, "09:00", SituacaoConsulta.CONFIRMADA),
+				existente(drJoao, maria, DIA, "11:00", SituacaoConsulta.AGENDADA),
+				existente(drJoao, maria, DIA.plusDays(1), "09:00", SituacaoConsulta.CONFIRMADA),
+				existente(cardiologista, maria, DIA, "10:00", SituacaoConsulta.CONFIRMADA)));
 
-		assertThat(service.listar(SituacaoConsulta.CONFIRMADA, 2L, DIA)).hasSize(1);
+		assertThat(service.listar(SituacaoConsulta.CONFIRMADA, 2L, DIA)).extracting(ConsultaResponse::horario)
+				.containsExactly(LocalTime.of(9, 0), LocalTime.of(16, 0));
+		assertThat(service.listar(null, null, null)).hasSize(5)
+				.extracting(consulta -> consulta.data().atTime(consulta.horario())).isSorted();
+		assertThat(service.listar(SituacaoConsulta.AGENDADA, null, null)).hasSize(1);
+		assertThat(service.listar(null, 3L, null)).extracting(ConsultaResponse::horario)
+				.containsExactly(LocalTime.of(10, 0));
 	}
 
 	@Test

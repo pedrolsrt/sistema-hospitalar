@@ -83,6 +83,14 @@ public class Internacao extends Atendimento {
 		return dataEfetivaAlta == null;
 	}
 
+	/**
+	 * Ativa enquanto não houver data efetiva de alta; encerrada depois dela.
+	 */
+	@Override
+	public SituacaoInternacao getSituacao() {
+		return isAtiva() ? SituacaoInternacao.ATIVA : SituacaoInternacao.ENCERRADA;
+	}
+
 	private static void validarNaoAnteriorAEntrada(LocalDate dataAlta, LocalDate dataEntrada, String tipoAlta) {
 		if (dataAlta.isBefore(dataEntrada)) {
 			throw new DataInvalidaException("A data de alta " + tipoAlta + " (" + FORMATO_DATA.format(dataAlta)

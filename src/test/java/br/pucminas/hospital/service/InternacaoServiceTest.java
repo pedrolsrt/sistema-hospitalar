@@ -176,16 +176,26 @@ class InternacaoServiceTest {
 				.hasMessage("Internação não encontrada (id 99).");
 	}
 
-	@Test
-	void listaAtivasEEncerradas() {
-		Internacao ativa = new Internacao(maria, medico, quarto, ENTRADA, ENTRADA.plusDays(5));
-		Internacao encerrada = new Internacao(maria, medico, quarto, ENTRADA.minusDays(20), ENTRADA.minusDays(15));
-		encerrada.darAlta(ENTRADA.minusDays(15));
-		when(repository.findByDataEfetivaAltaIsNullOrderByDataEntradaAsc()).thenReturn(List.of(ativa));
-		when(repository.findByDataEfetivaAltaIsNotNullOrderByDataEfetivaAltaDesc()).thenReturn(List.of(encerrada));
+	private Internacao internacao(int diasAntesDaEntrada, Integer diasAteAlta) {
+		Quarto enfermaria = new Quarto("1" + diasAntesDaEntrada, 1, TipoQuarto.ENFERMARIA, 6);
+		LocalDate entrada = ENTRADA.minusDays(diasAntesDaEntrada);
+		Internacao internacao = new Internacao(maria, medico, enfermaria, entrada, entrada.plusDays(10));
+		if (diasAteAlta != null) {
+			internacao.darAlta(entrada.plusDays(diasAteAlta));
+		}
+		return internacao;
+	}
 
-		assertThat(service.listarAtivas()).extracting(InternacaoResponse::ativa).containsExactly(true);
-		assertThat(service.listarEncerradas()).extracting(InternacaoResponse::ativa).containsExactly(false);
+	// Ativas em ordem de entrada; encerradas da alta mais recente para a mais antiga.
+	@Test
+	void listaAtivasEEncerradasComPredicateEComparator() {
+		when(repository.findAll()).thenReturn(List.of(internacao(1, null), internacao(30, 2), internacao(5, null),
+				internacao(20, 15)));
+
+		assertThat(service.listarAtivas()).extracting(InternacaoResponse::dataEntrada)
+				.containsExactly(ENTRADA.minusDays(5), ENTRADA.minusDays(1));
+		assertThat(service.listarEncerradas()).extracting(InternacaoResponse::dataEfetivaAlta)
+				.containsExactly(ENTRADA.minusDays(5), ENTRADA.minusDays(28));
 	}
 
 }

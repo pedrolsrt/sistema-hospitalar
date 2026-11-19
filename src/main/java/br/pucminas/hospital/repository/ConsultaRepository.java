@@ -6,11 +6,20 @@ import br.pucminas.hospital.model.SituacaoConsulta;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface ConsultaRepository extends JpaRepository<Consulta, Long> {
+
+	/**
+	 * Todas as consultas, para a listagem filtrada em memória. Paciente e profissional vêm na mesma
+	 * consulta, porque toda resposta mostra os dois.
+	 */
+	@Override
+	@EntityGraph(attributePaths = { "paciente", "profissionalResponsavel" })
+	List<Consulta> findAll();
 
 	/**
 	 * Consultas ativas do profissional que podem se sobrepor ao período. A sobreposição exata é decidida
@@ -64,18 +73,5 @@ public interface ConsultaRepository extends JpaRepository<Consulta, Long> {
 			""")
 	List<Consulta> findAgendaDoProfissional(@Param("profissionalId") Long profissionalId,
 			@Param("data") LocalDate data);
-
-	/**
-	 * Consultas com filtros opcionais (nulo = sem filtro), em ordem de data e horário.
-	 */
-	@Query("""
-			select c from Consulta c
-			where (:situacao is null or c.situacao = :situacao)
-			  and (:profissionalId is null or c.profissionalResponsavel.id = :profissionalId)
-			  and (:data is null or c.data = :data)
-			order by c.data, c.horario
-			""")
-	List<Consulta> findComFiltros(@Param("situacao") SituacaoConsulta situacao,
-			@Param("profissionalId") Long profissionalId, @Param("data") LocalDate data);
 
 }

@@ -43,17 +43,4 @@ class QuartoRepositoryTest {
 		assertThat(repository.findByNumero("999")).isEmpty();
 	}
 
-	@Test
-	void filtrosOpcionaisDeTipoEVaga() {
-		assertThat(repository.findComFiltros(null, false)).extracting(Quarto::getNumero)
-				.containsExactly("101", "201", "301", "302");
-		assertThat(repository.findComFiltros(null, true)).extracting(Quarto::getNumero)
-				.containsExactly("101", "301", "302");
-		assertThat(repository.findComFiltros(TipoQuarto.UTI, false)).extracting(Quarto::getNumero)
-				.containsExactly("201");
-		assertThat(repository.findComFiltros(TipoQuarto.UTI, true)).isEmpty();
-		assertThat(repository.findComFiltros(TipoQuarto.APARTAMENTO, true)).extracting(Quarto::getNumero)
-				.containsExactly("301", "302");
-	}
-
 }

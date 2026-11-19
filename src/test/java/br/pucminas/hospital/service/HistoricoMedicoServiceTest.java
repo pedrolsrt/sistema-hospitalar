@@ -6,14 +6,14 @@ import static org.mockito.Mockito.when;
 
 import br.pucminas.hospital.dto.AtendimentoEmergenciaResponse;
 import br.pucminas.hospital.dto.ConsultaResponse;
-import br.pucminas.hospital.dto.HistoricoItemResponse;
+import br.pucminas.hospital.dto.AtendimentoItemResponse;
 import br.pucminas.hospital.dto.HistoricoMedicoResponse;
 import br.pucminas.hospital.dto.InternacaoResponse;
 import br.pucminas.hospital.dto.ProcedimentoCirurgicoResponse;
 import br.pucminas.hospital.exception.RecursoNaoEncontradoException;
 import br.pucminas.hospital.mapper.AtendimentoEmergenciaMapper;
 import br.pucminas.hospital.mapper.ConsultaMapper;
-import br.pucminas.hospital.mapper.HistoricoMedicoMapper;
+import br.pucminas.hospital.mapper.AtendimentoMapper;
 import br.pucminas.hospital.mapper.InternacaoMapper;
 import br.pucminas.hospital.mapper.ProcedimentoCirurgicoMapper;
 import br.pucminas.hospital.model.AreaAtuacao;
@@ -60,7 +60,7 @@ class HistoricoMedicoServiceTest {
 
 	@BeforeEach
 	void configurar() {
-		HistoricoMedicoMapper mapper = new HistoricoMedicoMapper(new ConsultaMapper(), new InternacaoMapper(),
+		AtendimentoMapper mapper = new AtendimentoMapper(new ConsultaMapper(), new InternacaoMapper(),
 				new AtendimentoEmergenciaMapper(), new ProcedimentoCirurgicoMapper());
 		service = new HistoricoMedicoService(pacienteRepository, atendimentoRepository, mapper);
 		maria = new Paciente("Maria Silva", "52998224725", LocalDate.of(1990, 5, 10));
@@ -82,16 +82,17 @@ class HistoricoMedicoServiceTest {
 		ConsultaEspecializada especializada = new ConsultaEspecializada(maria, cardiologista, DIA.plusDays(3),
 				LocalTime.of(10, 0), "Avaliação", AreaAtuacao.CARDIOLOGIA);
 		when(pacienteRepository.findById(1L)).thenReturn(Optional.of(maria));
-		when(atendimentoRepository.findHistoricoDoPaciente(1L))
-				.thenReturn(List.of(emergencia, internacao, cirurgia, rotina, especializada));
+		// Fora de ordem: o service ordena pela data de referência.
+		when(atendimentoRepository.findByPacienteId(1L))
+				.thenReturn(List.of(rotina, cirurgia, especializada, emergencia, internacao));
 
 		HistoricoMedicoResponse historico = service.montar(1L);
 
 		assertThat(historico.paciente().nome()).isEqualTo("Maria Silva");
-		List<HistoricoItemResponse> itens = historico.atendimentos();
+		List<AtendimentoItemResponse> itens = historico.atendimentos();
 		assertThat(itens).extracting(item -> item.modalidade().codigo()).containsExactly("EMERGENCIA", "INTERNACAO",
 				"PROCEDIMENTO_CIRURGICO", "CONSULTA_ROTINA", "CONSULTA_ESPECIALIZADA");
-		assertThat(itens).extracting(HistoricoItemResponse::dataHora).containsExactly(
+		assertThat(itens).extracting(AtendimentoItemResponse::dataHora).containsExactly(
 				DIA.minusDays(1).atTime(22, 0), DIA.atStartOfDay(), DIA.plusDays(1).atTime(8, 0),
 				DIA.plusDays(2).atTime(9, 0), DIA.plusDays(3).atTime(10, 0));
 
@@ -111,7 +112,7 @@ class HistoricoMedicoServiceTest {
 	@Test
 	void historicoVazio() {
 		when(pacienteRepository.findById(1L)).thenReturn(Optional.of(maria));
-		when(atendimentoRepository.findHistoricoDoPaciente(1L)).thenReturn(List.of());
+		when(atendimentoRepository.findByPacienteId(1L)).thenReturn(List.of());
 
 		assertThat(service.montar(1L).atendimentos()).isEmpty();
 	}

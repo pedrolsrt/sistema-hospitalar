@@ -108,6 +108,7 @@ public class AtendimentoEmergencia extends Atendimento {
 		return dataHoraChegada;
 	}
 
+	@Override
 	public PrioridadeEmergencia getPrioridade() {
 		return prioridade;
 	}
@@ -116,6 +117,7 @@ public class AtendimentoEmergencia extends Atendimento {
 		return dataHoraChegada;
 	}
 
+	@Override
 	public SituacaoEmergencia getSituacao() {
 		return situacao;
 	}

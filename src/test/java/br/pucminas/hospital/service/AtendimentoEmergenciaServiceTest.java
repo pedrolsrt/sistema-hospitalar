@@ -173,17 +173,38 @@ class AtendimentoEmergenciaServiceTest {
 				.hasMessage("Atendimento de emergência não encontrado (id 99).");
 	}
 
-	@Test
-	void filaEListagemPorSituacao() {
-		AtendimentoEmergencia critico = new AtendimentoEmergencia(maria, plantonista, PrioridadeEmergencia.CRITICA, AGORA);
-		AtendimentoEmergencia baixo = new AtendimentoEmergencia(maria, plantonista, PrioridadeEmergencia.BAIXA, AGORA);
-		when(repository.findFilaDeAvaliacao()).thenReturn(List.of(critico, baixo));
-		when(repository.findBySituacaoOrderByDataHoraChegadaAsc(SituacaoEmergencia.AGUARDANDO_AVALIACAO))
-				.thenReturn(List.of(baixo, critico));
+	private AtendimentoEmergencia chegada(PrioridadeEmergencia prioridade, int minutosDepois) {
+		return new AtendimentoEmergencia(maria, plantonista, prioridade, AGORA.plusMinutes(minutosDepois));
+	}
 
-		assertThat(service.filaDeAvaliacao()).extracting(resposta -> resposta.prioridade().codigo())
-				.containsExactly("CRITICA", "BAIXA");
-		assertThat(service.listarPorSituacao(SituacaoEmergencia.AGUARDANDO_AVALIACAO)).hasSize(2);
+	// O repository devolve em ordem de chegada; a fila reordena por prioridade, com o Comparator de
+	// OrdenacaoAtendimentos.PRIORIDADE.
+	@Test
+	void filaOrdenaPorPrioridadeMaisGraveDepoisPorChegadaESemPrioridadeNoFim() {
+		when(repository.findBySituacaoOrderByDataHoraChegadaAsc(SituacaoEmergencia.AGUARDANDO_AVALIACAO))
+				.thenReturn(List.of(
+						chegada(null, 0), chegada(null, 5), chegada(PrioridadeEmergencia.MODERADA, 10),
+						chegada(PrioridadeEmergencia.ALTA, 20), chegada(PrioridadeEmergencia.BAIXA, 30),
+						chegada(PrioridadeEmergencia.ALTA, 40), chegada(PrioridadeEmergencia.CRITICA, 45),
+						chegada(PrioridadeEmergencia.CRITICA, 50)));
+
+		List<AtendimentoEmergenciaResponse> fila = service.filaDeAvaliacao();
+
+		assertThat(fila).extracting(resposta -> resposta.prioridade() == null ? null : resposta.prioridade().codigo())
+				.containsExactly("CRITICA", "CRITICA", "ALTA", "ALTA", "MODERADA", "BAIXA", null, null);
+		assertThat(fila).extracting(AtendimentoEmergenciaResponse::dataHoraChegada).containsExactly(
+				AGORA.plusMinutes(45), AGORA.plusMinutes(50), AGORA.plusMinutes(20), AGORA.plusMinutes(40),
+				AGORA.plusMinutes(10), AGORA.plusMinutes(30), AGORA, AGORA.plusMinutes(5));
+	}
+
+	@Test
+	void listaPorSituacaoEmOrdemDeChegada() {
+		when(repository.findBySituacaoOrderByDataHoraChegadaAsc(SituacaoEmergencia.AGUARDANDO_AVALIACAO))
+				.thenReturn(List.of(chegada(PrioridadeEmergencia.BAIXA, 0), chegada(PrioridadeEmergencia.CRITICA, 5)));
+
+		assertThat(service.listarPorSituacao(SituacaoEmergencia.AGUARDANDO_AVALIACAO))
+				.extracting(resposta -> resposta.prioridade().codigo())
+				.containsExactly("BAIXA", "CRITICA");
 	}
 
 }

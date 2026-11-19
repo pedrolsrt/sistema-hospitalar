@@ -15,6 +15,8 @@ import br.pucminas.hospital.mapper.ConsultaMapper;
 import br.pucminas.hospital.model.Consulta;
 import br.pucminas.hospital.model.ConsultaEspecializada;
 import br.pucminas.hospital.model.ConsultaRotina;
+import br.pucminas.hospital.model.FiltroAtendimentos;
+import br.pucminas.hospital.model.OrdenacaoAtendimentos;
 import br.pucminas.hospital.model.Paciente;
 import br.pucminas.hospital.model.ProfissionalSaude;
 import br.pucminas.hospital.model.SituacaoConsulta;
@@ -177,10 +179,17 @@ public class ConsultaService {
 	}
 
 	/**
-	 * Lista as consultas em ordem de data e horário. Cada filtro é opcional (nulo = sem filtro).
+	 * Lista as consultas em ordem de data e horário. Cada filtro é opcional (nulo = sem filtro) e a filtragem
+	 * é a mesma da busca de atendimentos, {@link FiltroAtendimentos}.
 	 */
 	public List<ConsultaResponse> listar(SituacaoConsulta situacao, Long profissionalId, LocalDate data) {
-		return repository.findComFiltros(situacao, profissionalId, data).stream().map(mapper::paraResponse).toList();
+		FiltroAtendimentos filtro = new FiltroAtendimentos(null, profissionalId,
+				situacao == null ? null : situacao.name(), null, data, data);
+		return repository.findAll().stream()
+				.filter(filtro.comoPredicado())
+				.sorted(OrdenacaoAtendimentos.DATA.comparador())
+				.map(mapper::paraResponse)
+				.toList();
 	}
 
 	/**

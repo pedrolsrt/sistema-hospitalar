@@ -59,13 +59,6 @@ class InternacaoRepositoryTest {
 	}
 
 	@Test
-	void internacoesAtivasEmOrdemDeEntrada() {
-		assertThat(repository.findByDataEfetivaAltaIsNullOrderByDataEntradaAsc())
-				.extracting(internacao -> internacao.getPaciente().getNome())
-				.containsExactly("Carla Dias", "Maria Silva");
-	}
-
-	@Test
 	void internacaoAtivaDoPaciente() {
 		assertThat(repository.findByPacienteIdAndDataEfetivaAltaIsNull(maria.getId()))
 				.get().extracting(internacao -> internacao.getQuarto().getNumero()).isEqualTo("101");
@@ -85,13 +78,6 @@ class InternacaoRepositoryTest {
 		assertThat(repository.existsByQuartoId(enfermaria.getId())).isTrue();
 		assertThat(repository.existsByQuartoId(apartamentoComAlta.getId())).isTrue();
 		assertThat(repository.existsByQuartoId(apartamentoVazio.getId())).isFalse();
-	}
-
-	@Test
-	void internacoesEncerradas() {
-		assertThat(repository.findByDataEfetivaAltaIsNotNullOrderByDataEfetivaAltaDesc())
-				.extracting(internacao -> internacao.getPaciente().getNome())
-				.containsExactly("José Lima");
 	}
 
 	@Test

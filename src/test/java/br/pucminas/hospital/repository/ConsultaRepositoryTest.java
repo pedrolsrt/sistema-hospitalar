@@ -11,6 +11,7 @@ import br.pucminas.hospital.model.ProfissionalSaude;
 import br.pucminas.hospital.model.SituacaoConsulta;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import org.hibernate.Hibernate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,15 +128,12 @@ class ConsultaRepositoryTest {
 	}
 
 	@Test
-	void listaComFiltrosOpcionais() {
-		assertThat(repository.findComFiltros(null, null, null)).hasSize(8)
-				.extracting(c -> c.getDataHoraReferencia()).isSorted();
-		assertThat(repository.findComFiltros(SituacaoConsulta.AGENDADA, null, null)).hasSize(3);
-		assertThat(repository.findComFiltros(null, drJoao.getId(), DIA)).hasSize(6);
-		assertThat(repository.findComFiltros(SituacaoConsulta.CANCELADA, drJoao.getId(), DIA))
-				.extracting(Consulta::getHorario).containsExactly(LocalTime.of(12, 0));
-		assertThat(repository.findComFiltros(null, null, DIA.plusDays(1))).hasSize(1);
-		assertThat(repository.findComFiltros(SituacaoConsulta.CONCLUIDA, draAna.getId(), null)).isEmpty();
+	void listaTodasComPacienteEProfissionalCarregados() {
+		assertThat(repository.findAll()).hasSize(8)
+				.allSatisfy(consulta -> {
+					assertThat(Hibernate.isInitialized(consulta.getPaciente())).isTrue();
+					assertThat(Hibernate.isInitialized(consulta.getProfissionalResponsavel())).isTrue();
+				});
 	}
 
 	@Test

@@ -11,6 +11,8 @@ import br.pucminas.hospital.model.TipoQuarto;
 import br.pucminas.hospital.repository.InternacaoRepository;
 import br.pucminas.hospital.repository.QuartoRepository;
 import java.util.List;
+import java.util.function.Predicate;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(readOnly = true)
 public class QuartoService {
+
+	private static final Predicate<Quarto> COM_VAGA = Quarto::temVaga;
 
 	private final QuartoRepository repository;
 	private final InternacaoRepository internacaoRepository;
@@ -67,13 +71,25 @@ public class QuartoService {
 	}
 
 	/**
-	 * Lista os quartos em ordem de número.
+	 * Lista os quartos em ordem de número. Os filtros são predicados combinados com {@code and()}; o que não
+	 * foi pedido não entra na combinação.
 	 *
 	 * @param tipo só os quartos deste tipo; nulo para todos
 	 * @param somenteComVaga se verdadeiro, só os quartos com vaga
 	 */
 	public List<QuartoResponse> listar(TipoQuarto tipo, boolean somenteComVaga) {
-		return paraResponses(repository.findComFiltros(tipo, somenteComVaga));
+		Predicate<Quarto> filtro = quarto -> true;
+		if (tipo != null) {
+			filtro = filtro.and(doTipo(tipo));
+		}
+		if (somenteComVaga) {
+			filtro = filtro.and(COM_VAGA);
+		}
+		return repository.findAll(Sort.by("numero")).stream().filter(filtro).map(mapper::paraResponse).toList();
+	}
+
+	private static Predicate<Quarto> doTipo(TipoQuarto tipo) {
+		return quarto -> quarto.getTipo() == tipo;
 	}
 
 	/**
@@ -108,10 +124,6 @@ public class QuartoService {
 
 	private Quarto buscar(Long id) {
 		return Busca.quarto(repository, id);
-	}
-
-	private List<QuartoResponse> paraResponses(List<Quarto> quartos) {
-		return quartos.stream().map(mapper::paraResponse).toList();
 	}
 
 }

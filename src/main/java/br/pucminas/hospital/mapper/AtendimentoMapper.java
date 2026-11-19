@@ -1,8 +1,8 @@
 package br.pucminas.hospital.mapper;
 
+import br.pucminas.hospital.dto.AtendimentoItemResponse;
 import br.pucminas.hospital.dto.AtendimentoResponse;
 import br.pucminas.hospital.dto.CodigoDescricao;
-import br.pucminas.hospital.dto.HistoricoItemResponse;
 import br.pucminas.hospital.dto.HistoricoMedicoResponse;
 import br.pucminas.hospital.model.Atendimento;
 import br.pucminas.hospital.model.AtendimentoEmergencia;
@@ -15,15 +15,16 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 /**
- * Monta o histórico médico. Os dados próprios de cada modalidade vêm do mapper dela, escolhido pelo
- * próprio atendimento via {@link Atendimento#aceitar(VisitanteAtendimento)}, sem testes de tipo.
+ * Converte atendimentos de qualquer modalidade, para o histórico médico e para a busca de atendimentos.
+ * Os dados próprios de cada modalidade vêm do mapper dela, escolhido pelo próprio atendimento via
+ * {@link Atendimento#aceitar(VisitanteAtendimento)}, sem testes de tipo.
  */
 @Component
-public class HistoricoMedicoMapper {
+public class AtendimentoMapper {
 
 	private final VisitanteAtendimento<AtendimentoResponse> detalhes;
 
-	public HistoricoMedicoMapper(ConsultaMapper consultaMapper, InternacaoMapper internacaoMapper,
+	public AtendimentoMapper(ConsultaMapper consultaMapper, InternacaoMapper internacaoMapper,
 			AtendimentoEmergenciaMapper emergenciaMapper, ProcedimentoCirurgicoMapper procedimentoMapper) {
 		this.detalhes = new VisitanteAtendimento<>() {
 
@@ -50,15 +51,17 @@ public class HistoricoMedicoMapper {
 		};
 	}
 
+	public AtendimentoItemResponse paraItem(Atendimento atendimento) {
+		return new AtendimentoItemResponse(atendimento.getDataHoraReferencia(),
+				CodigoDescricao.de(atendimento.getModalidade()), CodigoDescricao.de(atendimento.getSituacao()),
+				atendimento.aceitar(detalhes));
+	}
+
 	/**
 	 * @param atendimentos já em ordem cronológica
 	 */
-	public HistoricoMedicoResponse paraResponse(Paciente paciente, List<Atendimento> atendimentos) {
-		List<HistoricoItemResponse> itens = atendimentos.stream()
-				.map(atendimento -> new HistoricoItemResponse(atendimento.getDataHoraReferencia(),
-						CodigoDescricao.de(atendimento.getModalidade()), atendimento.aceitar(detalhes)))
-				.toList();
-		return new HistoricoMedicoResponse(Resumos.de(paciente), itens);
+	public HistoricoMedicoResponse paraHistorico(Paciente paciente, List<Atendimento> atendimentos) {
+		return new HistoricoMedicoResponse(Resumos.de(paciente), atendimentos.stream().map(this::paraItem).toList());
 	}
 
 }

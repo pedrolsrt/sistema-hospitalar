@@ -2,7 +2,8 @@ package br.pucminas.hospital.service;
 
 import br.pucminas.hospital.dto.HistoricoMedicoResponse;
 import br.pucminas.hospital.exception.RecursoNaoEncontradoException;
-import br.pucminas.hospital.mapper.HistoricoMedicoMapper;
+import br.pucminas.hospital.mapper.AtendimentoMapper;
+import br.pucminas.hospital.model.OrdenacaoAtendimentos;
 import br.pucminas.hospital.model.Paciente;
 import br.pucminas.hospital.repository.AtendimentoRepository;
 import br.pucminas.hospital.repository.PacienteRepository;
@@ -19,10 +20,10 @@ public class HistoricoMedicoService {
 
 	private final PacienteRepository pacienteRepository;
 	private final AtendimentoRepository atendimentoRepository;
-	private final HistoricoMedicoMapper mapper;
+	private final AtendimentoMapper mapper;
 
 	public HistoricoMedicoService(PacienteRepository pacienteRepository, AtendimentoRepository atendimentoRepository,
-			HistoricoMedicoMapper mapper) {
+			AtendimentoMapper mapper) {
 		this.pacienteRepository = pacienteRepository;
 		this.atendimentoRepository = atendimentoRepository;
 		this.mapper = mapper;
@@ -36,7 +37,9 @@ public class HistoricoMedicoService {
 	 */
 	public HistoricoMedicoResponse montar(Long pacienteId) {
 		Paciente paciente = Busca.paciente(pacienteRepository, pacienteId);
-		return mapper.paraResponse(paciente, atendimentoRepository.findHistoricoDoPaciente(pacienteId));
+		return mapper.paraHistorico(paciente, atendimentoRepository.findByPacienteId(pacienteId).stream()
+				.sorted(OrdenacaoAtendimentos.DATA.comparador())
+				.toList());
 	}
 
 }

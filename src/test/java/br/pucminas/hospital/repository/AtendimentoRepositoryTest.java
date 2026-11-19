@@ -9,6 +9,7 @@ import br.pucminas.hospital.model.Cirurgiao;
 import br.pucminas.hospital.model.ClinicoGeral;
 import br.pucminas.hospital.model.ConsultaRotina;
 import br.pucminas.hospital.model.Internacao;
+import br.pucminas.hospital.model.ModalidadeAtendimento;
 import br.pucminas.hospital.model.Paciente;
 import br.pucminas.hospital.model.PrioridadeEmergencia;
 import br.pucminas.hospital.model.ProcedimentoCirurgico;
@@ -19,7 +20,7 @@ import br.pucminas.hospital.model.TipoCirurgia;
 import br.pucminas.hospital.model.TipoQuarto;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
+import org.hibernate.Hibernate;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -41,7 +42,7 @@ class AtendimentoRepositoryTest {
 	private AtendimentoRepository repository;
 
 	@Test
-	void historicoDoPacienteReuneTodasAsModalidadesEmOrdemCronologica() {
+	void buscaOsAtendimentosDeTodasAsModalidades() {
 		Paciente maria = em.persist(new Paciente("Maria Silva", "52998224725", LocalDate.of(1990, 5, 10)));
 		Paciente jose = em.persist(new Paciente("José Lima", "11144477735", LocalDate.of(1985, 2, 1)));
 		ProfissionalSaude clinico = em.persist(new ClinicoGeral("Dra. Ana Lima", "CRM-MG 1"));
@@ -61,18 +62,19 @@ class AtendimentoRepositoryTest {
 		em.flush();
 		em.clear();
 
-		List<Atendimento> historico = repository.findHistoricoDoPaciente(maria.getId());
-
-		assertThat(historico).hasExactlyElementsOfTypes(AtendimentoEmergencia.class, Internacao.class,
-				ProcedimentoCirurgico.class, ConsultaRotina.class);
-		assertThat(historico).extracting(Atendimento::getDataHoraReferencia).isSorted();
+		assertThat(repository.findByPacienteId(maria.getId())).hasSize(4)
+				.extracting(Atendimento::getModalidade)
+				.containsExactlyInAnyOrder(ModalidadeAtendimento.EMERGENCIA, ModalidadeAtendimento.INTERNACAO,
+						ModalidadeAtendimento.PROCEDIMENTO_CIRURGICO, ModalidadeAtendimento.CONSULTA_ROTINA);
+		assertThat(repository.findAll()).hasSize(5)
+				.allSatisfy(atendimento -> assertThat(Hibernate.isInitialized(atendimento.getPaciente())).isTrue());
 	}
 
 	@Test
-	void historicoVazioParaPacienteSemAtendimentos() {
+	void pacienteSemAtendimentos() {
 		Paciente maria = em.persist(new Paciente("Maria Silva", "52998224725", LocalDate.of(1990, 5, 10)));
 
-		assertThat(repository.findHistoricoDoPaciente(maria.getId())).isEmpty();
+		assertThat(repository.findByPacienteId(maria.getId())).isEmpty();
 	}
 
 }

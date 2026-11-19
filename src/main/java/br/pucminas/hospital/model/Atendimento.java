@@ -94,6 +94,19 @@ public abstract class Atendimento {
 	public abstract ModalidadeAtendimento getModalidade();
 
 	/**
+	 * Situação do atendimento na máquina de estados da sua modalidade. Permite filtrar atendimentos de
+	 * modalidades diferentes pela situação, comparando o código ({@code name()}).
+	 */
+	public abstract SituacaoAtendimento<?> getSituacao();
+
+	/**
+	 * Prioridade de atendimento; só a emergência tem, as demais modalidades devolvem null.
+	 */
+	public PrioridadeEmergencia getPrioridade() {
+		return null;
+	}
+
+	/**
 	 * Executa a operação do visitante correspondente à modalidade deste atendimento.
 	 */
 	public abstract <R> R aceitar(VisitanteAtendimento<R> visitante);

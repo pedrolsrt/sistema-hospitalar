@@ -15,7 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import br.pucminas.hospital.dto.CodigoDescricao;
-import br.pucminas.hospital.dto.HistoricoItemResponse;
+import br.pucminas.hospital.dto.AtendimentoItemResponse;
 import br.pucminas.hospital.dto.HistoricoMedicoResponse;
 import br.pucminas.hospital.dto.PacienteAtualizacaoRequest;
 import br.pucminas.hospital.dto.PacienteRequest;
@@ -142,13 +142,15 @@ class PacienteControllerTest {
 	@Test
 	void historicoMedico() throws Exception {
 		when(historicoService.montar(1L)).thenReturn(new HistoricoMedicoResponse(Exemplos.MARIA, List.of(
-				new HistoricoItemResponse(LocalDateTime.of(2030, 1, 15, 14, 0),
-						new CodigoDescricao("CONSULTA_ROTINA", "Consulta de rotina"), Exemplos.consulta("CONCLUIDA")))));
+				new AtendimentoItemResponse(LocalDateTime.of(2030, 1, 15, 14, 0),
+						new CodigoDescricao("CONSULTA_ROTINA", "Consulta de rotina"),
+						new CodigoDescricao("CONCLUIDA", "Concluída"), Exemplos.consulta("CONCLUIDA")))));
 
 		mvc.perform(get("/pacientes/1/historico"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.paciente.nome").value("Maria Silva"))
 				.andExpect(jsonPath("$.atendimentos[0].modalidade.codigo").value("CONSULTA_ROTINA"))
+				.andExpect(jsonPath("$.atendimentos[0].situacao.codigo").value("CONCLUIDA"))
 				.andExpect(jsonPath("$.atendimentos[0].detalhes.motivo").value("Check-up"));
 	}
 

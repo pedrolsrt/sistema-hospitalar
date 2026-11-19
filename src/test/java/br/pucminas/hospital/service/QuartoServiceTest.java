@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Sort;
 
 @ExtendWith(MockitoExtension.class)
 class QuartoServiceTest {
@@ -131,16 +132,29 @@ class QuartoServiceTest {
 	}
 
 	@Test
-	void buscaPorIdELista() {
-		Quarto uti = new Quarto("201", 2, TipoQuarto.UTI, 1);
-		Quarto enfermaria = new Quarto("101", 1, TipoQuarto.ENFERMARIA, 6);
-		when(repository.findById(1L)).thenReturn(Optional.of(uti));
-		when(repository.findComFiltros(null, false)).thenReturn(List.of(enfermaria, uti));
-		when(repository.findComFiltros(TipoQuarto.UTI, true)).thenReturn(List.of(uti));
+	void buscaPorId() {
+		when(repository.findById(1L)).thenReturn(Optional.of(new Quarto("201", 2, TipoQuarto.UTI, 1)));
 
 		assertThat(service.buscarPorId(1L).numero()).isEqualTo("201");
-		assertThat(service.listar(null, false)).extracting(QuartoResponse::numero).containsExactly("101", "201");
-		assertThat(service.listar(TipoQuarto.UTI, true)).extracting(QuartoResponse::numero).containsExactly("201");
+	}
+
+	// UTI 201 lotada, apartamento 302 com uma vaga, enfermaria 101 e apartamento 301 vazios.
+	@Test
+	void filtrosDeTipoEVagaSoEntramQuandoInformados() {
+		Quarto utiLotada = new Quarto("201", 2, TipoQuarto.UTI, 1);
+		utiLotada.ocupar();
+		Quarto apartamentoComVaga = new Quarto("302", 3, TipoQuarto.APARTAMENTO, 2);
+		apartamentoComVaga.ocupar();
+		when(repository.findAll(Sort.by("numero"))).thenReturn(List.of(new Quarto("101", 1, TipoQuarto.ENFERMARIA, 6),
+				utiLotada, new Quarto("301", 3, TipoQuarto.APARTAMENTO, 2), apartamentoComVaga));
+
+		assertThat(service.listar(null, false)).extracting(QuartoResponse::numero)
+				.containsExactly("101", "201", "301", "302");
+		assertThat(service.listar(null, true)).extracting(QuartoResponse::numero).containsExactly("101", "301", "302");
+		assertThat(service.listar(TipoQuarto.UTI, false)).extracting(QuartoResponse::numero).containsExactly("201");
+		assertThat(service.listar(TipoQuarto.UTI, true)).isEmpty();
+		assertThat(service.listar(TipoQuarto.APARTAMENTO, true)).extracting(QuartoResponse::numero)
+				.containsExactly("301", "302");
 	}
 
 	@Test

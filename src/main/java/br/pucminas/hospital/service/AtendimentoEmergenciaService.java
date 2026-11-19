@@ -8,6 +8,7 @@ import br.pucminas.hospital.exception.RegraNegocioException;
 import br.pucminas.hospital.exception.TransicaoSituacaoInvalidaException;
 import br.pucminas.hospital.mapper.AtendimentoEmergenciaMapper;
 import br.pucminas.hospital.model.AtendimentoEmergencia;
+import br.pucminas.hospital.model.OrdenacaoAtendimentos;
 import br.pucminas.hospital.model.SituacaoEmergencia;
 import br.pucminas.hospital.repository.AtendimentoEmergenciaRepository;
 import br.pucminas.hospital.repository.PacienteRepository;
@@ -98,7 +99,10 @@ public class AtendimentoEmergenciaService {
 	 * sem prioridade definida, no fim.
 	 */
 	public List<AtendimentoEmergenciaResponse> filaDeAvaliacao() {
-		return repository.findFilaDeAvaliacao().stream().map(mapper::paraResponse).toList();
+		return repository.findBySituacaoOrderByDataHoraChegadaAsc(SituacaoEmergencia.AGUARDANDO_AVALIACAO).stream()
+				.sorted(OrdenacaoAtendimentos.PRIORIDADE.comparador())
+				.map(mapper::paraResponse)
+				.toList();
 	}
 
 	public List<AtendimentoEmergenciaResponse> listarPorSituacao(SituacaoEmergencia situacao) {

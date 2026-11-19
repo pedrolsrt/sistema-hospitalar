@@ -158,6 +158,7 @@ public abstract class Consulta extends Atendimento {
 		return motivo;
 	}
 
+	@Override
 	public SituacaoConsulta getSituacao() {
 		return situacao;
 	}
