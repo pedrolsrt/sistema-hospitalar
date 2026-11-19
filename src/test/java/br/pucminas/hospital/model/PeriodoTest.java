@@ -15,7 +15,7 @@ class PeriodoTest {
 
 	private static final LocalDate DIA = LocalDate.of(2030, 1, 15);
 
-	// Período fixo das 14:00 às 15:00, comparado com outros de mesmo tamanho ou não.
+	// Período fixo das 14:00 às 15:00, comparado com períodos antes, depois, dentro e em volta dele.
 	private static final Periodo DAS_14_AS_15 = new Periodo(DIA.atTime(14, 0), DIA.atTime(15, 0));
 
 	private static Periodo periodo(String inicio, String fim) {

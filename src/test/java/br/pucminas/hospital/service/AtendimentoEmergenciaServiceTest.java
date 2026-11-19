@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import br.pucminas.hospital.dto.AtendimentoEmergenciaRequest;
 import br.pucminas.hospital.dto.AtendimentoEmergenciaResponse;
+import br.pucminas.hospital.dto.ObservacoesRequest;
 import br.pucminas.hospital.dto.PrioridadeRequest;
 import br.pucminas.hospital.exception.RecursoNaoEncontradoException;
 import br.pucminas.hospital.exception.RegraNegocioException;
@@ -205,6 +206,31 @@ class AtendimentoEmergenciaServiceTest {
 		assertThat(service.listarPorSituacao(SituacaoEmergencia.AGUARDANDO_AVALIACAO))
 				.extracting(resposta -> resposta.prioridade().codigo())
 				.containsExactly("BAIXA", "CRITICA");
+	}
+
+	@Test
+	void registraObservacoesSemEspacosNasPontas() {
+		salva(PrioridadeEmergencia.ALTA).iniciar();
+
+		AtendimentoEmergenciaResponse resposta = service.registrarObservacoes(10L,
+				new ObservacoesRequest("  Sutura no antebraço. "));
+
+		assertThat(resposta.observacoes()).isEqualTo("Sutura no antebraço.");
+	}
+
+	@Test
+	void naoRegistraObservacoesDeQuemAguardaAvaliacao() {
+		salva(PrioridadeEmergencia.ALTA);
+
+		assertThatThrownBy(() -> service.registrarObservacoes(10L, new ObservacoesRequest("Sutura.")))
+				.isInstanceOf(RegraNegocioException.class)
+				.hasMessageEndingWith("Situação atual: Aguardando avaliação.");
+	}
+
+	@Test
+	void naoRegistraObservacoesDeAtendimentoInexistente() {
+		assertThatThrownBy(() -> service.registrarObservacoes(99L, new ObservacoesRequest("Sutura.")))
+				.isInstanceOf(RecursoNaoEncontradoException.class);
 	}
 
 }

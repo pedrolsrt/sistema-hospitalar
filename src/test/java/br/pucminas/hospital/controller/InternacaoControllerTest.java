@@ -14,7 +14,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import br.pucminas.hospital.dto.AltaRequest;
 import br.pucminas.hospital.dto.InternacaoRequest;
+import br.pucminas.hospital.dto.ObservacoesRequest;
 import br.pucminas.hospital.exception.QuartoSemVagasException;
+import br.pucminas.hospital.exception.RecursoNaoEncontradoException;
 import br.pucminas.hospital.service.InternacaoService;
 import java.time.LocalDate;
 import java.util.List;
@@ -92,6 +94,44 @@ class InternacaoControllerTest {
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.campos[0].mensagem").value("A data efetiva de alta não pode estar no futuro."));
 		verify(service, never()).registrarAlta(any(), any());
+	}
+
+	@Test
+	void observacoesNaInternacaoTemLimiteDeTamanho() throws Exception {
+		mvc.perform(post("/internacoes").contentType(MediaType.APPLICATION_JSON)
+				.content(INTERNACAO.replace("}", ", \"observacoes\": \"" + "x".repeat(1001) + "\"}")))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.campos[0].campo").value("observacoes"));
+		verify(service, never()).internar(any());
+	}
+
+	@Test
+	void registraObservacoes() throws Exception {
+		when(service.registrarObservacoes(eq(20L), any(ObservacoesRequest.class)))
+				.thenReturn(Exemplos.internacao(false));
+
+		mvc.perform(patch("/internacoes/20/registrar-observacoes").contentType(MediaType.APPLICATION_JSON)
+				.content("{\"texto\": \"Retorno em 15 dias.\"}"))
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	void observacoesSemTextoRespondem400() throws Exception {
+		mvc.perform(patch("/internacoes/20/registrar-observacoes").contentType(MediaType.APPLICATION_JSON)
+				.content("{}"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.campos[0].mensagem").value("O texto das observações é obrigatório."));
+		verify(service, never()).registrarObservacoes(any(), any());
+	}
+
+	@Test
+	void observacoesDeInternacaoInexistenteRespondem404() throws Exception {
+		when(service.registrarObservacoes(eq(99L), any(ObservacoesRequest.class)))
+				.thenThrow(new RecursoNaoEncontradoException("Internação não encontrada (id 99)."));
+
+		mvc.perform(patch("/internacoes/99/registrar-observacoes").contentType(MediaType.APPLICATION_JSON)
+				.content("{\"texto\": \"Dieta leve.\"}"))
+				.andExpect(status().isNotFound());
 	}
 
 }

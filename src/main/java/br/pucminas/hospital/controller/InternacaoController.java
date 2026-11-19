@@ -3,6 +3,7 @@ package br.pucminas.hospital.controller;
 import br.pucminas.hospital.dto.AltaRequest;
 import br.pucminas.hospital.dto.InternacaoRequest;
 import br.pucminas.hospital.dto.InternacaoResponse;
+import br.pucminas.hospital.dto.ObservacoesRequest;
 import br.pucminas.hospital.service.InternacaoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -33,7 +34,8 @@ public class InternacaoController {
 
 	@PostMapping
 	@Operation(summary = "Interna um paciente", description = "Exige paciente e profissional ativos, paciente sem outra "
-			+ "internação ativa, quarto com vaga e alta prevista não anterior à entrada.")
+			+ "internação ativa, quarto com vaga e alta prevista não anterior à entrada. As observações são "
+			+ "opcionais.")
 	@ApiResponse(responseCode = "201", description = "Paciente internado; o cabeçalho Location aponta para a internação")
 	@ApiResponse(responseCode = "400", description = "Dados inválidos")
 	@ApiResponse(responseCode = "404", description = "Paciente, profissional ou quarto não encontrado")
@@ -71,6 +73,18 @@ public class InternacaoController {
 	@ApiResponse(responseCode = "422", description = "Internação já encerrada ou alta anterior à entrada")
 	public InternacaoResponse registrarAlta(@PathVariable Long id, @Valid @RequestBody AltaRequest request) {
 		return service.registrarAlta(id, request);
+	}
+
+	@PatchMapping("/{id}/registrar-observacoes")
+	@Operation(summary = "Registra as observações da internação",
+			description = "Permitido na internação ativa e também depois da alta. Um novo registro substitui o "
+					+ "anterior.")
+	@ApiResponse(responseCode = "200", description = "Observações registradas")
+	@ApiResponse(responseCode = "400", description = "Texto ausente ou longo demais")
+	@ApiResponse(responseCode = "404", description = "Internação não encontrada")
+	public InternacaoResponse registrarObservacoes(@PathVariable Long id,
+			@Valid @RequestBody ObservacoesRequest request) {
+		return service.registrarObservacoes(id, request);
 	}
 
 }

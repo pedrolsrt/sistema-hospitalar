@@ -157,10 +157,6 @@ public class Quarto {
 		return ocupacaoAtual;
 	}
 
-	public Long getVersao() {
-		return versao;
-	}
-
 	@Override
 	public final boolean equals(Object o) {
 		if (this == o) {

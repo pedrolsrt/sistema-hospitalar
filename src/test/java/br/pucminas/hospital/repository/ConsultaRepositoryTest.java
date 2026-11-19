@@ -115,19 +115,6 @@ class ConsultaRepositoryTest {
 	}
 
 	@Test
-	void agendaDoProfissionalTemTodasAsSituacoesEmOrdemDeHorario() {
-		assertThat(repository.findAgendaDoProfissional(drJoao.getId(), DIA))
-				.extracting(Consulta::getHorario)
-				.containsExactly(LocalTime.of(9, 0), LocalTime.of(10, 0), LocalTime.of(11, 0), LocalTime.of(12, 0),
-						LocalTime.of(13, 0), LocalTime.of(14, 0));
-	}
-
-	@Test
-	void agendaVaziaEmDiaSemConsultas() {
-		assertThat(repository.findAgendaDoProfissional(draAna.getId(), DIA.plusDays(1))).isEmpty();
-	}
-
-	@Test
 	void listaTodasComPacienteEProfissionalCarregados() {
 		assertThat(repository.findAll()).hasSize(8)
 				.allSatisfy(consulta -> {

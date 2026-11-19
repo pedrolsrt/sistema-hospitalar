@@ -2,6 +2,7 @@ package br.pucminas.hospital.service;
 
 import br.pucminas.hospital.dto.AtendimentoEmergenciaRequest;
 import br.pucminas.hospital.dto.AtendimentoEmergenciaResponse;
+import br.pucminas.hospital.dto.ObservacoesRequest;
 import br.pucminas.hospital.dto.PrioridadeRequest;
 import br.pucminas.hospital.exception.RecursoNaoEncontradoException;
 import br.pucminas.hospital.exception.RegraNegocioException;
@@ -85,6 +86,14 @@ public class AtendimentoEmergenciaService {
 	@Transactional
 	public AtendimentoEmergenciaResponse concluir(Long id) {
 		return alterar(id, AtendimentoEmergencia::concluir);
+	}
+
+	/**
+	 * @throws RegraNegocioException se o paciente ainda aguardar avaliação
+	 */
+	@Transactional
+	public AtendimentoEmergenciaResponse registrarObservacoes(Long id, ObservacoesRequest request) {
+		return alterar(id, emergencia -> emergencia.registrarObservacoes(request.texto().strip()));
 	}
 
 	/**

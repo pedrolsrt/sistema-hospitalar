@@ -183,13 +183,8 @@ public class ConsultaService {
 	 * é a mesma da busca de atendimentos, {@link FiltroAtendimentos}.
 	 */
 	public List<ConsultaResponse> listar(SituacaoConsulta situacao, Long profissionalId, LocalDate data) {
-		FiltroAtendimentos filtro = new FiltroAtendimentos(null, profissionalId,
-				situacao == null ? null : situacao.name(), null, data, data);
-		return repository.findAll().stream()
-				.filter(filtro.comoPredicado())
-				.sorted(OrdenacaoAtendimentos.DATA.comparador())
-				.map(mapper::paraResponse)
-				.toList();
+		return listar(new FiltroAtendimentos(null, profissionalId, situacao == null ? null : situacao.name(), null,
+				data, data));
 	}
 
 	/**
@@ -199,7 +194,15 @@ public class ConsultaService {
 	 */
 	public List<ConsultaResponse> agendaDoProfissional(Long profissionalId, LocalDate data) {
 		Busca.profissional(profissionalRepository, profissionalId);
-		return repository.findAgendaDoProfissional(profissionalId, data).stream().map(mapper::paraResponse).toList();
+		return listar(new FiltroAtendimentos(null, profissionalId, null, null, data, data));
+	}
+
+	private List<ConsultaResponse> listar(FiltroAtendimentos filtro) {
+		return repository.findAll().stream()
+				.filter(filtro.comoPredicado())
+				.sorted(OrdenacaoAtendimentos.DATA.comparador())
+				.map(mapper::paraResponse)
+				.toList();
 	}
 
 	private ConsultaResponse alterar(Long id, Consumer<Consulta> alteracao) {

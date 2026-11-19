@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import br.pucminas.hospital.dto.AltaRequest;
 import br.pucminas.hospital.dto.InternacaoRequest;
 import br.pucminas.hospital.dto.InternacaoResponse;
+import br.pucminas.hospital.dto.ObservacoesRequest;
 import br.pucminas.hospital.exception.DataInvalidaException;
 import br.pucminas.hospital.exception.QuartoSemVagasException;
 import br.pucminas.hospital.exception.RecursoNaoEncontradoException;
@@ -74,7 +75,40 @@ class InternacaoServiceTest {
 	}
 
 	private static InternacaoRequest request() {
-		return new InternacaoRequest(1L, 2L, 3L, ENTRADA, ENTRADA.plusDays(5));
+		return new InternacaoRequest(1L, 2L, 3L, ENTRADA, ENTRADA.plusDays(5), null);
+	}
+
+	@Test
+	void internaJaComObservacoes() {
+		InternacaoResponse resposta = service.internar(
+				new InternacaoRequest(1L, 2L, 3L, ENTRADA, ENTRADA.plusDays(5), "  Dieta leve. "));
+
+		assertThat(resposta.observacoes()).isEqualTo("Dieta leve.");
+	}
+
+	@Test
+	void observacoesEmBrancoNaInternacaoFicamAusentes() {
+		assertThat(service.internar(new InternacaoRequest(1L, 2L, 3L, ENTRADA, ENTRADA.plusDays(5), "   "))
+				.observacoes()).isNull();
+	}
+
+	@Test
+	void registraObservacoesNaInternacaoAtivaEDepoisDaAlta() {
+		Internacao internacao = new Internacao(maria, medico, quarto, ENTRADA, ENTRADA.plusDays(5));
+		when(repository.findById(20L)).thenReturn(Optional.of(internacao));
+
+		assertThat(service.registrarObservacoes(20L, new ObservacoesRequest("Dieta leve.")).observacoes())
+				.isEqualTo("Dieta leve.");
+		internacao.darAlta(ENTRADA.plusDays(4));
+		assertThat(service.registrarObservacoes(20L, new ObservacoesRequest(" Retorno em 15 dias. ")).observacoes())
+				.isEqualTo("Retorno em 15 dias.");
+	}
+
+	@Test
+	void naoRegistraObservacoesDeInternacaoInexistente() {
+		assertThatThrownBy(() -> service.registrarObservacoes(99L, new ObservacoesRequest("Dieta leve.")))
+				.isInstanceOf(RecursoNaoEncontradoException.class)
+				.hasMessage("Internação não encontrada (id 99).");
 	}
 
 	@Test
@@ -121,18 +155,19 @@ class InternacaoServiceTest {
 
 	@Test
 	void naoInternaComAltaPrevistaAntesDaEntrada() {
-		assertThatThrownBy(() -> service.internar(new InternacaoRequest(1L, 2L, 3L, ENTRADA, ENTRADA.minusDays(1))))
+		assertThatThrownBy(() -> service.internar(
+				new InternacaoRequest(1L, 2L, 3L, ENTRADA, ENTRADA.minusDays(1), null)))
 				.isInstanceOf(DataInvalidaException.class);
 		assertThat(quarto.getOcupacaoAtual()).isZero();
 	}
 
 	@Test
 	void naoInternaComReferenciaInexistente() {
-		assertThatThrownBy(() -> service.internar(new InternacaoRequest(9L, 2L, 3L, ENTRADA, ENTRADA)))
+		assertThatThrownBy(() -> service.internar(new InternacaoRequest(9L, 2L, 3L, ENTRADA, ENTRADA, null)))
 				.hasMessage("Paciente não encontrado (id 9).");
-		assertThatThrownBy(() -> service.internar(new InternacaoRequest(1L, 9L, 3L, ENTRADA, ENTRADA)))
+		assertThatThrownBy(() -> service.internar(new InternacaoRequest(1L, 9L, 3L, ENTRADA, ENTRADA, null)))
 				.hasMessage("Profissional de saúde não encontrado (id 9).");
-		assertThatThrownBy(() -> service.internar(new InternacaoRequest(1L, 2L, 9L, ENTRADA, ENTRADA)))
+		assertThatThrownBy(() -> service.internar(new InternacaoRequest(1L, 2L, 9L, ENTRADA, ENTRADA, null)))
 				.hasMessage("Quarto não encontrado (id 9).");
 	}
 

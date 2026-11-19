@@ -122,6 +122,7 @@ class FluxoCompletoIntegracaoTest {
 				.startsWith("O profissional Dra. Ana Lima já tem consulta em 16/01/2099, das 10:00 às 10:30");
 		String agenda = chamar(get("/profissionais/" + clinico + "/agenda").param("data", "2099-01-16"), null, 200);
 		assertThat(JsonPath.<List<Integer>>read(agenda, "$[*].id")).containsExactly((int) retorno);
+		chamar(get("/profissionais/999/agenda").param("data", "2099-01-16"), null, 404);
 
 		// Consulta especializada com profissional de outra área (e com clínico geral) é recusada.
 		chamar(post("/consultas/especializadas"), """
@@ -139,8 +140,11 @@ class FluxoCompletoIntegracaoTest {
 
 		// Internação e alta -------------------------------------------------------------------------------
 		long internacao = criar("/internacoes", """
-				{"pacienteId": %d, "profissionalId": %d, "quartoId": %d, "dataEntrada": "%s", "dataPrevistaAlta": "%s"}
+				{"pacienteId": %d, "profissionalId": %d, "quartoId": %d, "dataEntrada": "%s", "dataPrevistaAlta": "%s",
+				 "observacoes": "Dieta leve."}
 				""".formatted(maria, clinico, uti, HOJE.minusDays(10), HOJE.minusDays(5)));
+		assertThat(campo(chamar(get("/internacoes/" + internacao), null, 200), "$.observacoes"))
+				.isEqualTo("Dieta leve.");
 		assertThat(campo(chamar(get("/quartos/" + uti), null, 200), "$.situacao")).isEqualTo("OCUPADO");
 		chamar(post("/internacoes"), """
 				{"pacienteId": %d, "profissionalId": %d, "quartoId": %d, "dataEntrada": "%s", "dataPrevistaAlta": "%s"}
@@ -149,6 +153,9 @@ class FluxoCompletoIntegracaoTest {
 		chamar(patch("/internacoes/" + internacao + "/registrar-alta"),
 				"{\"dataEfetivaAlta\": \"%s\"}".formatted(HOJE.minusDays(6)), 200);
 		assertThat(campo(chamar(get("/quartos/" + uti), null, 200), "$.ocupacaoAtual")).isEqualTo("0");
+		String observacoesDaAlta = chamar(patch("/internacoes/" + internacao + "/registrar-observacoes"),
+				"{\"texto\": \"Retorno em 15 dias.\"}", 200);
+		assertThat(campo(observacoesDaAlta, "$.observacoes")).isEqualTo("Retorno em 15 dias.");
 		chamar(delete("/quartos/" + uti), null, 422);
 		chamar(delete("/quartos/" + enfermaria), null, 204);
 		chamar(get("/quartos/" + enfermaria), null, 404);
@@ -158,8 +165,12 @@ class FluxoCompletoIntegracaoTest {
 		String fila = chamar(get("/emergencias/fila"), null, 200);
 		assertThat(JsonPath.<List<Integer>>read(fila, "$[*].id")).containsExactly((int) emergencia);
 		chamar(patch("/emergencias/" + emergencia + "/iniciar"), null, 422);
+		chamar(patch("/emergencias/" + emergencia + "/registrar-observacoes"), "{\"texto\": \"Sutura.\"}", 422);
 		chamar(patch("/emergencias/" + emergencia + "/definir-prioridade"), "{\"prioridade\": \"ALTA\"}", 200);
 		chamar(patch("/emergencias/" + emergencia + "/iniciar"), null, 200);
+		String observacoesDaEmergencia = chamar(patch("/emergencias/" + emergencia + "/registrar-observacoes"),
+				"{\"texto\": \"Sutura no antebraço.\"}", 200);
+		assertThat(campo(observacoesDaEmergencia, "$.observacoes")).isEqualTo("Sutura no antebraço.");
 		chamar(patch("/emergencias/" + emergencia + "/concluir"), null, 200);
 		assertThat(JsonPath.<List<Object>>read(chamar(get("/emergencias/fila"), null, 200), "$")).isEmpty();
 

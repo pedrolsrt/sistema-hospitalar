@@ -3,6 +3,7 @@ package br.pucminas.hospital.service;
 import br.pucminas.hospital.dto.AltaRequest;
 import br.pucminas.hospital.dto.InternacaoRequest;
 import br.pucminas.hospital.dto.InternacaoResponse;
+import br.pucminas.hospital.dto.ObservacoesRequest;
 import br.pucminas.hospital.exception.DataInvalidaException;
 import br.pucminas.hospital.exception.QuartoSemVagasException;
 import br.pucminas.hospital.exception.RecursoNaoEncontradoException;
@@ -69,7 +70,24 @@ public class InternacaoService {
 		});
 		Internacao internacao = new Internacao(paciente, profissional, quarto, request.dataEntrada(),
 				request.dataPrevistaAlta());
+		if (request.observacoes() != null && !request.observacoes().isBlank()) {
+			internacao.registrarObservacoes(request.observacoes().strip());
+		}
 		return mapper.paraResponse(repository.save(internacao));
+	}
+
+	/**
+	 * Registra as observações. A internação está em curso desde a admissão, e as observações da alta são
+	 * escritas depois dela; por isso o registro vale na internação ativa e na encerrada. Um novo registro
+	 * substitui o anterior.
+	 *
+	 * @throws RecursoNaoEncontradoException se a internação não existir
+	 */
+	@Transactional
+	public InternacaoResponse registrarObservacoes(Long id, ObservacoesRequest request) {
+		Internacao internacao = buscar(id);
+		internacao.registrarObservacoes(request.texto().strip());
+		return mapper.paraResponse(internacao);
 	}
 
 	/**

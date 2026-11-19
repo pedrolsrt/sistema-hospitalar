@@ -426,14 +426,21 @@ class ConsultaServiceTest {
 				.containsExactly(LocalTime.of(10, 0));
 	}
 
+	// A agenda usa o mesmo filtro da listagem: só o profissional e a data, em qualquer situação.
 	@Test
-	void agendaDoProfissional() {
-		when(repository.findAgendaDoProfissional(2L, DIA)).thenReturn(List.of(
+	void agendaDoProfissionalTemTodasAsSituacoesDaDataEmOrdemDeHorario() {
+		Consulta cancelada = existente(drJoao, maria, DIA, "11:00", SituacaoConsulta.AGENDADA);
+		cancelada.cancelar();
+		when(repository.findAll()).thenReturn(List.of(
+				existente(drJoao, maria, DIA, "14:00", SituacaoConsulta.CONFIRMADA),
+				cancelada,
 				existente(drJoao, maria, DIA, "09:00", SituacaoConsulta.AGENDADA),
-				existente(drJoao, maria, DIA, "10:00", SituacaoConsulta.CONFIRMADA)));
+				existente(drJoao, maria, DIA.plusDays(1), "08:00", SituacaoConsulta.AGENDADA),
+				existente(cardiologista, maria, DIA, "10:00", SituacaoConsulta.AGENDADA)));
 
 		assertThat(service.agendaDoProfissional(2L, DIA)).extracting(ConsultaResponse::horario)
-				.containsExactly(LocalTime.of(9, 0), LocalTime.of(10, 0));
+				.containsExactly(LocalTime.of(9, 0), LocalTime.of(11, 0), LocalTime.of(14, 0));
+		assertThat(service.agendaDoProfissional(2L, DIA.plusDays(2))).isEmpty();
 	}
 
 	@Test

@@ -141,4 +141,25 @@ class AtendimentoEmergenciaTest {
 				.hasMessage("A data e hora de chegada do paciente são obrigatórias.");
 	}
 
+	@ParameterizedTest
+	@EnumSource(value = SituacaoEmergencia.class, names = { "EM_ATENDIMENTO", "CONCLUIDO" })
+	void registraObservacoesDuranteOuDepoisDoAtendimento(SituacaoEmergencia situacao) {
+		AtendimentoEmergencia emergencia = emergenciaEm(situacao);
+
+		emergencia.registrarObservacoes("Sutura no antebraço.");
+
+		assertThat(emergencia.getObservacoes()).isEqualTo("Sutura no antebraço.");
+	}
+
+	@Test
+	void naoRegistraObservacoesAntesDaAvaliacao() {
+		AtendimentoEmergencia emergencia = emergenciaEm(SituacaoEmergencia.AGUARDANDO_AVALIACAO);
+
+		assertThatThrownBy(() -> emergencia.registrarObservacoes("Sutura no antebraço."))
+				.isInstanceOf(RegraNegocioException.class)
+				.hasMessage("As observações da emergência só podem ser registradas durante o atendimento ou depois "
+						+ "da conclusão. Situação atual: Aguardando avaliação.");
+		assertThat(emergencia.getObservacoes()).isNull();
+	}
+
 }

@@ -8,8 +8,6 @@ import java.util.Collection;
 import java.util.List;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 public interface ConsultaRepository extends JpaRepository<Consulta, Long> {
 
@@ -62,16 +60,5 @@ public interface ConsultaRepository extends JpaRepository<Consulta, Long> {
 
 	List<Consulta> findByPacienteIdAndDataBetweenAndSituacaoIn(Long pacienteId, LocalDate de, LocalDate ate,
 			Collection<SituacaoConsulta> situacoes);
-
-	/**
-	 * Agenda do profissional na data, em qualquer situação, em ordem de horário.
-	 */
-	@Query("""
-			select c from Consulta c
-			where c.profissionalResponsavel.id = :profissionalId and c.data = :data
-			order by c.horario
-			""")
-	List<Consulta> findAgendaDoProfissional(@Param("profissionalId") Long profissionalId,
-			@Param("data") LocalDate data);
 
 }

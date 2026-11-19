@@ -1,7 +1,8 @@
 package br.pucminas.hospital.dto;
 
 /**
- * Resposta de qualquer modalidade de atendimento; usada no histórico médico, que reúne todas.
+ * Resposta de qualquer modalidade de atendimento; usada no histórico médico e na busca de atendimentos, que
+ * reúnem todas.
  */
 public sealed interface AtendimentoResponse permits ConsultaResponse, InternacaoResponse,
 		AtendimentoEmergenciaResponse, ProcedimentoCirurgicoResponse {

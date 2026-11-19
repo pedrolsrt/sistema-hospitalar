@@ -2,6 +2,8 @@ package br.pucminas.hospital.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -11,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import br.pucminas.hospital.dto.AtendimentoEmergenciaRequest;
+import br.pucminas.hospital.dto.ObservacoesRequest;
 import br.pucminas.hospital.dto.PrioridadeRequest;
 import br.pucminas.hospital.exception.RegraNegocioException;
 import br.pucminas.hospital.exception.TransicaoSituacaoInvalidaException;
@@ -111,6 +114,36 @@ class AtendimentoEmergenciaControllerTest {
 
 		mvc.perform(patch("/emergencias/30/iniciar")).andExpect(status().isUnprocessableContent());
 		mvc.perform(patch("/emergencias/30/concluir")).andExpect(status().isConflict());
+	}
+
+	@Test
+	void registraObservacoes() throws Exception {
+		when(service.registrarObservacoes(eq(30L), any(ObservacoesRequest.class)))
+				.thenReturn(Exemplos.emergencia("EM_ATENDIMENTO"));
+
+		mvc.perform(patch("/emergencias/30/registrar-observacoes").contentType(MediaType.APPLICATION_JSON)
+				.content("{\"texto\": \"Sutura no antebraço.\"}"))
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	void observacoesSemTextoRespondem400() throws Exception {
+		mvc.perform(patch("/emergencias/30/registrar-observacoes").contentType(MediaType.APPLICATION_JSON)
+				.content("{\"texto\": \" \"}"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.campos[0].campo").value("texto"));
+		verify(service, never()).registrarObservacoes(any(), any());
+	}
+
+	@Test
+	void observacoesAntesDaAvaliacaoRespondem422() throws Exception {
+		when(service.registrarObservacoes(eq(30L), any(ObservacoesRequest.class))).thenThrow(new RegraNegocioException(
+				"As observações da emergência só podem ser registradas durante o atendimento ou depois da conclusão. "
+						+ "Situação atual: Aguardando avaliação."));
+
+		mvc.perform(patch("/emergencias/30/registrar-observacoes").contentType(MediaType.APPLICATION_JSON)
+				.content("{\"texto\": \"Sutura no antebraço.\"}"))
+				.andExpect(status().isUnprocessableContent());
 	}
 
 }

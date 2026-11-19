@@ -26,6 +26,13 @@ public enum SituacaoEmergencia implements SituacaoAtendimento<SituacaoEmergencia
 		};
 	}
 
+	/**
+	 * Observações só depois que o paciente começa a ser atendido, como na consulta.
+	 */
+	public boolean permiteRegistrarObservacoes() {
+		return this == EM_ATENDIMENTO || this == CONCLUIDO;
+	}
+
 	@Override
 	public String getDescricao() {
 		return descricao;

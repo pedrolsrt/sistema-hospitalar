@@ -83,6 +83,20 @@ public class AtendimentoEmergencia extends Atendimento {
 	}
 
 	/**
+	 * Registra as observações, permitido apenas durante o atendimento ou depois da conclusão.
+	 *
+	 * @throws RegraNegocioException se o paciente ainda aguardar avaliação
+	 */
+	@Override
+	public void registrarObservacoes(String texto) {
+		if (!situacao.permiteRegistrarObservacoes()) {
+			throw new RegraNegocioException("As observações da emergência só podem ser registradas durante o "
+					+ "atendimento ou depois da conclusão. Situação atual: " + situacao.getDescricao() + ".");
+		}
+		super.registrarObservacoes(texto);
+	}
+
+	/**
 	 * Exige a prioridade definida.
 	 */
 	@Override

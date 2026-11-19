@@ -2,6 +2,7 @@ package br.pucminas.hospital.controller;
 
 import br.pucminas.hospital.dto.AtendimentoEmergenciaRequest;
 import br.pucminas.hospital.dto.AtendimentoEmergenciaResponse;
+import br.pucminas.hospital.dto.ObservacoesRequest;
 import br.pucminas.hospital.dto.PrioridadeRequest;
 import br.pucminas.hospital.model.SituacaoEmergencia;
 import br.pucminas.hospital.service.AtendimentoEmergenciaService;
@@ -99,6 +100,19 @@ public class AtendimentoEmergenciaController {
 	@ApiResponse(responseCode = "409", description = "O atendimento não está em andamento")
 	public AtendimentoEmergenciaResponse concluir(@PathVariable Long id) {
 		return service.concluir(id);
+	}
+
+	@PatchMapping("/{id}/registrar-observacoes")
+	@Operation(summary = "Registra as observações do atendimento",
+			description = "Permitido durante o atendimento ou depois da conclusão; não enquanto o paciente aguarda "
+					+ "avaliação. Um novo registro substitui o anterior.")
+	@ApiResponse(responseCode = "200", description = "Observações registradas")
+	@ApiResponse(responseCode = "400", description = "Texto ausente ou longo demais")
+	@ApiResponse(responseCode = "404", description = "Atendimento não encontrado")
+	@ApiResponse(responseCode = "422", description = "O paciente ainda aguarda avaliação")
+	public AtendimentoEmergenciaResponse registrarObservacoes(@PathVariable Long id,
+			@Valid @RequestBody ObservacoesRequest request) {
+		return service.registrarObservacoes(id, request);
 	}
 
 }
