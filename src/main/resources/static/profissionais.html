@@ -5,7 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Profissionais | Sistema Hospitalar</title>
 	<link rel="stylesheet" href="css/estilo.css">
-	<script src="js/prototipo.js" defer></script>
+	<script src="js/profissionais.js" defer></script>
 </head>
 <body>
 	<a class="pular" href="#conteudo">Pular para o conteúdo</a>
@@ -65,85 +65,7 @@
 								<th scope="col">Ações</th>
 							</tr>
 						</thead>
-						<tbody>
-							<tr>
-								<td class="quebra">Helena Martins</td>
-								<td>CRM-MG 45123</td>
-								<td class="quebra">Cardiologia</td>
-								<td class="quebra">(31) 3409-1101<br><span class="dica">helena.martins@<wbr>hospital.exemplo.com.br</span></td>
-								<td><span class="etiqueta etiqueta-ativo">Ativo</span></td>
-								<td>
-									<div class="acoes">
-										<button type="button" class="botao botao-secundario botao-pequeno" data-prototipo aria-label="Editar Helena Martins">Editar</button>
-										<button type="button" class="botao botao-perigo botao-pequeno" data-prototipo aria-label="Inativar Helena Martins">Inativar</button>
-									</div>
-								</td>
-							</tr>
-							<tr>
-								<td class="quebra">Ricardo Souza</td>
-								<td>CRM-MG 38907</td>
-								<td class="quebra">Clínica Médica</td>
-								<td class="quebra">(31) 3409-1102<br><span class="dica">ricardo.souza@<wbr>hospital.exemplo.com.br</span></td>
-								<td><span class="etiqueta etiqueta-ativo">Ativo</span></td>
-								<td>
-									<div class="acoes">
-										<button type="button" class="botao botao-secundario botao-pequeno" data-prototipo aria-label="Editar Ricardo Souza">Editar</button>
-										<button type="button" class="botao botao-perigo botao-pequeno" data-prototipo aria-label="Inativar Ricardo Souza">Inativar</button>
-									</div>
-								</td>
-							</tr>
-							<tr>
-								<td class="quebra">Paula Andrade</td>
-								<td>CRM-MG 52340</td>
-								<td class="quebra">Ortopedia</td>
-								<td class="quebra">(31) 3409-1103<br><span class="dica">paula.andrade@<wbr>hospital.exemplo.com.br</span></td>
-								<td><span class="etiqueta etiqueta-ativo">Ativo</span></td>
-								<td>
-									<div class="acoes">
-										<button type="button" class="botao botao-secundario botao-pequeno" data-prototipo aria-label="Editar Paula Andrade">Editar</button>
-										<button type="button" class="botao botao-perigo botao-pequeno" data-prototipo aria-label="Inativar Paula Andrade">Inativar</button>
-									</div>
-								</td>
-							</tr>
-							<tr>
-								<td class="quebra">Marcos Vieira</td>
-								<td>CRM-MG 41876</td>
-								<td class="quebra">Neurologia</td>
-								<td class="quebra">(31) 3409-1104<br><span class="dica">marcos.vieira@<wbr>hospital.exemplo.com.br</span></td>
-								<td><span class="etiqueta etiqueta-ativo">Ativo</span></td>
-								<td>
-									<div class="acoes">
-										<button type="button" class="botao botao-secundario botao-pequeno" data-prototipo aria-label="Editar Marcos Vieira">Editar</button>
-										<button type="button" class="botao botao-perigo botao-pequeno" data-prototipo aria-label="Inativar Marcos Vieira">Inativar</button>
-									</div>
-								</td>
-							</tr>
-							<tr>
-								<td class="quebra">Juliana Castro</td>
-								<td>COREN-MG 234567</td>
-								<td class="quebra">Enfermagem</td>
-								<td class="quebra">(31) 3409-1105<br><span class="dica">juliana.castro@<wbr>hospital.exemplo.com.br</span></td>
-								<td><span class="etiqueta etiqueta-ativo">Ativo</span></td>
-								<td>
-									<div class="acoes">
-										<button type="button" class="botao botao-secundario botao-pequeno" data-prototipo aria-label="Editar Juliana Castro">Editar</button>
-										<button type="button" class="botao botao-perigo botao-pequeno" data-prototipo aria-label="Inativar Juliana Castro">Inativar</button>
-									</div>
-								</td>
-							</tr>
-							<tr class="inativo">
-								<td class="quebra">Antônio Reis</td>
-								<td>CRM-MG 29554</td>
-								<td class="quebra">Dermatologia</td>
-								<td class="quebra">(31) 3409-1106<br><span class="dica">antonio.reis@<wbr>hospital.exemplo.com.br</span></td>
-								<td><span class="etiqueta etiqueta-inativo">Inativo</span></td>
-								<td>
-									<div class="acoes">
-										<button type="button" class="botao botao-secundario botao-pequeno" data-prototipo aria-label="Editar Antônio Reis">Editar</button>
-									</div>
-								</td>
-							</tr>
-						</tbody>
+						<tbody id="lista-profissionais"></tbody>
 					</table>
 				</div>
 			</section>
@@ -151,7 +73,7 @@
 			<section class="painel" id="cadastro" aria-labelledby="titulo-cadastro">
 				<h2 id="titulo-cadastro">Cadastrar profissional</h2>
 				<p class="dica">Campos marcados com <span class="obrigatorio" aria-hidden="true">*</span> são obrigatórios.</p>
-				<form>
+				<form id="form-profissional">
 					<div class="grade-form">
 						<div class="campo campo-largo">
 							<label for="nome">Nome completo <span class="obrigatorio" aria-hidden="true">*</span></label>
@@ -159,29 +81,49 @@
 						</div>
 						<div class="campo">
 							<label for="registro">Registro profissional <span class="obrigatorio" aria-hidden="true">*</span></label>
-							<input type="text" id="registro" name="registroProfissional" placeholder="CRM-MG 00000" aria-describedby="ajuda-registro" required>
+							<input type="text" id="registro" name="registroProfissional" maxlength="30" placeholder="CRM-MG 00000" aria-describedby="ajuda-registro" required>
 							<small id="ajuda-registro" class="dica">CRM, COREN ou outro conselho, com a UF.</small>
 						</div>
 						<div class="campo">
-							<label for="especialidade">Especialidade <span class="obrigatorio" aria-hidden="true">*</span></label>
-							<input type="text" id="especialidade" name="especialidade" list="especialidades" required>
-							<datalist id="especialidades">
-								<option value="Cardiologia"></option>
-								<option value="Clínica Médica"></option>
-								<option value="Dermatologia"></option>
-								<option value="Enfermagem"></option>
-								<option value="Neurologia"></option>
-								<option value="Ortopedia"></option>
-								<option value="Pediatria"></option>
-							</datalist>
+							<label for="categoria">Categoria <span class="obrigatorio" aria-hidden="true">*</span></label>
+							<select id="categoria" name="categoria" required>
+								<option value="CLINICO_GERAL">Clínico geral</option>
+								<option value="MEDICO_ESPECIALISTA">Médico especialista</option>
+								<option value="CIRURGIAO">Cirurgião</option>
+							</select>
+						</div>
+						<div class="campo" id="campo-area">
+							<label for="area-atuacao">Área de atuação <span class="obrigatorio" aria-hidden="true">*</span></label>
+							<select id="area-atuacao" name="areaAtuacao">
+								<option value="">Selecione</option>
+								<option value="CARDIOLOGIA">Cardiologia</option>
+								<option value="NEUROLOGIA">Neurologia</option>
+								<option value="ORTOPEDIA">Ortopedia</option>
+								<option value="PEDIATRIA">Pediatria</option>
+								<option value="DERMATOLOGIA">Dermatologia</option>
+								<option value="GINECOLOGIA">Ginecologia</option>
+								<option value="OBSTETRICIA">Obstetrícia</option>
+								<option value="OFTALMOLOGIA">Oftalmologia</option>
+								<option value="OTORRINOLARINGOLOGIA">Otorrinolaringologia</option>
+								<option value="PSIQUIATRIA">Psiquiatria</option>
+								<option value="ENDOCRINOLOGIA">Endocrinologia</option>
+								<option value="GASTROENTEROLOGIA">Gastroenterologia</option>
+								<option value="PNEUMOLOGIA">Pneumologia</option>
+								<option value="NEFROLOGIA">Nefrologia</option>
+								<option value="UROLOGIA">Urologia</option>
+								<option value="ONCOLOGIA">Oncologia</option>
+								<option value="CIRURGIA_GERAL">Cirurgia geral</option>
+								<option value="CIRURGIA_CARDIOVASCULAR">Cirurgia cardiovascular</option>
+								<option value="NEUROCIRURGIA">Neurocirurgia</option>
+							</select>
 						</div>
 						<div class="campo">
 							<label for="telefone">Telefone</label>
-							<input type="tel" id="telefone" name="telefone" autocomplete="tel" placeholder="(31) 0000-0000">
+							<input type="tel" id="telefone" name="telefone" maxlength="20" autocomplete="tel" placeholder="(31) 0000-0000">
 						</div>
 						<div class="campo">
 							<label for="email">E-mail</label>
-							<input type="email" id="email" name="email" autocomplete="email">
+							<input type="email" id="email" name="email" maxlength="150" autocomplete="email">
 						</div>
 					</div>
 					<div class="acoes-form">
@@ -192,8 +134,8 @@
 			</section>
 		</main>
 
-		<footer class="rodape">Sistema de Informação Hospitalar · Protótipo da Sprint 1</footer>
+		<footer class="rodape">Sistema de Informação Hospitalar</footer>
 	</div>
-	<div id="aviso-prototipo" class="aviso" role="status" aria-live="polite"></div>
+	<div id="aviso-api" class="aviso" role="status" aria-live="polite"></div>
 </body>
 </html>
