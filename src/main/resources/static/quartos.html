@@ -5,7 +5,9 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Quartos | Sistema Hospitalar</title>
 	<link rel="stylesheet" href="css/estilo.css">
-	<script src="js/prototipo.js" defer></script>
+	<script src="js/api.js" defer></script>
+	<script src="js/dominios.js" defer></script>
+	<script src="js/quartos.js" defer></script>
 </head>
 <body>
 	<a class="pular" href="#conteudo">Pular para o conteúdo</a>
@@ -23,6 +25,7 @@
 					<li><a href="consultas.html"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>Consultas</a></li>
 					<li><a href="internacoes.html"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>Internações</a></li>
 					<li><a href="quartos.html" aria-current="page"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 21V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v17"/><path d="M3 21h18"/><path d="M15 12h.01"/></svg>Quartos</a></li>
+					<li><a href="salas-cirurgicas.html"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="3"/><path d="M8.12 8.12 12 12"/><path d="M20 4 8.12 15.88"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8 20 20"/></svg>Salas cirúrgicas</a></li>
 					<li><a href="historico.html"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>Histórico médico</a></li>
 				</ul>
 			</nav>
@@ -50,6 +53,28 @@
 				<a class="botao" href="#cadastro"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v14"/><path d="M5 12h14"/></svg>Novo quarto</a>
 			</div>
 
+			<section class="painel" aria-labelledby="titulo-filtro">
+				<h2 id="titulo-filtro">Filtrar quartos</h2>
+				<form class="filtros" id="form-filtro">
+					<div class="campo">
+						<label for="filtro-tipo">Tipo</label>
+						<select id="filtro-tipo" name="tipo">
+							<option value="">Todos os tipos</option>
+						</select>
+					</div>
+					<div class="campo">
+						<label for="filtro-vaga">Vagas</label>
+						<select id="filtro-vaga" name="comVaga">
+							<option value="false">Todos os quartos</option>
+							<option value="true">Só quartos com vaga</option>
+						</select>
+					</div>
+					<div>
+						<button type="submit" class="botao">Filtrar</button>
+					</div>
+				</form>
+			</section>
+
 			<section class="painel" aria-labelledby="titulo-lista">
 				<h2 id="titulo-lista">Quartos cadastrados</h2>
 				<div class="tabela-rolagem">
@@ -59,63 +84,22 @@
 							<tr>
 								<th scope="col">Número</th>
 								<th scope="col">Andar</th>
+								<th scope="col">Tipo</th>
 								<th scope="col">Capacidade máxima</th>
 								<th scope="col">Ocupação atual</th>
 								<th scope="col">Situação</th>
+								<th scope="col">Ações</th>
 							</tr>
 						</thead>
-						<tbody>
-							<tr>
-								<td>101</td>
-								<td>1º</td>
-								<td>2</td>
-								<td>1</td>
-								<td><span class="etiqueta etiqueta-disponivel">Disponível</span></td>
-							</tr>
-							<tr>
-								<td>102</td>
-								<td>1º</td>
-								<td>1</td>
-								<td>1</td>
-								<td><span class="etiqueta etiqueta-ocupado">Ocupado</span></td>
-							</tr>
-							<tr>
-								<td>103</td>
-								<td>1º</td>
-								<td>2</td>
-								<td>0</td>
-								<td><span class="etiqueta etiqueta-disponivel">Disponível</span></td>
-							</tr>
-							<tr>
-								<td>201</td>
-								<td>2º</td>
-								<td>1</td>
-								<td>1</td>
-								<td><span class="etiqueta etiqueta-ocupado">Ocupado</span></td>
-							</tr>
-							<tr>
-								<td>202</td>
-								<td>2º</td>
-								<td>3</td>
-								<td>0</td>
-								<td><span class="etiqueta etiqueta-disponivel">Disponível</span></td>
-							</tr>
-							<tr>
-								<td>203</td>
-								<td>2º</td>
-								<td>1</td>
-								<td>0</td>
-								<td><span class="etiqueta etiqueta-disponivel">Disponível</span></td>
-							</tr>
-						</tbody>
+						<tbody id="lista-quartos"></tbody>
 					</table>
 				</div>
 			</section>
 
 			<section class="painel" id="cadastro" aria-labelledby="titulo-cadastro">
 				<h2 id="titulo-cadastro">Cadastrar quarto</h2>
-				<p class="dica">O quarto começa vazio; a ocupação muda conforme as internações e altas. Campos marcados com <span class="obrigatorio" aria-hidden="true">*</span> são obrigatórios.</p>
-				<form>
+				<p class="dica">O quarto começa vazio; a ocupação muda conforme as internações e altas. Cada tipo tem um limite de leitos, mostrado na lista de tipos. Campos marcados com <span class="obrigatorio" aria-hidden="true">*</span> são obrigatórios.</p>
+				<form id="form-quarto">
 					<div class="grade-form">
 						<div class="campo">
 							<label for="numero">Número <span class="obrigatorio" aria-hidden="true">*</span></label>
@@ -124,6 +108,13 @@
 						<div class="campo">
 							<label for="andar">Andar <span class="obrigatorio" aria-hidden="true">*</span></label>
 							<input type="number" id="andar" name="andar" min="0" step="1" required>
+						</div>
+						<div class="campo">
+							<label for="tipo">Tipo <span class="obrigatorio" aria-hidden="true">*</span></label>
+							<select id="tipo" name="tipo" aria-describedby="ajuda-tipo" required>
+								<option value="">Selecione</option>
+							</select>
+							<small id="ajuda-tipo" class="dica">Escolha o tipo para ver o limite de leitos.</small>
 						</div>
 						<div class="campo">
 							<label for="capacidade">Capacidade máxima <span class="obrigatorio" aria-hidden="true">*</span></label>
@@ -139,8 +130,8 @@
 			</section>
 		</main>
 
-		<footer class="rodape">Sistema de Informação Hospitalar · Protótipo da Sprint 1</footer>
+		<footer class="rodape">Sistema de Informação Hospitalar</footer>
 	</div>
-	<div id="aviso-prototipo" class="aviso" role="status" aria-live="polite"></div>
+	<div id="aviso-api" class="aviso" role="status" aria-live="polite"></div>
 </body>
 </html>

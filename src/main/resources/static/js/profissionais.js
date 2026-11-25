@@ -9,7 +9,8 @@
 	var campoArea = formulario.elements.areaAtuacao;
 	var idEmEdicao = null;
 	var temporizadorAviso;
-	var categoriasComArea = ['MEDICO_ESPECIALISTA', 'CIRURGIAO'];
+	// Códigos das categorias que exigem área de atuação, vindos do GET /dominios.
+	var categoriasComArea = [];
 
 	function mostrarAviso(mensagem) {
 		aviso.textContent = mensagem;
@@ -184,6 +185,24 @@
 		window.setTimeout(atualizarCampoArea);
 	});
 
-	atualizarCampoArea();
-	carregarProfissionais();
+	async function iniciar() {
+		try {
+			var dominios = await Dominios.carregar();
+			Dominios.preencher(campoCategoria, dominios.categoriasProfissional);
+			categoriasComArea = dominios.categoriasProfissional
+				.filter(function (categoria) {
+					return categoria.exigeArea;
+				})
+				.map(function (categoria) {
+					return categoria.codigo;
+				});
+			Dominios.preencher(campoArea, dominios.areasAtuacao);
+		} catch (erro) {
+			mostrarAviso('Não foi possível carregar as categorias e as áreas de atuação. ' + erro.message);
+		}
+		atualizarCampoArea();
+		await carregarProfissionais();
+	}
+
+	iniciar();
 })();

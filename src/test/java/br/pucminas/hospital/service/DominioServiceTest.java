@@ -2,8 +2,10 @@ package br.pucminas.hospital.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import br.pucminas.hospital.dto.CategoriaProfissionalResponse;
 import br.pucminas.hospital.dto.CodigoDescricao;
 import br.pucminas.hospital.dto.DominiosResponse;
+import br.pucminas.hospital.dto.TipoQuartoResponse;
 import br.pucminas.hospital.model.AreaAtuacao;
 import br.pucminas.hospital.model.CategoriaProfissional;
 import br.pucminas.hospital.model.Descritivel;
@@ -39,9 +41,7 @@ class DominioServiceTest {
 		assertThat(codigos(dominios.situacoesProcedimento())).isEqualTo(nomes(SituacaoProcedimento.values()));
 		assertThat(codigos(dominios.situacoesInternacao())).isEqualTo(nomes(SituacaoInternacao.values()));
 		assertThat(codigos(dominios.modalidades())).isEqualTo(nomes(ModalidadeAtendimento.values()));
-		assertThat(codigos(dominios.categoriasProfissional())).isEqualTo(nomes(CategoriaProfissional.values()));
 		assertThat(codigos(dominios.areasAtuacao())).isEqualTo(nomes(AreaAtuacao.values()));
-		assertThat(codigos(dominios.tiposQuarto())).isEqualTo(nomes(TipoQuarto.values()));
 		assertThat(codigos(dominios.prioridadesEmergencia())).isEqualTo(nomes(PrioridadeEmergencia.values()));
 		assertThat(codigos(dominios.tiposCirurgia())).isEqualTo(nomes(TipoCirurgia.values()));
 		assertThat(codigos(dominios.ordenacoes())).isEqualTo(nomes(OrdenacaoAtendimentos.values()));
@@ -57,6 +57,28 @@ class DominioServiceTest {
 		assertThat(dominios.prioridadesEmergencia()).containsExactly(new CodigoDescricao("BAIXA", "Baixa"),
 				new CodigoDescricao("MODERADA", "Moderada"), new CodigoDescricao("ALTA", "Alta"),
 				new CodigoDescricao("CRITICA", "Crítica"));
+	}
+
+	@Test
+	void categoriasTrazemSeExigemAreaDoEnum() {
+		assertThat(dominios.categoriasProfissional()).containsExactly(
+				new CategoriaProfissionalResponse("CLINICO_GERAL", "Clínico geral",
+						CategoriaProfissional.CLINICO_GERAL.exigeArea()),
+				new CategoriaProfissionalResponse("MEDICO_ESPECIALISTA", "Médico especialista",
+						CategoriaProfissional.MEDICO_ESPECIALISTA.exigeArea()),
+				new CategoriaProfissionalResponse("CIRURGIAO", "Cirurgião", CategoriaProfissional.CIRURGIAO.exigeArea()));
+		assertThat(dominios.categoriasProfissional()).extracting(CategoriaProfissionalResponse::exigeArea)
+				.containsExactly(false, true, true);
+	}
+
+	@Test
+	void tiposDeQuartoTrazemOLimiteDeLeitosDoEnum() {
+		assertThat(dominios.tiposQuarto()).containsExactly(
+				new TipoQuartoResponse("ENFERMARIA", "Enfermaria", TipoQuarto.ENFERMARIA.getCapacidadeMaximaPermitida()),
+				new TipoQuartoResponse("APARTAMENTO", "Apartamento", TipoQuarto.APARTAMENTO.getCapacidadeMaximaPermitida()),
+				new TipoQuartoResponse("UTI", "UTI", TipoQuarto.UTI.getCapacidadeMaximaPermitida()));
+		assertThat(dominios.tiposQuarto()).extracting(TipoQuartoResponse::capacidadeMaximaPermitida)
+				.containsExactly(6, 2, 1);
 	}
 
 	@Test

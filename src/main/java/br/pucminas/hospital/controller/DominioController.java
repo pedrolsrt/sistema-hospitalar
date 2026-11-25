@@ -22,9 +22,9 @@ public class DominioController {
 
 	@GetMapping
 	@Operation(summary = "Lista os valores de cada enum", description = "Situações de cada modalidade, modalidades, "
-			+ "categorias de profissional, áreas de atuação, tipos de quarto, prioridades de emergência, tipos de "
-			+ "cirurgia e opções de ordenação, cada valor com o código, que é o que se envia à API, e a descrição "
-			+ "para exibir.")
+			+ "categorias de profissional (com a indicação de que exigem área), áreas de atuação, tipos de quarto (com o "
+			+ "limite de leitos), prioridades de emergência, tipos de cirurgia e opções de ordenação, cada valor com o "
+			+ "código, que é o que se envia à API, e a descrição para exibir.")
 	@ApiResponse(responseCode = "200", description = "Valores de cada lista, na ordem em que foram declarados")
 	public DominiosResponse listar() {
 		return service.listar();

@@ -1,7 +1,9 @@
 package br.pucminas.hospital.service;
 
+import br.pucminas.hospital.dto.CategoriaProfissionalResponse;
 import br.pucminas.hospital.dto.CodigoDescricao;
 import br.pucminas.hospital.dto.DominiosResponse;
+import br.pucminas.hospital.dto.TipoQuartoResponse;
 import br.pucminas.hospital.model.AreaAtuacao;
 import br.pucminas.hospital.model.CategoriaProfissional;
 import br.pucminas.hospital.model.Descritivel;
@@ -32,9 +34,15 @@ public class DominioService {
 				valores(SituacaoProcedimento.values()),
 				valores(SituacaoInternacao.values()),
 				valores(ModalidadeAtendimento.values()),
-				valores(CategoriaProfissional.values()),
+				Stream.of(CategoriaProfissional.values())
+						.map(categoria -> new CategoriaProfissionalResponse(categoria.name(), categoria.getDescricao(),
+								categoria.exigeArea()))
+						.toList(),
 				valores(AreaAtuacao.values()),
-				valores(TipoQuarto.values()),
+				Stream.of(TipoQuarto.values())
+						.map(tipo -> new TipoQuartoResponse(tipo.name(), tipo.getDescricao(),
+								tipo.getCapacidadeMaximaPermitida()))
+						.toList(),
 				valores(PrioridadeEmergencia.values()),
 				valores(TipoCirurgia.values()),
 				valores(OrdenacaoAtendimentos.values()));

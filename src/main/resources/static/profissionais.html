@@ -6,6 +6,7 @@
 	<title>Profissionais | Sistema Hospitalar</title>
 	<link rel="stylesheet" href="css/estilo.css">
 	<script src="js/api.js" defer></script>
+	<script src="js/dominios.js" defer></script>
 	<script src="js/profissionais.js" defer></script>
 </head>
 <body>
@@ -24,6 +25,7 @@
 					<li><a href="consultas.html"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>Consultas</a></li>
 					<li><a href="internacoes.html"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>Internações</a></li>
 					<li><a href="quartos.html"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 21V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v17"/><path d="M3 21h18"/><path d="M15 12h.01"/></svg>Quartos</a></li>
+					<li><a href="salas-cirurgicas.html"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="3"/><path d="M8.12 8.12 12 12"/><path d="M20 4 8.12 15.88"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8 20 20"/></svg>Salas cirúrgicas</a></li>
 					<li><a href="historico.html"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>Histórico médico</a></li>
 				</ul>
 			</nav>
@@ -88,34 +90,12 @@
 						<div class="campo">
 							<label for="categoria">Categoria <span class="obrigatorio" aria-hidden="true">*</span></label>
 							<select id="categoria" name="categoria" required>
-								<option value="CLINICO_GERAL">Clínico geral</option>
-								<option value="MEDICO_ESPECIALISTA">Médico especialista</option>
-								<option value="CIRURGIAO">Cirurgião</option>
 							</select>
 						</div>
 						<div class="campo" id="campo-area">
 							<label for="area-atuacao">Área de atuação <span class="obrigatorio" aria-hidden="true">*</span></label>
 							<select id="area-atuacao" name="areaAtuacao">
 								<option value="">Selecione</option>
-								<option value="CARDIOLOGIA">Cardiologia</option>
-								<option value="NEUROLOGIA">Neurologia</option>
-								<option value="ORTOPEDIA">Ortopedia</option>
-								<option value="PEDIATRIA">Pediatria</option>
-								<option value="DERMATOLOGIA">Dermatologia</option>
-								<option value="GINECOLOGIA">Ginecologia</option>
-								<option value="OBSTETRICIA">Obstetrícia</option>
-								<option value="OFTALMOLOGIA">Oftalmologia</option>
-								<option value="OTORRINOLARINGOLOGIA">Otorrinolaringologia</option>
-								<option value="PSIQUIATRIA">Psiquiatria</option>
-								<option value="ENDOCRINOLOGIA">Endocrinologia</option>
-								<option value="GASTROENTEROLOGIA">Gastroenterologia</option>
-								<option value="PNEUMOLOGIA">Pneumologia</option>
-								<option value="NEFROLOGIA">Nefrologia</option>
-								<option value="UROLOGIA">Urologia</option>
-								<option value="ONCOLOGIA">Oncologia</option>
-								<option value="CIRURGIA_GERAL">Cirurgia geral</option>
-								<option value="CIRURGIA_CARDIOVASCULAR">Cirurgia cardiovascular</option>
-								<option value="NEUROCIRURGIA">Neurocirurgia</option>
 							</select>
 						</div>
 						<div class="campo">

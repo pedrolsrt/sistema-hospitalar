@@ -31,8 +31,12 @@ class DominioControllerTest {
 				.andExpect(jsonPath("$.situacoesInternacao[1].codigo").value("ENCERRADA"))
 				.andExpect(jsonPath("$.modalidades.length()").value(5))
 				.andExpect(jsonPath("$.categoriasProfissional[2].descricao").value("Cirurgião"))
+				.andExpect(jsonPath("$.categoriasProfissional[0].exigeArea").value(false))
+				.andExpect(jsonPath("$.categoriasProfissional[2].exigeArea").value(true))
 				.andExpect(jsonPath("$.areasAtuacao.length()").value(19))
 				.andExpect(jsonPath("$.tiposQuarto[2].codigo").value("UTI"))
+				.andExpect(jsonPath("$.tiposQuarto[0].capacidadeMaximaPermitida").value(6))
+				.andExpect(jsonPath("$.tiposQuarto[2].capacidadeMaximaPermitida").value(1))
 				.andExpect(jsonPath("$.prioridadesEmergencia[3].descricao").value("Crítica"))
 				.andExpect(jsonPath("$.tiposCirurgia.length()").value(3))
 				.andExpect(jsonPath("$.ordenacoes[0].codigo").value("DATA"));
