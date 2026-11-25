@@ -5,6 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Pacientes | Sistema Hospitalar</title>
 	<link rel="stylesheet" href="css/estilo.css">
+	<script src="js/api.js" defer></script>
 	<script src="js/pacientes.js" defer></script>
 </head>
 <body>
@@ -66,119 +67,7 @@
 								<th scope="col">Ações</th>
 							</tr>
 						</thead>
-						<tbody>
-							<tr>
-								<td class="quebra">Ana Beatriz Rocha</td>
-								<td>123.456.789-09</td>
-								<td>14/05/1985</td>
-								<td>(31) 98765-4321</td>
-								<td class="quebra">Belo Horizonte/MG</td>
-								<td><span class="etiqueta etiqueta-ativo">Ativo</span></td>
-								<td>
-									<div class="acoes">
-										<button type="button" class="botao botao-secundario botao-pequeno" data-prototipo aria-label="Editar Ana Beatriz Rocha">Editar</button>
-										<button type="button" class="botao botao-perigo botao-pequeno" data-prototipo aria-label="Inativar Ana Beatriz Rocha">Inativar</button>
-									</div>
-								</td>
-							</tr>
-							<tr>
-								<td class="quebra">Carlos Eduardo Menezes</td>
-								<td>234.567.890-92</td>
-								<td>02/11/1958</td>
-								<td>(31) 99812-3345</td>
-								<td class="quebra">Contagem/MG</td>
-								<td><span class="etiqueta etiqueta-ativo">Ativo</span></td>
-								<td>
-									<div class="acoes">
-										<button type="button" class="botao botao-secundario botao-pequeno" data-prototipo aria-label="Editar Carlos Eduardo Menezes">Editar</button>
-										<button type="button" class="botao botao-perigo botao-pequeno" data-prototipo aria-label="Inativar Carlos Eduardo Menezes">Inativar</button>
-									</div>
-								</td>
-							</tr>
-							<tr>
-								<td class="quebra">Fernanda Lima Duarte</td>
-								<td>345.678.901-75</td>
-								<td>23/07/1992</td>
-								<td>(31) 98456-7788</td>
-								<td class="quebra">Belo Horizonte/MG</td>
-								<td><span class="etiqueta etiqueta-ativo">Ativo</span></td>
-								<td>
-									<div class="acoes">
-										<button type="button" class="botao botao-secundario botao-pequeno" data-prototipo aria-label="Editar Fernanda Lima Duarte">Editar</button>
-										<button type="button" class="botao botao-perigo botao-pequeno" data-prototipo aria-label="Inativar Fernanda Lima Duarte">Inativar</button>
-									</div>
-								</td>
-							</tr>
-							<tr>
-								<td class="quebra">João Pedro Alves</td>
-								<td>456.789.012-49</td>
-								<td>09/01/2001</td>
-								<td>(31) 99234-5566</td>
-								<td class="quebra">Betim/MG</td>
-								<td><span class="etiqueta etiqueta-ativo">Ativo</span></td>
-								<td>
-									<div class="acoes">
-										<button type="button" class="botao botao-secundario botao-pequeno" data-prototipo aria-label="Editar João Pedro Alves">Editar</button>
-										<button type="button" class="botao botao-perigo botao-pequeno" data-prototipo aria-label="Inativar João Pedro Alves">Inativar</button>
-									</div>
-								</td>
-							</tr>
-							<tr>
-								<td class="quebra">Lucas Oliveira Santos</td>
-								<td>567.890.123-03</td>
-								<td>30/03/1978</td>
-								<td>(31) 98877-1122</td>
-								<td class="quebra">Belo Horizonte/MG</td>
-								<td><span class="etiqueta etiqueta-ativo">Ativo</span></td>
-								<td>
-									<div class="acoes">
-										<button type="button" class="botao botao-secundario botao-pequeno" data-prototipo aria-label="Editar Lucas Oliveira Santos">Editar</button>
-										<button type="button" class="botao botao-perigo botao-pequeno" data-prototipo aria-label="Inativar Lucas Oliveira Santos">Inativar</button>
-									</div>
-								</td>
-							</tr>
-							<tr>
-								<td class="quebra">Mariana Costa Ferreira</td>
-								<td>678.901.234-69</td>
-								<td>17/09/1969</td>
-								<td>(31) 99654-3210</td>
-								<td class="quebra">Nova Lima/MG</td>
-								<td><span class="etiqueta etiqueta-ativo">Ativo</span></td>
-								<td>
-									<div class="acoes">
-										<button type="button" class="botao botao-secundario botao-pequeno" data-prototipo aria-label="Editar Mariana Costa Ferreira">Editar</button>
-										<button type="button" class="botao botao-perigo botao-pequeno" data-prototipo aria-label="Inativar Mariana Costa Ferreira">Inativar</button>
-									</div>
-								</td>
-							</tr>
-							<tr>
-								<td class="quebra">Patrícia Gomes Ribeiro</td>
-								<td>789.012.345-05</td>
-								<td>05/12/1988</td>
-								<td>(31) 98321-9087</td>
-								<td class="quebra">Belo Horizonte/MG</td>
-								<td><span class="etiqueta etiqueta-ativo">Ativo</span></td>
-								<td>
-									<div class="acoes">
-										<button type="button" class="botao botao-secundario botao-pequeno" data-prototipo aria-label="Editar Patrícia Gomes Ribeiro">Editar</button>
-										<button type="button" class="botao botao-perigo botao-pequeno" data-prototipo aria-label="Inativar Patrícia Gomes Ribeiro">Inativar</button>
-									</div>
-								</td>
-							</tr>
-							<tr class="inativo">
-								<td class="quebra">Roberto Nunes Silva</td>
-								<td>890.123.456-42</td>
-								<td>21/06/1950</td>
-								<td>(31) 99100-2233</td>
-								<td class="quebra">Sabará/MG</td>
-								<td><span class="etiqueta etiqueta-inativo">Inativo</span></td>
-								<td>
-									<div class="acoes">
-										<button type="button" class="botao botao-secundario botao-pequeno" data-prototipo aria-label="Editar Roberto Nunes Silva">Editar</button>
-									</div>
-								</td>
-							</tr>
-						</tbody>
+						<tbody id="lista-pacientes"></tbody>
 					</table>
 				</div>
 			</section>
@@ -186,7 +75,7 @@
 			<section class="painel" id="cadastro" aria-labelledby="titulo-cadastro">
 				<h2 id="titulo-cadastro">Cadastrar paciente</h2>
 				<p class="dica">Campos marcados com <span class="obrigatorio" aria-hidden="true">*</span> são obrigatórios.</p>
-				<form>
+				<form id="form-paciente">
 					<div class="grade-form">
 						<div class="campo campo-largo">
 							<label for="nome">Nome completo <span class="obrigatorio" aria-hidden="true">*</span></label>
@@ -203,11 +92,11 @@
 						</div>
 						<div class="campo">
 							<label for="telefone">Telefone</label>
-							<input type="tel" id="telefone" name="telefone" autocomplete="tel" placeholder="(31) 90000-0000">
+							<input type="tel" id="telefone" name="telefone" maxlength="20" autocomplete="tel" placeholder="(31) 90000-0000">
 						</div>
 						<div class="campo">
 							<label for="email">E-mail</label>
-							<input type="email" id="email" name="email" autocomplete="email">
+							<input type="email" id="email" name="email" maxlength="150" autocomplete="email">
 						</div>
 					</div>
 
@@ -216,23 +105,23 @@
 						<div class="grade-form">
 							<div class="campo campo-largo">
 								<label for="logradouro">Logradouro</label>
-								<input type="text" id="logradouro" name="logradouro" autocomplete="address-line1">
+								<input type="text" id="logradouro" name="logradouro" maxlength="150" autocomplete="address-line1">
 							</div>
 							<div class="campo">
 								<label for="numero">Número</label>
-								<input type="text" id="numero" name="numero" inputmode="numeric">
+								<input type="text" id="numero" name="numero" maxlength="10" inputmode="numeric">
 							</div>
 							<div class="campo">
 								<label for="complemento">Complemento</label>
-								<input type="text" id="complemento" name="complemento" autocomplete="address-line2">
+								<input type="text" id="complemento" name="complemento" maxlength="100" autocomplete="address-line2">
 							</div>
 							<div class="campo">
 								<label for="bairro">Bairro</label>
-								<input type="text" id="bairro" name="bairro">
+								<input type="text" id="bairro" name="bairro" maxlength="100">
 							</div>
 							<div class="campo">
 								<label for="cidade">Cidade</label>
-								<input type="text" id="cidade" name="cidade" autocomplete="address-level2">
+								<input type="text" id="cidade" name="cidade" maxlength="100" autocomplete="address-level2">
 							</div>
 							<div class="campo">
 								<label for="uf">UF</label>
@@ -262,8 +151,8 @@
 			</section>
 		</main>
 
-		<footer class="rodape">Sistema de Informação Hospitalar · Protótipo da Sprint 1</footer>
+		<footer class="rodape">Sistema de Informação Hospitalar</footer>
 	</div>
-	<div id="aviso-prototipo" class="aviso" role="status" aria-live="polite"></div>
+	<div id="aviso-api" class="aviso" role="status" aria-live="polite"></div>
 </body>
 </html>

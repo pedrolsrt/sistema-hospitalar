@@ -1,6 +1,7 @@
 (function () {
 	'use strict';
 
+	var requisitar = Api.requisitar;
 	var formulario = document.getElementById('form-profissional');
 	var corpo = document.getElementById('lista-profissionais');
 	var aviso = document.getElementById('aviso-api');
@@ -9,37 +10,6 @@
 	var idEmEdicao = null;
 	var temporizadorAviso;
 	var categoriasComArea = ['MEDICO_ESPECIALISTA', 'CIRURGIAO'];
-
-	async function requisitar(url, opcoes) {
-		var resposta;
-		try {
-			resposta = await fetch(url, Object.assign({
-				headers: { 'Content-Type': 'application/json' }
-			}, opcoes || {}));
-		} catch (erro) {
-			throw new Error('Não foi possível conectar à API. Verifique se o servidor está disponível.');
-		}
-
-		if (!resposta.ok) {
-			var texto = await resposta.text();
-			var problema;
-			try {
-				problema = texto ? JSON.parse(texto) : {};
-			} catch (erroDeParse) {
-				throw new Error('A API respondeu com erro (' + resposta.status + ').');
-			}
-			var mensagensCampos = Array.isArray(problema.campos)
-				? problema.campos.map(function (campo) {
-					return campo.campo + ': ' + campo.mensagem;
-				})
-				: [];
-			throw new Error(mensagensCampos.length
-				? mensagensCampos.join(' ')
-				: problema.detail || problema.title || 'A API respondeu com erro (' + resposta.status + ').');
-		}
-
-		return resposta.status === 204 ? null : resposta.json();
-	}
 
 	function mostrarAviso(mensagem) {
 		aviso.textContent = mensagem;
@@ -87,8 +57,8 @@
 			}
 			criarCelula(linha, profissional.nome, 'quebra');
 			criarCelula(linha, profissional.registroProfissional);
-			criarCelula(linha, profissional.areaAtuacao
-				? profissional.areaAtuacao.descricao : profissional.categoria.descricao, 'quebra');
+			criarCelula(linha, profissional.categoria.descricao
+				+ (profissional.areaAtuacao ? ' · ' + profissional.areaAtuacao.descricao : ''), 'quebra');
 
 			var contato = criarCelula(linha, '', 'quebra');
 			contato.replaceChildren();
@@ -204,15 +174,14 @@
 	});
 
 	formulario.addEventListener('reset', function () {
-		window.setTimeout(function () {
-			idEmEdicao = null;
-			formulario.elements.registroProfissional.disabled = false;
-			campoCategoria.disabled = false;
-			campoArea.disabled = false;
-			document.getElementById('titulo-cadastro').textContent = 'Cadastrar profissional';
-			formulario.querySelector('[type="submit"]').textContent = 'Salvar profissional';
-			atualizarCampoArea();
-		});
+		idEmEdicao = null;
+		formulario.elements.registroProfissional.disabled = false;
+		campoCategoria.disabled = false;
+		campoArea.disabled = false;
+		document.getElementById('titulo-cadastro').textContent = 'Cadastrar profissional';
+		formulario.querySelector('[type="submit"]').textContent = 'Salvar profissional';
+		// Os campos só voltam ao valor inicial depois deste evento.
+		window.setTimeout(atualizarCampoArea);
 	});
 
 	atualizarCampoArea();

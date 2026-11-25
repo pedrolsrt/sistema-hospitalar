@@ -1,43 +1,13 @@
 (function () {
 	'use strict';
 
+	var requisitar = Api.requisitar;
 	var formulario = document.getElementById('form-paciente');
 	var corpo = document.getElementById('lista-pacientes');
 	var aviso = document.getElementById('aviso-api');
 	var idEmEdicao = null;
 	var temporizadorAviso;
 	var camposEndereco = ['logradouro', 'numero', 'complemento', 'bairro', 'cidade', 'uf', 'cep'];
-
-	async function requisitar(url, opcoes) {
-		var resposta;
-		try {
-			resposta = await fetch(url, Object.assign({
-				headers: { 'Content-Type': 'application/json' }
-			}, opcoes || {}));
-		} catch (erro) {
-			throw new Error('Não foi possível conectar à API. Verifique se o servidor está disponível.');
-		}
-
-		if (!resposta.ok) {
-			var texto = await resposta.text();
-			var problema;
-			try {
-				problema = texto ? JSON.parse(texto) : {};
-			} catch (erroDeParse) {
-				throw new Error('A API respondeu com erro (' + resposta.status + ').');
-			}
-			var mensagensCampos = Array.isArray(problema.campos)
-				? problema.campos.map(function (campo) {
-					return campo.campo + ': ' + campo.mensagem;
-				})
-				: [];
-			throw new Error(mensagensCampos.length
-				? mensagensCampos.join(' ')
-				: problema.detail || problema.title || 'A API respondeu com erro (' + resposta.status + ').');
-		}
-
-		return resposta.status === 204 ? null : resposta.json();
-	}
 
 	function mostrarAviso(mensagem) {
 		aviso.textContent = mensagem;
@@ -157,6 +127,7 @@
 		camposEndereco.forEach(function (campo) {
 			formulario.elements[campo].value = paciente.endereco ? paciente.endereco[campo] || '' : '';
 		});
+		atualizarRequisitosEndereco();
 		document.getElementById('titulo-cadastro').textContent = 'Editar paciente';
 		formulario.querySelector('[type="submit"]').textContent = 'Salvar alterações';
 		document.getElementById('cadastro').scrollIntoView({ behavior: 'smooth' });
@@ -215,13 +186,12 @@
 	});
 
 	formulario.addEventListener('reset', function () {
-		window.setTimeout(function () {
-			idEmEdicao = null;
-			formulario.elements.cpf.disabled = false;
-			document.getElementById('titulo-cadastro').textContent = 'Cadastrar paciente';
-			formulario.querySelector('[type="submit"]').textContent = 'Salvar paciente';
-			atualizarRequisitosEndereco();
-		});
+		idEmEdicao = null;
+		formulario.elements.cpf.disabled = false;
+		document.getElementById('titulo-cadastro').textContent = 'Cadastrar paciente';
+		formulario.querySelector('[type="submit"]').textContent = 'Salvar paciente';
+		// Os campos só voltam ao valor inicial depois deste evento.
+		window.setTimeout(atualizarRequisitosEndereco);
 	});
 
 	carregarPacientes();
