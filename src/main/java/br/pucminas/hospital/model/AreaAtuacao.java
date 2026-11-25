@@ -17,8 +17,8 @@ public enum AreaAtuacao implements Descritivel {
 	NEFROLOGIA("Nefrologia"),
 	UROLOGIA("Urologia"),
 	ONCOLOGIA("Oncologia"),
-	CIRURGIA_GERAL("Cirurgia Geral"),
-	CIRURGIA_CARDIOVASCULAR("Cirurgia Cardiovascular"),
+	CIRURGIA_GERAL("Cirurgia geral"),
+	CIRURGIA_CARDIOVASCULAR("Cirurgia cardiovascular"),
 	NEUROCIRURGIA("Neurocirurgia");
 
 	private final String descricao;

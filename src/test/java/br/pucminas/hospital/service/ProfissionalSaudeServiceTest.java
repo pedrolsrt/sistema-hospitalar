@@ -77,7 +77,7 @@ class ProfissionalSaudeServiceTest {
 				Arguments.of(CategoriaProfissional.MEDICO_ESPECIALISTA, AreaAtuacao.CARDIOLOGIA,
 						MedicoEspecialista.class, new CodigoDescricao("CARDIOLOGIA", "Cardiologia")),
 				Arguments.of(CategoriaProfissional.CIRURGIAO, AreaAtuacao.CIRURGIA_GERAL, Cirurgiao.class,
-						new CodigoDescricao("CIRURGIA_GERAL", "Cirurgia Geral")));
+						new CodigoDescricao("CIRURGIA_GERAL", "Cirurgia geral")));
 	}
 
 	@ParameterizedTest

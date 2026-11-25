@@ -1,6 +1,5 @@
 package br.pucminas.hospital.dto;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
@@ -15,7 +14,7 @@ public record ProfissionalSaudeAtualizacaoRequest(
 		@Size(max = 20, message = "O telefone deve ter no máximo 20 caracteres.")
 		String telefone,
 
-		@Email(message = "O e-mail informado não é válido.")
+		@EmailValido
 		@Size(max = 150, message = "O e-mail deve ter no máximo 150 caracteres.")
 		String email) {
 }

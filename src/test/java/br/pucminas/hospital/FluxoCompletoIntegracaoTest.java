@@ -267,6 +267,36 @@ class FluxoCompletoIntegracaoTest {
 		assertThat(campo(situacaoDesconhecida, "$.campos[0].mensagem"))
 				.startsWith("A situação informada não foi reconhecida. Use um destes códigos: AGENDADA");
 
+		// Indicadores conferidos com o que a busca de atendimentos e a lista de quartos devolvem -----------
+		String indicadores = chamar(get("/indicadores"), null, 200);
+		String todos = chamar(get("/atendimentos"), null, 200);
+		assertThat(JsonPath.<Integer>read(indicadores, "$.consultasRealizadas")).isEqualTo(1);
+		for (String modalidade : List.of("CONSULTA_ROTINA", "CONSULTA_ESPECIALIZADA", "EMERGENCIA",
+				"PROCEDIMENTO_CIRURGICO", "INTERNACAO")) {
+			assertThat(JsonPath.<List<Integer>>read(indicadores,
+					"$.atendimentosPorModalidade[?(@.modalidade.codigo == '" + modalidade + "')].quantidade"))
+					.containsExactly(JsonPath.<List<Object>>read(todos,
+							"$[?(@.modalidade.codigo == '" + modalidade + "')]").size());
+		}
+		assertThat(JsonPath.<List<Integer>>read(indicadores, "$.atendimentosPorProfissional[*].quantidade")
+				.stream().mapToInt(Integer::intValue).sum()).isEqualTo(JsonPath.<List<Object>>read(todos, "$").size());
+		String quartos = chamar(get("/quartos"), null, 200);
+		assertThat(JsonPath.<Integer>read(indicadores, "$.quartos.ocupados"))
+				.isEqualTo(JsonPath.<List<Object>>read(quartos, "$[?(@.situacao == 'OCUPADO')]").size());
+		assertThat(JsonPath.<Integer>read(indicadores, "$.quartos.disponiveis"))
+				.isEqualTo(JsonPath.<List<Object>>read(quartos, "$[?(@.situacao == 'DISPONIVEL')]").size());
+		String diaDosProcedimentos = chamar(get("/indicadores").param("inicio", "2099-02-01").param("fim", "2099-02-01"),
+				null, 200);
+		assertThat(JsonPath.<List<Integer>>read(diaDosProcedimentos,
+				"$.atendimentosPorModalidade[?(@.modalidade.codigo == 'PROCEDIMENTO_CIRURGICO')].quantidade"))
+				.containsExactly(JsonPath.<List<Object>>read(chamar(get("/atendimentos")
+						.param("modalidade", "PROCEDIMENTO_CIRURGICO").param("inicio", "2099-02-01")
+						.param("fim", "2099-02-01"), null, 200), "$").size());
+		chamar(get("/indicadores").param("inicio", "2099-02-01").param("fim", "2099-01-31"), null, 422);
+		String dominios = chamar(get("/dominios"), null, 200);
+		assertThat(JsonPath.<List<String>>read(dominios, "$.areasAtuacao[?(@.codigo == 'CIRURGIA_GERAL')].descricao"))
+				.containsExactly("Cirurgia geral");
+
 		// Com a consulta de retorno ainda agendada, o paciente não pode ser inativado; depois de cancelá-la, pode.
 		String impedido = chamar(patch("/pacientes/" + maria + "/inativar"), null, 422);
 		assertThat(campo(impedido, "$.detail")).isEqualTo("O paciente Maria Silva não pode ser inativado porque tem: "

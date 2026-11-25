@@ -78,6 +78,28 @@ class ValidacaoDtoTest {
 				.containsEntry("email", "O e-mail informado não é válido.");
 	}
 
+	@ParameterizedTest
+	@ValueSource(strings = { "maria@email.com", "maria.silva@hospital.org.br", "ana+agenda@sub.dominio.com" })
+	void aceitaEmailComPontoNoDominio(String email) {
+		assertThat(erros(paciente("52998224725", LocalDate.of(1990, 5, 10), email))).isEmpty();
+		assertThat(erros(new ProfissionalSaudeAtualizacaoRequest("Dra. Ana", null, email))).isEmpty();
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = { "x@y", "maria@hospital", "maria@hospital.", "maria@.com", "maria.com" })
+	void recusaEmailSemPontoNoDominioEmTodosOsCadastros(String email) {
+		String mensagem = "O e-mail informado não é válido.";
+		LocalDate nascimento = LocalDate.of(1990, 5, 10);
+
+		assertThat(erros(paciente("52998224725", nascimento, email))).containsEntry("email", mensagem);
+		assertThat(erros(new PacienteAtualizacaoRequest("Maria Silva", nascimento, null, email, null)))
+				.containsEntry("email", mensagem);
+		assertThat(erros(new ProfissionalSaudeRequest("Dra. Ana", "CRM-MG 1", CategoriaProfissional.CLINICO_GERAL, null,
+				null, email))).containsEntry("email", mensagem);
+		assertThat(erros(new ProfissionalSaudeAtualizacaoRequest("Dra. Ana", null, email)))
+				.containsEntry("email", mensagem);
+	}
+
 	@Test
 	void validaOEnderecoAninhado() {
 		PacienteRequest request = new PacienteRequest("Maria Silva", "52998224725", LocalDate.of(1990, 5, 10), null,

@@ -101,6 +101,18 @@ class PacienteControllerTest {
 	}
 
 	@Test
+	void emailSemPontoNoDominioResponde400() throws Exception {
+		mvc.perform(post("/pacientes").contentType(MediaType.APPLICATION_JSON)
+				.content("""
+						{"nome": "Maria Silva", "cpf": "529.982.247-25", "dataNascimento": "1990-05-10", "email": "maria@hospital"}
+						"""))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.campos[0].campo").value("email"))
+				.andExpect(jsonPath("$.campos[0].mensagem").value("O e-mail informado não é válido."));
+		verify(service, never()).cadastrar(any());
+	}
+
+	@Test
 	void cpfDuplicadoResponde409() throws Exception {
 		when(service.cadastrar(any(PacienteRequest.class)))
 				.thenThrow(new DadoJaCadastradoException("Já existe um paciente cadastrado com o CPF 529.982.247-25."));
