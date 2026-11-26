@@ -5,7 +5,9 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Internações | Sistema Hospitalar</title>
 	<link rel="stylesheet" href="css/estilo.css">
-	<script src="js/prototipo.js" defer></script>
+	<script src="js/api.js" defer></script>
+	<script src="js/dominios.js" defer></script>
+	<script src="js/internacoes.js" defer></script>
 </head>
 <body>
 	<a class="pular" href="#conteudo">Pular para o conteúdo</a>
@@ -46,65 +48,33 @@
 			<div class="cabecalho-pagina">
 				<div>
 					<h1>Internações</h1>
-					<p>Um paciente só pode ter uma internação ativa, e o quarto precisa ter vaga.</p>
+					<p>Um paciente só pode ter uma internação ativa, e o quarto precisa ter vaga. A alta libera a vaga do quarto.</p>
 				</div>
 				<a class="botao" href="#nova-internacao"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v14"/><path d="M5 12h14"/></svg>Nova internação</a>
 			</div>
 
-			<section class="painel" aria-labelledby="titulo-ativas">
-				<h2 id="titulo-ativas">Internações em andamento</h2>
-				<div class="tabela-rolagem">
-					<table>
-						<caption class="visualmente-oculto">Internações sem alta registrada</caption>
-						<thead>
-							<tr>
-								<th scope="col">Paciente</th>
-								<th scope="col">Responsável</th>
-								<th scope="col">Quarto</th>
-								<th scope="col">Entrada</th>
-								<th scope="col">Alta prevista</th>
-								<th scope="col">Observações</th>
-								<th scope="col">Ações</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr>
-								<td class="quebra">Carlos Eduardo Menezes</td>
-								<td class="quebra">Helena Martins</td>
-								<td>102</td>
-								<td>20/09/2026</td>
-								<td>27/09/2026</td>
-								<td class="texto-longo">Monitoramento cardíaco após episódio de dor torácica.</td>
-								<td><a class="botao botao-secundario botao-pequeno" href="#registrar-alta" aria-label="Registrar alta de Carlos Eduardo Menezes">Registrar alta</a></td>
-							</tr>
-							<tr>
-								<td class="quebra">Mariana Costa Ferreira</td>
-								<td class="quebra">Marcos Vieira</td>
-								<td>201</td>
-								<td>22/09/2026</td>
-								<td>26/09/2026</td>
-								<td class="texto-longo">Investigação de crise convulsiva. Aguardando ressonância.</td>
-								<td><a class="botao botao-secundario botao-pequeno" href="#registrar-alta" aria-label="Registrar alta de Mariana Costa Ferreira">Registrar alta</a></td>
-							</tr>
-							<tr>
-								<td class="quebra">João Pedro Alves</td>
-								<td class="quebra">Paula Andrade</td>
-								<td>101</td>
-								<td>23/09/2026</td>
-								<td>25/09/2026</td>
-								<td class="texto-longo">Pós-operatório de fratura no tornozelo esquerdo.</td>
-								<td><a class="botao botao-secundario botao-pequeno" href="#registrar-alta" aria-label="Registrar alta de João Pedro Alves">Registrar alta</a></td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
+			<section class="painel" aria-labelledby="titulo-filtro">
+				<h2 id="titulo-filtro">Filtrar internações</h2>
+				<form class="filtros" id="form-filtro">
+					<div class="campo">
+						<label for="filtro-ativas">Situação</label>
+						<select id="filtro-ativas" name="ativas">
+							<option value="true">Em andamento</option>
+							<option value="false">Encerradas</option>
+						</select>
+					</div>
+					<div>
+						<button type="submit" class="botao">Filtrar</button>
+					</div>
+				</form>
 			</section>
 
-			<section class="painel" id="encerradas" aria-labelledby="titulo-encerradas">
-				<h2 id="titulo-encerradas">Internações encerradas</h2>
+			<section class="painel" aria-labelledby="titulo-lista">
+				<h2 id="titulo-lista">Internações em andamento</h2>
+				<p class="dica" id="ordem-lista">Em ordem de entrada.</p>
 				<div class="tabela-rolagem">
 					<table>
-						<caption class="visualmente-oculto">Internações com alta registrada, da mais recente para a mais antiga</caption>
+						<caption class="visualmente-oculto" id="legenda-lista">Internações sem alta registrada</caption>
 						<thead>
 							<tr>
 								<th scope="col">Paciente</th>
@@ -113,92 +83,67 @@
 								<th scope="col">Entrada</th>
 								<th scope="col">Alta prevista</th>
 								<th scope="col">Alta efetiva</th>
+								<th scope="col">Situação</th>
 								<th scope="col">Observações</th>
+								<th scope="col">Ações</th>
 							</tr>
 						</thead>
-						<tbody>
-							<tr>
-								<td class="quebra">Ana Beatriz Rocha</td>
-								<td class="quebra">Helena Martins</td>
-								<td>103</td>
-								<td>10/03/2026</td>
-								<td>13/03/2026</td>
-								<td>14/03/2026</td>
-								<td class="texto-longo">Holter de 24 horas e ajuste de medicação. Alta adiada em um dia para concluir exames.</td>
-							</tr>
-							<tr>
-								<td class="quebra">Roberto Nunes Silva</td>
-								<td class="quebra">Ricardo Souza</td>
-								<td>202</td>
-								<td>02/02/2026</td>
-								<td>07/02/2026</td>
-								<td>06/02/2026</td>
-								<td class="texto-longo">Tratamento de pneumonia com antibiótico venoso. Boa resposta, alta antecipada.</td>
-							</tr>
-						</tbody>
+						<tbody id="lista-internacoes"></tbody>
 					</table>
 				</div>
 			</section>
 
-			<section class="painel" id="registrar-alta" aria-labelledby="titulo-alta">
-				<h2 id="titulo-alta">Registrar alta</h2>
-				<p class="dica">A data efetiva de alta não pode ser anterior à data de entrada. Ao registrar a alta, a vaga do quarto é liberada.</p>
-				<form>
+			<section class="painel" id="acao-internacao" aria-labelledby="titulo-acao" hidden>
+				<h2 id="titulo-acao">Registrar alta</h2>
+				<p class="dica" id="resumo-acao"></p>
+				<form id="form-alta" hidden>
+					<p class="dica">A data efetiva de alta não pode ser anterior à entrada nem estar no futuro. Ao registrar a alta, a vaga do quarto é liberada.</p>
 					<div class="grade-form">
-						<div class="campo">
-							<label for="internacao-alta">Internação <span class="obrigatorio" aria-hidden="true">*</span></label>
-							<select id="internacao-alta" name="internacao" required>
-								<option value="">Selecione a internação</option>
-								<option value="1">Carlos Eduardo Menezes, quarto 102</option>
-								<option value="2">Mariana Costa Ferreira, quarto 201</option>
-								<option value="3">João Pedro Alves, quarto 101</option>
-							</select>
-						</div>
 						<div class="campo">
 							<label for="data-efetiva-alta">Data efetiva de alta <span class="obrigatorio" aria-hidden="true">*</span></label>
 							<input type="date" id="data-efetiva-alta" name="dataEfetivaAlta" required>
 						</div>
 					</div>
 					<div class="acoes-form">
+						<button type="button" class="botao botao-secundario" data-fechar>Fechar</button>
 						<button type="submit" class="botao">Confirmar alta</button>
+					</div>
+				</form>
+				<form id="form-observacoes" hidden>
+					<div class="grade-form">
+						<div class="campo campo-largo">
+							<label for="texto-observacoes">Observações <span class="obrigatorio" aria-hidden="true">*</span></label>
+							<textarea id="texto-observacoes" name="texto" maxlength="1000" required></textarea>
+						</div>
+					</div>
+					<div class="acoes-form">
+						<button type="button" class="botao botao-secundario" data-fechar>Fechar</button>
+						<button type="submit" class="botao">Salvar observações</button>
 					</div>
 				</form>
 			</section>
 
 			<section class="painel" id="nova-internacao" aria-labelledby="titulo-nova">
 				<h2 id="titulo-nova">Nova internação</h2>
-				<p class="dica">Somente pacientes ativos sem internação em andamento e quartos com vaga aparecem na lista. Campos marcados com <span class="obrigatorio" aria-hidden="true">*</span> são obrigatórios.</p>
-				<form>
+				<p class="dica">Somente pacientes e profissionais ativos e quartos com vaga aparecem na lista. Campos marcados com <span class="obrigatorio" aria-hidden="true">*</span> são obrigatórios.</p>
+				<form id="form-internacao">
 					<div class="grade-form">
 						<div class="campo">
 							<label for="paciente">Paciente <span class="obrigatorio" aria-hidden="true">*</span></label>
-							<select id="paciente" name="paciente" required>
+							<select id="paciente" name="pacienteId" required>
 								<option value="">Selecione o paciente</option>
-								<option value="1">Ana Beatriz Rocha</option>
-								<option value="3">Fernanda Lima Duarte</option>
-								<option value="5">Lucas Oliveira Santos</option>
-								<option value="7">Patrícia Gomes Ribeiro</option>
 							</select>
 						</div>
 						<div class="campo">
 							<label for="profissional">Profissional responsável <span class="obrigatorio" aria-hidden="true">*</span></label>
-							<select id="profissional" name="profissionalResponsavel" required>
+							<select id="profissional" name="profissionalId" required>
 								<option value="">Selecione o profissional</option>
-								<option value="1">Helena Martins (Cardiologia)</option>
-								<option value="2">Ricardo Souza (Clínica Médica)</option>
-								<option value="3">Paula Andrade (Ortopedia)</option>
-								<option value="4">Marcos Vieira (Neurologia)</option>
-								<option value="5">Juliana Castro (Enfermagem)</option>
 							</select>
 						</div>
 						<div class="campo">
 							<label for="quarto">Quarto <span class="obrigatorio" aria-hidden="true">*</span></label>
-							<select id="quarto" name="quarto" required>
+							<select id="quarto" name="quartoId" required>
 								<option value="">Selecione o quarto</option>
-								<option value="101">101, 1º andar (1 vaga)</option>
-								<option value="103">103, 1º andar (2 vagas)</option>
-								<option value="202">202, 2º andar (3 vagas)</option>
-								<option value="203">203, 2º andar (1 vaga)</option>
 							</select>
 						</div>
 						<div class="campo">
@@ -206,13 +151,13 @@
 							<input type="date" id="data-entrada" name="dataEntrada" required>
 						</div>
 						<div class="campo">
-							<label for="data-prevista-alta">Data prevista de alta</label>
-							<input type="date" id="data-prevista-alta" name="dataPrevistaAlta" aria-describedby="ajuda-prevista">
+							<label for="data-prevista-alta">Data prevista de alta <span class="obrigatorio" aria-hidden="true">*</span></label>
+							<input type="date" id="data-prevista-alta" name="dataPrevistaAlta" aria-describedby="ajuda-prevista" required>
 							<small id="ajuda-prevista" class="dica">Não pode ser anterior à data de entrada.</small>
 						</div>
 						<div class="campo campo-largo">
 							<label for="observacoes">Observações</label>
-							<textarea id="observacoes" name="observacoes"></textarea>
+							<textarea id="observacoes" name="observacoes" maxlength="1000"></textarea>
 						</div>
 					</div>
 					<div class="acoes-form">
@@ -223,8 +168,8 @@
 			</section>
 		</main>
 
-		<footer class="rodape">Sistema de Informação Hospitalar · Protótipo da Sprint 1</footer>
+		<footer class="rodape">Sistema de Informação Hospitalar</footer>
 	</div>
-	<div id="aviso-prototipo" class="aviso" role="status" aria-live="polite"></div>
+	<div id="aviso-api" class="aviso" role="status" aria-live="polite"></div>
 </body>
 </html>

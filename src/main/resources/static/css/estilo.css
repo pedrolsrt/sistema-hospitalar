@@ -536,13 +536,16 @@ tr.inativo td {
 	white-space: nowrap;
 }
 
-.etiqueta-agendada {
+.etiqueta-agendada,
+.etiqueta-agendado,
+.etiqueta-aguardando-avaliacao {
 	background: var(--info-fundo);
 	color: var(--info-texto);
 }
 
 .etiqueta-realizada,
 .etiqueta-concluida,
+.etiqueta-concluido,
 .etiqueta-disponivel,
 .etiqueta-ativo {
 	background: var(--sucesso-fundo);
@@ -554,13 +557,16 @@ tr.inativo td {
 	color: var(--destaque-texto);
 }
 
-.etiqueta-cancelada {
+.etiqueta-cancelada,
+.etiqueta-cancelado {
 	background: var(--perigo-fundo);
 	color: var(--perigo-texto);
 }
 
 .etiqueta-ocupado,
-.etiqueta-em-atendimento {
+.etiqueta-ativa,
+.etiqueta-em-atendimento,
+.etiqueta-em-andamento {
 	background: var(--alerta-fundo);
 	color: var(--alerta-texto);
 }
@@ -772,6 +778,14 @@ legend {
 
 .linha-tempo > li.evento-internacao::before {
 	border-color: var(--alerta-texto);
+}
+
+.linha-tempo > li.evento-emergencia::before {
+	border-color: var(--perigo-texto);
+}
+
+.linha-tempo > li.evento-procedimento::before {
+	border-color: var(--destaque-texto);
 }
 
 .evento {
