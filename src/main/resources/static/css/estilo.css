@@ -314,27 +314,6 @@ main:focus {
 	color: var(--cor-texto-suave);
 }
 
-.usuario {
-	display: flex;
-	align-items: center;
-	gap: var(--e-2);
-	color: var(--cor-texto);
-	font-weight: 600;
-}
-
-.avatar {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	width: 2rem;
-	height: 2rem;
-	border-radius: 50%;
-	background: var(--cor-primaria-clara);
-	color: var(--cor-primaria-escura);
-	font-size: 0.75rem;
-	font-weight: 700;
-}
-
 /* ==========================================================================
    Cabeçalho da página
    ========================================================================== */
@@ -375,12 +354,12 @@ main:focus {
 }
 
 /* ==========================================================================
-   Painel inicial
+   Painel inicial e indicadores
    ========================================================================== */
 
 .indicadores {
 	display: grid;
-	grid-template-columns: repeat(3, minmax(0, 1fr));
+	grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
 	gap: var(--e-4);
 	margin-bottom: var(--e-5);
 }
@@ -448,6 +427,48 @@ main:focus {
 .atalhos span {
 	font-size: 0.875rem;
 	color: var(--cor-texto-suave);
+}
+
+/* Barras de comparação dos indicadores: rótulo, barra proporcional e número. */
+.barras {
+	display: grid;
+	gap: var(--e-3);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.barras li {
+	display: grid;
+	grid-template-columns: minmax(8rem, 14rem) minmax(0, 1fr) 3rem;
+	align-items: center;
+	gap: var(--e-3);
+}
+
+.barra {
+	height: 0.75rem;
+	border-radius: 999px;
+	background: var(--neutro-fundo);
+	overflow: hidden;
+}
+
+.barra-preenchida {
+	height: 100%;
+	border-radius: 999px;
+	background: var(--cor-primaria);
+}
+
+.barra-valor {
+	font-weight: 700;
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+}
+
+.barra-na-tabela {
+	display: grid;
+	grid-template-columns: minmax(6rem, 12rem) 3rem;
+	align-items: center;
+	gap: var(--e-3);
 }
 
 /* ==========================================================================
