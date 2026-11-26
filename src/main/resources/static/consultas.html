@@ -5,7 +5,9 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Consultas | Sistema Hospitalar</title>
 	<link rel="stylesheet" href="css/estilo.css">
-	<script src="js/prototipo.js" defer></script>
+	<script src="js/api.js" defer></script>
+	<script src="js/dominios.js" defer></script>
+	<script src="js/consultas.js" defer></script>
 </head>
 <body>
 	<a class="pular" href="#conteudo">Pular para o conteúdo</a>
@@ -46,28 +48,29 @@
 			<div class="cabecalho-pagina">
 				<div>
 					<h1>Consultas</h1>
-					<p>Cada consulta ocupa 30 minutos na agenda do profissional e do paciente.</p>
+					<p>Cada consulta ocupa 30 minutos na agenda do profissional e do paciente. As ações de cada consulta dependem da situação em que ela está.</p>
 				</div>
 				<a class="botao" href="#agendar"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v14"/><path d="M5 12h14"/></svg>Nova consulta</a>
 			</div>
 
 			<section class="painel" aria-labelledby="titulo-filtro">
 				<h2 id="titulo-filtro">Filtrar agenda</h2>
-				<form class="filtros">
+				<form class="filtros" id="form-filtro">
 					<div class="campo">
 						<label for="filtro-profissional">Profissional</label>
-						<select id="filtro-profissional" name="profissional">
+						<select id="filtro-profissional" name="profissionalId">
 							<option value="">Todos os profissionais</option>
-							<option value="1">Helena Martins (Cardiologia)</option>
-							<option value="2">Ricardo Souza (Clínica Médica)</option>
-							<option value="3">Paula Andrade (Ortopedia)</option>
-							<option value="4">Marcos Vieira (Neurologia)</option>
-							<option value="5">Juliana Castro (Enfermagem)</option>
 						</select>
 					</div>
 					<div class="campo">
 						<label for="filtro-data">Data</label>
-						<input type="date" id="filtro-data" name="data" value="2026-09-24">
+						<input type="date" id="filtro-data" name="data">
+					</div>
+					<div class="campo">
+						<label for="filtro-situacao">Situação</label>
+						<select id="filtro-situacao" name="situacao">
+							<option value="">Todas as situações</option>
+						</select>
 					</div>
 					<div>
 						<button type="submit" class="botao">Filtrar</button>
@@ -76,103 +79,83 @@
 			</section>
 
 			<section class="painel" aria-labelledby="titulo-agenda">
-				<h2 id="titulo-agenda">Agenda de <time datetime="2026-09-24">24/09/2026</time></h2>
+				<h2 id="titulo-agenda">Agenda</h2>
 				<div class="tabela-rolagem">
 					<table>
-						<caption class="visualmente-oculto">Consultas de 24/09/2026, todos os profissionais</caption>
+						<caption class="visualmente-oculto">Consultas encontradas, em ordem de data e horário</caption>
 						<thead>
 							<tr>
-								<th scope="col">Horário</th>
+								<th scope="col">Data e horário</th>
 								<th scope="col">Paciente</th>
 								<th scope="col">Profissional</th>
+								<th scope="col">Modalidade</th>
 								<th scope="col">Motivo</th>
-								<th scope="col">Status</th>
+								<th scope="col">Situação</th>
 								<th scope="col">Ações</th>
 							</tr>
 						</thead>
-						<tbody>
-							<tr>
-								<td>08:00</td>
-								<td class="quebra">Ana Beatriz Rocha</td>
-								<td class="quebra">Helena Martins</td>
-								<td class="quebra">Retorno cardiológico</td>
-								<td><span class="etiqueta etiqueta-realizada">Realizada</span></td>
-								<td><span class="sem-acao" aria-hidden="true">—</span><span class="visualmente-oculto">Nenhuma ação disponível</span></td>
-							</tr>
-							<tr>
-								<td>09:00</td>
-								<td class="quebra">Fernanda Lima Duarte</td>
-								<td class="quebra">Ricardo Souza</td>
-								<td class="quebra">Dor abdominal</td>
-								<td><span class="etiqueta etiqueta-realizada">Realizada</span></td>
-								<td><span class="sem-acao" aria-hidden="true">—</span><span class="visualmente-oculto">Nenhuma ação disponível</span></td>
-							</tr>
-							<tr>
-								<td>10:30</td>
-								<td class="quebra">Lucas Oliveira Santos</td>
-								<td class="quebra">Paula Andrade</td>
-								<td class="quebra">Dor no joelho direito</td>
-								<td><span class="etiqueta etiqueta-agendada">Agendada</span></td>
-								<td>
-									<div class="acoes">
-										<button type="button" class="botao botao-secundario botao-pequeno" data-prototipo aria-label="Marcar como realizada a consulta de Lucas Oliveira Santos às 10:30">Marcar como realizada</button>
-										<button type="button" class="botao botao-perigo botao-pequeno" data-prototipo aria-label="Cancelar a consulta de Lucas Oliveira Santos às 10:30">Cancelar</button>
-									</div>
-								</td>
-							</tr>
-							<tr>
-								<td>14:00</td>
-								<td class="quebra">Patrícia Gomes Ribeiro</td>
-								<td class="quebra">Marcos Vieira</td>
-								<td class="quebra">Cefaleia recorrente</td>
-								<td><span class="etiqueta etiqueta-agendada">Agendada</span></td>
-								<td>
-									<div class="acoes">
-										<button type="button" class="botao botao-secundario botao-pequeno" data-prototipo aria-label="Marcar como realizada a consulta de Patrícia Gomes Ribeiro às 14:00">Marcar como realizada</button>
-										<button type="button" class="botao botao-perigo botao-pequeno" data-prototipo aria-label="Cancelar a consulta de Patrícia Gomes Ribeiro às 14:00">Cancelar</button>
-									</div>
-								</td>
-							</tr>
-							<tr>
-								<td>15:30</td>
-								<td class="quebra">Fernanda Lima Duarte</td>
-								<td class="quebra">Helena Martins</td>
-								<td class="quebra">Avaliação de pressão arterial</td>
-								<td><span class="etiqueta etiqueta-cancelada">Cancelada</span></td>
-								<td><span class="sem-acao" aria-hidden="true">—</span><span class="visualmente-oculto">Nenhuma ação disponível</span></td>
-							</tr>
-						</tbody>
+						<tbody id="lista-consultas"></tbody>
 					</table>
 				</div>
 			</section>
 
-			<section class="painel" id="agendar" aria-labelledby="titulo-agendar">
-				<h2 id="titulo-agendar">Agendar consulta</h2>
-				<p class="dica">Somente pacientes e profissionais ativos aparecem na lista. Não é possível agendar no passado nem em horário já ocupado. Campos marcados com <span class="obrigatorio" aria-hidden="true">*</span> são obrigatórios.</p>
-				<form>
+			<section class="painel" id="acao-consulta" aria-labelledby="titulo-acao" hidden>
+				<h2 id="titulo-acao">Registrar observações</h2>
+				<p class="dica" id="resumo-acao"></p>
+				<form id="form-observacoes" hidden>
+					<div class="grade-form">
+						<div class="campo campo-largo">
+							<label for="texto-observacoes">Observações <span class="obrigatorio" aria-hidden="true">*</span></label>
+							<textarea id="texto-observacoes" name="texto" maxlength="1000" required></textarea>
+						</div>
+					</div>
+					<div class="acoes-form">
+						<button type="button" class="botao botao-secundario" data-fechar>Fechar</button>
+						<button type="submit" class="botao">Salvar observações</button>
+					</div>
+				</form>
+				<form id="form-encaminhamento" hidden>
 					<div class="grade-form">
 						<div class="campo">
+							<label for="area-encaminhamento">Área do atendimento especializado <span class="obrigatorio" aria-hidden="true">*</span></label>
+							<select id="area-encaminhamento" name="areaAtuacao" required>
+								<option value="">Selecione</option>
+							</select>
+						</div>
+					</div>
+					<div class="acoes-form">
+						<button type="button" class="botao botao-secundario" data-fechar>Fechar</button>
+						<button type="submit" class="botao">Encaminhar</button>
+					</div>
+				</form>
+			</section>
+
+			<section class="painel" id="agendar" aria-labelledby="titulo-agendar">
+				<h2 id="titulo-agendar">Agendar consulta</h2>
+				<p class="dica">Somente pacientes e profissionais ativos aparecem na lista. Não é possível agendar no passado nem em horário já ocupado. As observações são registradas depois, durante ou após o atendimento. Campos marcados com <span class="obrigatorio" aria-hidden="true">*</span> são obrigatórios.</p>
+				<form id="form-agendamento">
+					<div class="grade-form">
+						<div class="campo">
+							<label for="modalidade">Modalidade <span class="obrigatorio" aria-hidden="true">*</span></label>
+							<select id="modalidade" name="modalidade" required></select>
+						</div>
+						<div class="campo" id="campo-area">
+							<label for="area-atuacao">Área de atuação <span class="obrigatorio" aria-hidden="true">*</span></label>
+							<select id="area-atuacao" name="areaAtuacao" aria-describedby="ajuda-area">
+								<option value="">Selecione</option>
+							</select>
+							<small id="ajuda-area" class="dica">A lista de profissionais mostra só os ativos desta área.</small>
+						</div>
+						<div class="campo">
 							<label for="paciente">Paciente <span class="obrigatorio" aria-hidden="true">*</span></label>
-							<select id="paciente" name="paciente" required>
+							<select id="paciente" name="pacienteId" required>
 								<option value="">Selecione o paciente</option>
-								<option value="1">Ana Beatriz Rocha</option>
-								<option value="2">Carlos Eduardo Menezes</option>
-								<option value="3">Fernanda Lima Duarte</option>
-								<option value="4">João Pedro Alves</option>
-								<option value="5">Lucas Oliveira Santos</option>
-								<option value="6">Mariana Costa Ferreira</option>
-								<option value="7">Patrícia Gomes Ribeiro</option>
 							</select>
 						</div>
 						<div class="campo">
 							<label for="profissional">Profissional <span class="obrigatorio" aria-hidden="true">*</span></label>
-							<select id="profissional" name="profissional" required>
+							<select id="profissional" name="profissionalId" required>
 								<option value="">Selecione o profissional</option>
-								<option value="1">Helena Martins (Cardiologia)</option>
-								<option value="2">Ricardo Souza (Clínica Médica)</option>
-								<option value="3">Paula Andrade (Ortopedia)</option>
-								<option value="4">Marcos Vieira (Neurologia)</option>
-								<option value="5">Juliana Castro (Enfermagem)</option>
 							</select>
 						</div>
 						<div class="campo">
@@ -185,12 +168,7 @@
 						</div>
 						<div class="campo campo-largo">
 							<label for="motivo">Motivo <span class="obrigatorio" aria-hidden="true">*</span></label>
-							<input type="text" id="motivo" name="motivo" maxlength="255" required>
-						</div>
-						<div class="campo campo-largo">
-							<label for="observacoes">Observações médicas</label>
-							<textarea id="observacoes" name="observacoes" aria-describedby="ajuda-observacoes"></textarea>
-							<small id="ajuda-observacoes" class="dica">Podem ser completadas depois, quando a consulta for realizada.</small>
+							<input type="text" id="motivo" name="motivo" maxlength="500" required>
 						</div>
 					</div>
 					<div class="acoes-form">
@@ -201,8 +179,8 @@
 			</section>
 		</main>
 
-		<footer class="rodape">Sistema de Informação Hospitalar · Protótipo da Sprint 1</footer>
+		<footer class="rodape">Sistema de Informação Hospitalar</footer>
 	</div>
-	<div id="aviso-prototipo" class="aviso" role="status" aria-live="polite"></div>
+	<div id="aviso-api" class="aviso" role="status" aria-live="polite"></div>
 </body>
 </html>

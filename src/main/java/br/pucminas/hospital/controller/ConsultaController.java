@@ -29,7 +29,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/consultas")
 @Tag(name = "Consultas", description = "Consultas de rotina e especializadas. Situações: AGENDADA -> CONFIRMADA -> "
 		+ "EM_ATENDIMENTO -> CONCLUIDA; agendada ou confirmada pode ser cancelada ou ter o não comparecimento "
-		+ "registrado. Remarcar significa agendar uma nova consulta.")
+		+ "registrado. Remarcar significa agendar uma nova consulta. Toda resposta de consulta informa as próximas "
+		+ "situações possíveis (proximasSituacoes) e se é possível registrar observações "
+		+ "(permiteRegistrarObservacoes) e encaminhar o paciente (permiteEncaminhar), para o cliente oferecer só as "
+		+ "ações válidas.")
 public class ConsultaController {
 
 	private final ConsultaService service;

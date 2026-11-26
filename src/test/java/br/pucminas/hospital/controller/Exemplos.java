@@ -16,6 +16,7 @@ import br.pucminas.hospital.model.SituacaoQuarto;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 /**
  * Respostas de exemplo devolvidas pelos services simulados nos testes de controller.
@@ -46,7 +47,7 @@ final class Exemplos {
 	static ConsultaResponse consulta(String situacao) {
 		return new ConsultaResponse(10L, new CodigoDescricao("CONSULTA_ROTINA", "Consulta de rotina"), MARIA, DR_JOAO,
 				LocalDate.of(2030, 1, 15), LocalTime.of(14, 0), "Check-up", null, new CodigoDescricao(situacao, situacao),
-				null, null);
+				null, null, List.of(), false, false);
 	}
 
 	static InternacaoResponse internacao(boolean ativa) {

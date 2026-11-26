@@ -32,6 +32,8 @@
 	--perigo-texto: #8f1d1d;
 	--neutro-fundo: #eceff2;
 	--neutro-texto: #44505c;
+	--destaque-fundo: #ece6f7;
+	--destaque-texto: #4b2a85;
 
 	/* Escala de espaçamento: todo margin, padding e gap usa um destes valores. */
 	--e-1: 0.25rem;
@@ -540,10 +542,16 @@ tr.inativo td {
 }
 
 .etiqueta-realizada,
+.etiqueta-concluida,
 .etiqueta-disponivel,
 .etiqueta-ativo {
 	background: var(--sucesso-fundo);
 	color: var(--sucesso-texto);
+}
+
+.etiqueta-confirmada {
+	background: var(--destaque-fundo);
+	color: var(--destaque-texto);
 }
 
 .etiqueta-cancelada {
@@ -551,13 +559,15 @@ tr.inativo td {
 	color: var(--perigo-texto);
 }
 
-.etiqueta-ocupado {
+.etiqueta-ocupado,
+.etiqueta-em-atendimento {
 	background: var(--alerta-fundo);
 	color: var(--alerta-texto);
 }
 
 .etiqueta-inativo,
-.etiqueta-encerrada {
+.etiqueta-encerrada,
+.etiqueta-nao-compareceu {
 	background: var(--neutro-fundo);
 	color: var(--neutro-texto);
 }

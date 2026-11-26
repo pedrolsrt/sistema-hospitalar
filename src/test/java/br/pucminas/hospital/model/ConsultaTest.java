@@ -271,4 +271,40 @@ class ConsultaTest {
 		assertThat(consulta.getAreaEncaminhamento()).isNull();
 	}
 
+	private static boolean encaminhaSemErro(Consulta consulta) {
+		try {
+			consulta.encaminhar(AreaAtuacao.NEUROLOGIA);
+			return true;
+		} catch (RegraNegocioException erro) {
+			return false;
+		}
+	}
+
+	// permiteEncaminhar informa a tela; encaminhar aplica a regra. Os dois precisam concordar em toda situação.
+	@ParameterizedTest
+	@EnumSource(SituacaoConsulta.class)
+	void permiteEncaminharConcordaComEncaminharNaConsultaDeRotinaDoClinico(SituacaoConsulta situacao) {
+		Consulta consulta = consultaEm(situacao);
+		boolean permite = consulta.permiteEncaminhar();
+
+		assertThat(permite).isEqualTo(situacao.permiteRegistrarObservacoes());
+		assertThat(encaminhaSemErro(consulta)).isEqualTo(permite);
+	}
+
+	@Test
+	void naoPermiteEncaminharComOutroProfissionalNemNaConsultaEspecializada() {
+		ProfissionalSaude cardiologista = new MedicoEspecialista("Dr. Pedro", "CRM-MG 2", AreaAtuacao.CARDIOLOGIA);
+		Consulta rotinaDoEspecialista = new ConsultaRotina(paciente, cardiologista, LocalDate.of(2030, 1, 15),
+				LocalTime.of(14, 0), "Retorno");
+		Consulta especializada = new ConsultaEspecializada(paciente, cardiologista, LocalDate.of(2030, 1, 15),
+				LocalTime.of(15, 0), "Arritmia", AreaAtuacao.CARDIOLOGIA);
+		for (Consulta consulta : new Consulta[] { rotinaDoEspecialista, especializada }) {
+			consulta.confirmar();
+			consulta.iniciarAtendimento();
+
+			assertThat(consulta.permiteEncaminhar()).isFalse();
+			assertThat(encaminhaSemErro(consulta)).isFalse();
+		}
+	}
+
 }

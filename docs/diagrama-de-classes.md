@@ -369,12 +369,14 @@ classDiagram
         +registrarNaoComparecimento() void
         +registrarObservacoes(String) void
         +encaminhar(AreaAtuacao) void
+        +permiteEncaminhar() boolean
         +getAreaAtuacao() AreaAtuacao
         +getAreaEncaminhamento() AreaAtuacao
     }
 
     class ConsultaRotina {
         +encaminhar(AreaAtuacao) void
+        +permiteEncaminhar() boolean
         +getAreaEncaminhamento() AreaAtuacao
     }
 

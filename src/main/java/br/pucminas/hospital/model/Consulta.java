@@ -110,6 +110,14 @@ public abstract class Consulta extends Atendimento {
 	}
 
 	/**
+	 * Indica se a consulta admite encaminhamento agora, nas mesmas condições de {@link #encaminhar}. Por padrão,
+	 * não; só a consulta de rotina pode admitir.
+	 */
+	public boolean permiteEncaminhar() {
+		return false;
+	}
+
+	/**
 	 * Área para a qual o paciente foi encaminhado; nula se não houve encaminhamento.
 	 */
 	public AreaAtuacao getAreaEncaminhamento() {

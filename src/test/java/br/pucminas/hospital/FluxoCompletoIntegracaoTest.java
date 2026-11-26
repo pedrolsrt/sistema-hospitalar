@@ -101,6 +101,9 @@ class FluxoCompletoIntegracaoTest {
 		String concluida = chamar(patch("/consultas/" + consulta + "/concluir"), null, 200);
 		assertThat(campo(concluida, "$.situacao.codigo")).isEqualTo("CONCLUIDA");
 		assertThat(campo(concluida, "$.observacoes")).isEqualTo("Pressão 12x8.");
+		assertThat(JsonPath.<List<Object>>read(concluida, "$.proximasSituacoes")).isEmpty();
+		assertThat(JsonPath.<Boolean>read(concluida, "$.permiteRegistrarObservacoes")).isTrue();
+		assertThat(JsonPath.<Boolean>read(concluida, "$.permiteEncaminhar")).isTrue();
 		chamar(patch("/consultas/" + consulta + "/encaminhar"), "{\"areaAtuacao\": \"CARDIOLOGIA\"}", 200);
 		String encaminhada = chamar(get("/consultas/" + consulta), null, 200);
 		assertThat(campo(encaminhada, "$.areaEncaminhamento.codigo")).isEqualTo("CARDIOLOGIA");
@@ -114,6 +117,11 @@ class FluxoCompletoIntegracaoTest {
 		long retorno = criar("/consultas/rotina", """
 				{"pacienteId": %d, "profissionalId": %d, "data": "2099-01-16", "horario": "10:00", "motivo": "Retorno"}
 				""".formatted(maria, clinico));
+		String agendada = chamar(get("/consultas/" + retorno), null, 200);
+		assertThat(JsonPath.<List<String>>read(agendada, "$.proximasSituacoes[*].codigo"))
+				.containsExactly("CONFIRMADA", "CANCELADA", "NAO_COMPARECEU");
+		assertThat(JsonPath.<Boolean>read(agendada, "$.permiteRegistrarObservacoes")).isFalse();
+		assertThat(JsonPath.<Boolean>read(agendada, "$.permiteEncaminhar")).isFalse();
 		String sobreposta = chamar(post("/consultas/rotina"), """
 				{"pacienteId": %d, "profissionalId": %d, "data": "2099-01-16", "horario": "10:15", "motivo": "Exames"}
 				""".formatted(maria, clinico), 409);

@@ -9,6 +9,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import br.pucminas.hospital.dto.CodigoDescricao;
 import br.pucminas.hospital.dto.ConsultaEspecializadaRequest;
 import br.pucminas.hospital.dto.ConsultaResponse;
 import br.pucminas.hospital.dto.ConsultaRotinaRequest;
@@ -278,6 +279,26 @@ class ConsultaServiceTest {
 
 		assertThat(service.confirmar(10L).situacao().codigo()).isEqualTo("CONFIRMADA");
 		assertThat(consulta.getSituacao()).isEqualTo(SituacaoConsulta.CONFIRMADA);
+	}
+
+	@Test
+	void respostaInformaAsAcoesPossiveisNaSituacao() {
+		consultaSalva(SituacaoConsulta.AGENDADA);
+
+		ConsultaResponse confirmada = service.confirmar(10L);
+		assertThat(confirmada.proximasSituacoes()).extracting(CodigoDescricao::codigo)
+				.containsExactly("EM_ATENDIMENTO", "CANCELADA", "NAO_COMPARECEU");
+		assertThat(confirmada.permiteRegistrarObservacoes()).isFalse();
+		assertThat(confirmada.permiteEncaminhar()).isFalse();
+
+		ConsultaResponse emAtendimento = service.iniciarAtendimento(10L);
+		assertThat(emAtendimento.proximasSituacoes()).extracting(CodigoDescricao::codigo).containsExactly("CONCLUIDA");
+		assertThat(emAtendimento.permiteRegistrarObservacoes()).isTrue();
+		assertThat(emAtendimento.permiteEncaminhar()).isTrue();
+
+		ConsultaResponse concluida = service.concluir(10L);
+		assertThat(concluida.proximasSituacoes()).isEmpty();
+		assertThat(concluida.permiteRegistrarObservacoes()).isTrue();
 	}
 
 	@Test

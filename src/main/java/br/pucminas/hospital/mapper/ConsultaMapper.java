@@ -13,7 +13,9 @@ public class ConsultaMapper {
 				Resumos.de(consulta.getPaciente()), Resumos.de(consulta.getProfissionalResponsavel()), consulta.getData(),
 				consulta.getHorario(), consulta.getMotivo(), CodigoDescricao.de(consulta.getAreaAtuacao()),
 				CodigoDescricao.de(consulta.getSituacao()), consulta.getObservacoes(),
-				CodigoDescricao.de(consulta.getAreaEncaminhamento()));
+				CodigoDescricao.de(consulta.getAreaEncaminhamento()),
+				consulta.getSituacao().getProximasPossiveis().stream().map(CodigoDescricao::de).toList(),
+				consulta.getSituacao().permiteRegistrarObservacoes(), consulta.permiteEncaminhar());
 	}
 
 }

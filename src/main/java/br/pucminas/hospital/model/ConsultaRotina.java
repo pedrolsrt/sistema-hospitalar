@@ -52,6 +52,16 @@ public class ConsultaRotina extends Consulta {
 		this.areaEncaminhamento = area;
 	}
 
+	/**
+	 * Admite encaminhamento quando o profissional pode encaminhar (clínico geral) e a consulta está em atendimento
+	 * ou concluída.
+	 */
+	@Override
+	public boolean permiteEncaminhar() {
+		return getProfissionalResponsavel().podeEncaminharParaEspecialista()
+				&& getSituacao().permiteRegistrarObservacoes();
+	}
+
 	@Override
 	public AreaAtuacao getAreaEncaminhamento() {
 		return areaEncaminhamento;
