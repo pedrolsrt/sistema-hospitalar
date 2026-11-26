@@ -130,7 +130,12 @@ class ProcedimentoCirurgicoControllerTest {
 				.thenReturn(Exemplos.procedimento("CONCLUIDO"));
 		when(service.cancelar(40L)).thenReturn(Exemplos.procedimento("CANCELADO"));
 
-		mvc.perform(get("/procedimentos/40")).andExpect(status().isOk());
+		mvc.perform(get("/procedimentos/40"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.proximasSituacoes[0].codigo").value("EM_ANDAMENTO"))
+				.andExpect(jsonPath("$.proximasSituacoes[1].codigo").value("CANCELADO"))
+				.andExpect(jsonPath("$.permiteRegistrarObservacoesPreOperatorias").value(true))
+				.andExpect(jsonPath("$.permiteRegistrarObservacoesPosOperatorias").value(false));
 		mvc.perform(patch("/procedimentos/40/iniciar").contentType(MediaType.APPLICATION_JSON)
 				.content("{\"dataHoraInicio\": \"2030-03-10T08:15:00\"}"))
 				.andExpect(jsonPath("$.situacao.codigo").value("EM_ANDAMENTO"));

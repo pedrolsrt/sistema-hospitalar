@@ -12,6 +12,7 @@ import br.pucminas.hospital.dto.ConclusaoProcedimentoRequest;
 import br.pucminas.hospital.dto.InicioProcedimentoRequest;
 import br.pucminas.hospital.dto.ObservacoesRequest;
 import br.pucminas.hospital.dto.ProcedimentoCirurgicoRequest;
+import br.pucminas.hospital.dto.CodigoDescricao;
 import br.pucminas.hospital.dto.ProcedimentoCirurgicoResponse;
 import br.pucminas.hospital.exception.AtendimentoIndisponivelException;
 import br.pucminas.hospital.exception.DataInvalidaException;
@@ -188,6 +189,27 @@ class ProcedimentoCirurgicoServiceTest {
 		assertThat(iniciado.situacao().codigo()).isEqualTo("EM_ANDAMENTO");
 		assertThat(concluido.situacao().codigo()).isEqualTo("CONCLUIDO");
 		assertThat(concluido.dataHoraFim()).isEqualTo(PREVISTA.plusHours(2));
+	}
+
+	@Test
+	void respostaInformaAsAcoesPossiveisNaSituacao() {
+		salvo();
+
+		ProcedimentoCirurgicoResponse agendado = service.buscarPorId(10L);
+		assertThat(agendado.proximasSituacoes()).extracting(CodigoDescricao::codigo)
+				.containsExactly("EM_ANDAMENTO", "CANCELADO");
+		assertThat(agendado.permiteRegistrarObservacoesPreOperatorias()).isTrue();
+		assertThat(agendado.permiteRegistrarObservacoesPosOperatorias()).isFalse();
+
+		ProcedimentoCirurgicoResponse emAndamento = service.iniciar(10L, new InicioProcedimentoRequest(PREVISTA));
+		assertThat(emAndamento.proximasSituacoes()).extracting(CodigoDescricao::codigo).containsExactly("CONCLUIDO");
+		assertThat(emAndamento.permiteRegistrarObservacoesPosOperatorias()).isTrue();
+
+		ProcedimentoCirurgicoResponse concluido = service.concluir(10L,
+				new ConclusaoProcedimentoRequest(PREVISTA.plusHours(1)));
+		assertThat(concluido.proximasSituacoes()).isEmpty();
+		assertThat(concluido.permiteRegistrarObservacoesPreOperatorias()).isTrue();
+		assertThat(concluido.permiteRegistrarObservacoesPosOperatorias()).isTrue();
 	}
 
 	@Test

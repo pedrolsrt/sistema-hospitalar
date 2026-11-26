@@ -162,4 +162,59 @@ class AtendimentoEmergenciaTest {
 		assertThat(emergencia.getObservacoes()).isNull();
 	}
 
+	private static boolean executaSemErro(Runnable acao) {
+		try {
+			acao.run();
+			return true;
+		} catch (RegraNegocioException erro) {
+			return false;
+		}
+	}
+
+	// As permissões informam a tela; os métodos de ação aplicam a regra. Os dois precisam concordar em toda situação.
+	@ParameterizedTest
+	@EnumSource(SituacaoEmergencia.class)
+	void permiteDefinirPrioridadeConcordaComDefinirPrioridade(SituacaoEmergencia situacao) {
+		AtendimentoEmergencia emergencia = emergenciaEm(situacao);
+		boolean permite = emergencia.permiteDefinirPrioridade();
+
+		assertThat(permite).isEqualTo(situacao != SituacaoEmergencia.CONCLUIDO);
+		assertThat(executaSemErro(() -> emergencia.definirPrioridade(PrioridadeEmergencia.CRITICA))).isEqualTo(permite);
+	}
+
+	@ParameterizedTest
+	@EnumSource(SituacaoEmergencia.class)
+	void permiteIniciarConcordaComIniciarComPrioridadeDefinida(SituacaoEmergencia situacao) {
+		AtendimentoEmergencia emergencia = emergenciaEm(situacao);
+		boolean permite = emergencia.permiteIniciar();
+
+		assertThat(permite).isEqualTo(situacao == SituacaoEmergencia.AGUARDANDO_AVALIACAO);
+		assertThat(executaSemErro(emergencia::iniciar)).isEqualTo(permite);
+	}
+
+	@Test
+	void semPrioridadeNaoPermiteIniciarAteATriagem() {
+		AtendimentoEmergencia emergencia = registrar(null);
+
+		assertThat(emergencia.permiteIniciar()).isFalse();
+		assertThatThrownBy(emergencia::iniciar)
+				.isInstanceOf(RegraNegocioException.class)
+				.isNotInstanceOf(TransicaoSituacaoInvalidaException.class);
+
+		emergencia.definirPrioridade(PrioridadeEmergencia.BAIXA);
+
+		assertThat(emergencia.permiteIniciar()).isTrue();
+		assertThat(executaSemErro(emergencia::iniciar)).isTrue();
+		assertThat(emergencia.permiteIniciar()).isFalse();
+	}
+
+	@ParameterizedTest
+	@EnumSource(SituacaoEmergencia.class)
+	void permiteRegistrarObservacoesConcordaComRegistrarObservacoes(SituacaoEmergencia situacao) {
+		AtendimentoEmergencia emergencia = emergenciaEm(situacao);
+
+		assertThat(executaSemErro(() -> emergencia.registrarObservacoes("Paciente estável.")))
+				.isEqualTo(situacao.permiteRegistrarObservacoes());
+	}
+
 }

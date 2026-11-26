@@ -42,6 +42,12 @@ class SituacoesEmergenciaEProcedimentoTest {
 					.containsExactly(SituacaoEmergencia.CONCLUIDO);
 		}
 
+		@Test
+		void observacoesSoDuranteOuDepoisDoAtendimento() {
+			assertThat(Arrays.stream(SituacaoEmergencia.values()).filter(SituacaoEmergencia::permiteRegistrarObservacoes))
+					.containsExactlyInAnyOrder(SituacaoEmergencia.EM_ATENDIMENTO, SituacaoEmergencia.CONCLUIDO);
+		}
+
 	}
 
 	@Nested
@@ -78,6 +84,11 @@ class SituacoesEmergenciaEProcedimentoTest {
 			assertThat(Arrays.stream(SituacaoProcedimento.values())
 					.filter(SituacaoProcedimento::permiteObservacoesPosOperatorias))
 					.containsExactlyInAnyOrder(SituacaoProcedimento.EM_ANDAMENTO, SituacaoProcedimento.CONCLUIDO);
+		}
+
+		@Test
+		void observacoesPreOperatoriasEmQualquerSituacao() {
+			assertThat(SituacaoProcedimento.values()).allMatch(SituacaoProcedimento::permiteObservacoesPreOperatorias);
 		}
 
 	}

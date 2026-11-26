@@ -17,6 +17,9 @@ import java.time.LocalDateTime;
 @Table(name = "atendimento_emergencia")
 public class AtendimentoEmergencia extends Atendimento {
 
+	private static final String MENSAGEM_SEM_PRIORIDADE =
+			"Defina a prioridade do atendimento de emergência antes de iniciar o atendimento.";
+
 	@Enumerated(EnumType.STRING)
 	@Column(length = 20)
 	private PrioridadeEmergencia prioridade;
@@ -55,7 +58,7 @@ public class AtendimentoEmergencia extends Atendimento {
 		if (prioridade == null) {
 			throw new RegraNegocioException("Informe a prioridade do atendimento de emergência.");
 		}
-		if (situacao.isFinal()) {
+		if (!permiteDefinirPrioridade()) {
 			throw new RegraNegocioException(
 					"Não é possível alterar a prioridade de um atendimento de emergência já concluído.");
 		}
@@ -63,15 +66,38 @@ public class AtendimentoEmergencia extends Atendimento {
 	}
 
 	/**
-	 * Inicia o atendimento depois de verificar que ele pode ser realizado.
+	 * A prioridade pode ser definida ou reclassificada até a conclusão do atendimento.
+	 */
+	public boolean permiteDefinirPrioridade() {
+		return !situacao.isFinal();
+	}
+
+	/**
+	 * O atendimento pode ser iniciado quando a situação permite a transição (aguardando avaliação) e a
+	 * prioridade já foi definida na triagem.
+	 */
+	public boolean permiteIniciar() {
+		return situacao.podeMudarPara(SituacaoEmergencia.EM_ATENDIMENTO) && temPrioridadeDefinida();
+	}
+
+	/**
+	 * Inicia o atendimento depois de verificar que ele pode ser iniciado e realizado.
 	 *
 	 * @throws TransicaoSituacaoInvalidaException se o atendimento não estiver aguardando avaliação
-	 * @throws RegraNegocioException se o atendimento não puder ser realizado
+	 * @throws RegraNegocioException se a prioridade não estiver definida ou o atendimento não puder ser realizado
 	 */
 	public void iniciar() {
-		exigirTransicao(situacao, SituacaoEmergencia.EM_ATENDIMENTO, "iniciar um atendimento de emergência");
+		if (!permiteIniciar()) {
+			// A exceção indica o motivo: situação que não permite iniciar (409) ou prioridade ainda não definida (422).
+			exigirTransicao(situacao, SituacaoEmergencia.EM_ATENDIMENTO, "iniciar um atendimento de emergência");
+			throw new RegraNegocioException(MENSAGEM_SEM_PRIORIDADE);
+		}
 		validarRealizacao();
 		situacao = SituacaoEmergencia.EM_ATENDIMENTO;
+	}
+
+	private boolean temPrioridadeDefinida() {
+		return prioridade != null;
 	}
 
 	/**
@@ -101,9 +127,8 @@ public class AtendimentoEmergencia extends Atendimento {
 	 */
 	@Override
 	protected void validarCondicoesEspecificas() {
-		if (prioridade == null) {
-			throw new RegraNegocioException(
-					"Defina a prioridade do atendimento de emergência antes de iniciar o atendimento.");
+		if (!temPrioridadeDefinida()) {
+			throw new RegraNegocioException(MENSAGEM_SEM_PRIORIDADE);
 		}
 	}
 

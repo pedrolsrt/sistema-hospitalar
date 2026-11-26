@@ -57,14 +57,17 @@ final class Exemplos {
 
 	static AtendimentoEmergenciaResponse emergencia(String situacao) {
 		return new AtendimentoEmergenciaResponse(30L, MARIA, DR_JOAO, new CodigoDescricao("ALTA", "Alta"),
-				LocalDateTime.of(2030, 1, 15, 22, 40), new CodigoDescricao(situacao, situacao), null);
+				LocalDateTime.of(2030, 1, 15, 22, 40), new CodigoDescricao(situacao, situacao), null,
+				List.of(new CodigoDescricao("EM_ATENDIMENTO", "Em atendimento")), true, true, false);
 	}
 
 	static ProcedimentoCirurgicoResponse procedimento(String situacao) {
 		return new ProcedimentoCirurgicoResponse(40L, MARIA, DR_JOAO, "Apendicectomia",
 				new CodigoDescricao("URGENCIA", "Urgência"), new SalaCirurgicaResumo(5L, "Sala 1"),
 				LocalDateTime.of(2030, 3, 10, 8, 0), 90, LocalDateTime.of(2030, 3, 10, 9, 30), null, null,
-				new CodigoDescricao(situacao, situacao), null, null, null);
+				new CodigoDescricao(situacao, situacao), null, null, null,
+				List.of(new CodigoDescricao("EM_ANDAMENTO", "Em andamento"), new CodigoDescricao("CANCELADO", "Cancelado")),
+				true, false);
 	}
 
 	static SalaCirurgicaResponse sala(boolean ativa) {

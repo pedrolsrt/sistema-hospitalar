@@ -25,7 +25,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/emergencias")
 @Tag(name = "Emergências", description = "Atendimentos de emergência. Situações: AGUARDANDO_AVALIACAO -> "
-		+ "EM_ATENDIMENTO -> CONCLUIDO. A prioridade pode ser definida na chegada ou na avaliação e é exigida para iniciar.")
+		+ "EM_ATENDIMENTO -> CONCLUIDO. A prioridade pode ser definida na chegada ou na avaliação e é exigida para iniciar. "
+		+ "Toda resposta de emergência informa as próximas situações possíveis (proximasSituacoes) e se é possível "
+		+ "iniciar o atendimento (permiteIniciar: aguardando avaliação e com prioridade definida), definir a "
+		+ "prioridade (permiteDefinirPrioridade) e registrar observações (permiteRegistrarObservacoes), para o "
+		+ "cliente oferecer só as ações válidas.")
 public class AtendimentoEmergenciaController {
 
 	private final AtendimentoEmergenciaService service;
@@ -84,7 +88,8 @@ public class AtendimentoEmergenciaController {
 	}
 
 	@PatchMapping("/{id}/iniciar")
-	@Operation(summary = "Inicia o atendimento")
+	@Operation(summary = "Inicia o atendimento", description = "Exige o atendimento aguardando avaliação e a "
+			+ "prioridade definida, as mesmas condições informadas em permiteIniciar.")
 	@ApiResponse(responseCode = "200", description = "Atendimento iniciado")
 	@ApiResponse(responseCode = "404", description = "Atendimento não encontrado")
 	@ApiResponse(responseCode = "409", description = "O atendimento não está aguardando avaliação")

@@ -275,4 +275,25 @@ class ProcedimentoCirurgicoTest {
 		assertThat(procedimento.getObservacoesPosOperatorias()).isNull();
 	}
 
+	private static boolean executaSemErro(Runnable acao) {
+		try {
+			acao.run();
+			return true;
+		} catch (RegraNegocioException erro) {
+			return false;
+		}
+	}
+
+	// As permissões informam a tela; os métodos de registro aplicam a regra. Os dois precisam concordar.
+	@ParameterizedTest
+	@EnumSource(SituacaoProcedimento.class)
+	void permissoesDeObservacoesConcordamComOsRegistros(SituacaoProcedimento situacao) {
+		ProcedimentoCirurgico procedimento = procedimentoEm(situacao);
+
+		assertThat(executaSemErro(() -> procedimento.registrarObservacoesPreOperatorias("Jejum de 8 horas.")))
+				.isEqualTo(situacao.permiteObservacoesPreOperatorias());
+		assertThat(executaSemErro(() -> procedimento.registrarObservacoesPosOperatorias("Sem intercorrências.")))
+				.isEqualTo(situacao.permiteObservacoesPosOperatorias());
+	}
+
 }

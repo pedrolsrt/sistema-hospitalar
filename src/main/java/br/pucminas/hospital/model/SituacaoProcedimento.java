@@ -28,6 +28,14 @@ public enum SituacaoProcedimento implements SituacaoAtendimento<SituacaoProcedim
 		};
 	}
 
+	/**
+	 * As observações pré-operatórias não têm restrição de situação: podem ser registradas ou corrigidas a
+	 * qualquer momento. O método existe para a API informar a tela, como faz com as pós-operatórias.
+	 */
+	public boolean permiteObservacoesPreOperatorias() {
+		return true;
+	}
+
 	public boolean permiteObservacoesPosOperatorias() {
 		return this == EM_ANDAMENTO || this == CONCLUIDO;
 	}

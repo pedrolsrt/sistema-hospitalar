@@ -172,14 +172,23 @@ class FluxoCompletoIntegracaoTest {
 		long emergencia = criar("/emergencias", "{\"pacienteId\": %d, \"profissionalId\": %d}".formatted(maria, clinico));
 		String fila = chamar(get("/emergencias/fila"), null, 200);
 		assertThat(JsonPath.<List<Integer>>read(fila, "$[*].id")).containsExactly((int) emergencia);
+		assertThat(JsonPath.<List<String>>read(fila, "$[0].proximasSituacoes[*].codigo")).containsExactly("EM_ATENDIMENTO");
+		assertThat(JsonPath.<Boolean>read(fila, "$[0].permiteIniciar")).isFalse();
+		assertThat(JsonPath.<Boolean>read(fila, "$[0].permiteDefinirPrioridade")).isTrue();
+		assertThat(JsonPath.<Boolean>read(fila, "$[0].permiteRegistrarObservacoes")).isFalse();
 		chamar(patch("/emergencias/" + emergencia + "/iniciar"), null, 422);
 		chamar(patch("/emergencias/" + emergencia + "/registrar-observacoes"), "{\"texto\": \"Sutura.\"}", 422);
-		chamar(patch("/emergencias/" + emergencia + "/definir-prioridade"), "{\"prioridade\": \"ALTA\"}", 200);
+		String triada = chamar(patch("/emergencias/" + emergencia + "/definir-prioridade"),
+				"{\"prioridade\": \"ALTA\"}", 200);
+		assertThat(JsonPath.<Boolean>read(triada, "$.permiteIniciar")).isTrue();
 		chamar(patch("/emergencias/" + emergencia + "/iniciar"), null, 200);
 		String observacoesDaEmergencia = chamar(patch("/emergencias/" + emergencia + "/registrar-observacoes"),
 				"{\"texto\": \"Sutura no antebraço.\"}", 200);
 		assertThat(campo(observacoesDaEmergencia, "$.observacoes")).isEqualTo("Sutura no antebraço.");
-		chamar(patch("/emergencias/" + emergencia + "/concluir"), null, 200);
+		String emergenciaConcluida = chamar(patch("/emergencias/" + emergencia + "/concluir"), null, 200);
+		assertThat(JsonPath.<List<Object>>read(emergenciaConcluida, "$.proximasSituacoes")).isEmpty();
+		assertThat(JsonPath.<Boolean>read(emergenciaConcluida, "$.permiteDefinirPrioridade")).isFalse();
+		assertThat(JsonPath.<Boolean>read(emergenciaConcluida, "$.permiteRegistrarObservacoes")).isTrue();
 		assertThat(JsonPath.<List<Object>>read(chamar(get("/emergencias/fila"), null, 200), "$")).isEmpty();
 
 		// Salas cirúrgicas --------------------------------------------------------------------------------
@@ -204,8 +213,12 @@ class FluxoCompletoIntegracaoTest {
 				 "salaCirurgicaId": %d, "dataHoraPrevista": "2099-02-01T08:00:00", "duracaoPrevistaMinutos": 120,
 				 "observacoesPreOperatorias": "Jejum de 8 horas."}
 				""".formatted(maria, cirurgiao, sala1));
-		assertThat(campo(chamar(get("/procedimentos/" + procedimento), null, 200), "$.dataHoraFimPrevista"))
-				.isEqualTo("2099-02-01T10:00:00");
+		String agendado = chamar(get("/procedimentos/" + procedimento), null, 200);
+		assertThat(campo(agendado, "$.dataHoraFimPrevista")).isEqualTo("2099-02-01T10:00:00");
+		assertThat(JsonPath.<List<String>>read(agendado, "$.proximasSituacoes[*].codigo"))
+				.containsExactly("EM_ANDAMENTO", "CANCELADO");
+		assertThat(JsonPath.<Boolean>read(agendado, "$.permiteRegistrarObservacoesPreOperatorias")).isTrue();
+		assertThat(JsonPath.<Boolean>read(agendado, "$.permiteRegistrarObservacoesPosOperatorias")).isFalse();
 
 		// Disponibilidade: a sala, o cirurgião e o paciente ficam ocupados das 08:00 às 10:00.
 		long jose = criar("/pacientes", """

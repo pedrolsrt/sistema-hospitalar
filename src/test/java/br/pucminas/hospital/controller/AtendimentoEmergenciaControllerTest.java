@@ -89,7 +89,12 @@ class AtendimentoEmergenciaControllerTest {
 		when(service.iniciar(30L)).thenReturn(Exemplos.emergencia("EM_ATENDIMENTO"));
 		when(service.concluir(30L)).thenReturn(Exemplos.emergencia("CONCLUIDO"));
 
-		mvc.perform(get("/emergencias/30")).andExpect(status().isOk());
+		mvc.perform(get("/emergencias/30"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.proximasSituacoes[0].codigo").value("EM_ATENDIMENTO"))
+				.andExpect(jsonPath("$.permiteIniciar").value(true))
+				.andExpect(jsonPath("$.permiteDefinirPrioridade").value(true))
+				.andExpect(jsonPath("$.permiteRegistrarObservacoes").value(false));
 		mvc.perform(patch("/emergencias/30/definir-prioridade").contentType(MediaType.APPLICATION_JSON)
 				.content("{\"prioridade\": \"ALTA\"}"))
 				.andExpect(status().isOk());

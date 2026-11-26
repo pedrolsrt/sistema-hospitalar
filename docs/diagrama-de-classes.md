@@ -433,6 +433,8 @@ classDiagram
     class AtendimentoEmergencia {
         -LocalDateTime dataHoraChegada
         +definirPrioridade(PrioridadeEmergencia) void
+        +permiteDefinirPrioridade() boolean
+        +permiteIniciar() boolean
         +iniciar() void
         +concluir() void
     }
@@ -522,6 +524,7 @@ classDiagram
         EM_ATENDIMENTO
         CONCLUIDO
         -String descricao
+        +permiteRegistrarObservacoes() boolean
     }
 
     class SituacaoProcedimento {
@@ -531,6 +534,7 @@ classDiagram
         CONCLUIDO
         CANCELADO
         -String descricao
+        +permiteObservacoesPreOperatorias() boolean
         +permiteObservacoesPosOperatorias() boolean
     }
 

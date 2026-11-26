@@ -27,7 +27,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/procedimentos")
 @Tag(name = "Procedimentos cirúrgicos", description = "Procedimentos realizados por cirurgiões. Situações: AGENDADO -> "
-		+ "EM_ANDAMENTO -> CONCLUIDO; só o agendado pode ser cancelado, e não se conclui sem ter iniciado.")
+		+ "EM_ANDAMENTO -> CONCLUIDO; só o agendado pode ser cancelado, e não se conclui sem ter iniciado. Toda "
+		+ "resposta de procedimento informa as próximas situações possíveis (proximasSituacoes) e se é possível "
+		+ "registrar as observações pré-operatórias (permiteRegistrarObservacoesPreOperatorias) e pós-operatórias "
+		+ "(permiteRegistrarObservacoesPosOperatorias), para o cliente oferecer só as ações válidas.")
 public class ProcedimentoCirurgicoController {
 
 	private final ProcedimentoCirurgicoService service;

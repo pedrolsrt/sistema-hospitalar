@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import br.pucminas.hospital.dto.AtendimentoEmergenciaRequest;
 import br.pucminas.hospital.dto.AtendimentoEmergenciaResponse;
+import br.pucminas.hospital.dto.CodigoDescricao;
 import br.pucminas.hospital.dto.ObservacoesRequest;
 import br.pucminas.hospital.dto.PrioridadeRequest;
 import br.pucminas.hospital.exception.RecursoNaoEncontradoException;
@@ -149,6 +150,38 @@ class AtendimentoEmergenciaServiceTest {
 
 		assertThat(service.iniciar(10L).situacao().codigo()).isEqualTo("EM_ATENDIMENTO");
 		assertThat(service.concluir(10L).situacao().codigo()).isEqualTo("CONCLUIDO");
+	}
+
+	@Test
+	void respostaInformaAsAcoesPossiveisNaSituacao() {
+		salva(PrioridadeEmergencia.ALTA);
+
+		AtendimentoEmergenciaResponse aguardando = service.buscarPorId(10L);
+		assertThat(aguardando.proximasSituacoes()).extracting(CodigoDescricao::codigo).containsExactly("EM_ATENDIMENTO");
+		assertThat(aguardando.permiteIniciar()).isTrue();
+		assertThat(aguardando.permiteDefinirPrioridade()).isTrue();
+		assertThat(aguardando.permiteRegistrarObservacoes()).isFalse();
+
+		AtendimentoEmergenciaResponse emAtendimento = service.iniciar(10L);
+		assertThat(emAtendimento.proximasSituacoes()).extracting(CodigoDescricao::codigo).containsExactly("CONCLUIDO");
+		assertThat(emAtendimento.permiteIniciar()).isFalse();
+		assertThat(emAtendimento.permiteDefinirPrioridade()).isTrue();
+		assertThat(emAtendimento.permiteRegistrarObservacoes()).isTrue();
+
+		AtendimentoEmergenciaResponse concluido = service.concluir(10L);
+		assertThat(concluido.proximasSituacoes()).isEmpty();
+		assertThat(concluido.permiteIniciar()).isFalse();
+		assertThat(concluido.permiteDefinirPrioridade()).isFalse();
+		assertThat(concluido.permiteRegistrarObservacoes()).isTrue();
+	}
+
+	@Test
+	void semPrioridadeARespostaNaoPermiteIniciarAteDefinirAPrioridade() {
+		salva(null);
+
+		assertThat(service.buscarPorId(10L).permiteIniciar()).isFalse();
+		assertThat(service.definirPrioridade(10L, new PrioridadeRequest(PrioridadeEmergencia.ALTA)).permiteIniciar())
+				.isTrue();
 	}
 
 	@Test

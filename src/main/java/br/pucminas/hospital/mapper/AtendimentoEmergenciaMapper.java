@@ -12,7 +12,10 @@ public class AtendimentoEmergenciaMapper {
 		return new AtendimentoEmergenciaResponse(emergencia.getId(), Resumos.de(emergencia.getPaciente()),
 				Resumos.de(emergencia.getProfissionalResponsavel()), CodigoDescricao.de(emergencia.getPrioridade()),
 				emergencia.getDataHoraChegada(), CodigoDescricao.de(emergencia.getSituacao()),
-				emergencia.getObservacoes());
+				emergencia.getObservacoes(),
+				emergencia.getSituacao().getProximasPossiveis().stream().map(CodigoDescricao::de).toList(),
+				emergencia.permiteIniciar(), emergencia.permiteDefinirPrioridade(),
+				emergencia.getSituacao().permiteRegistrarObservacoes());
 	}
 
 }

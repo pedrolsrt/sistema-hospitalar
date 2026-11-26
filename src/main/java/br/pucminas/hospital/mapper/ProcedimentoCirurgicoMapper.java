@@ -16,7 +16,10 @@ public class ProcedimentoCirurgicoMapper {
 				procedimento.getPeriodoPrevisto().fim(), procedimento.getDataHoraInicio(),
 				procedimento.getDataHoraFim(), CodigoDescricao.de(procedimento.getSituacao()),
 				procedimento.getObservacoesPreOperatorias(), procedimento.getObservacoesPosOperatorias(),
-				procedimento.getObservacoes());
+				procedimento.getObservacoes(),
+				procedimento.getSituacao().getProximasPossiveis().stream().map(CodigoDescricao::de).toList(),
+				procedimento.getSituacao().permiteObservacoesPreOperatorias(),
+				procedimento.getSituacao().permiteObservacoesPosOperatorias());
 	}
 
 }

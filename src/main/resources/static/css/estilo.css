@@ -34,6 +34,8 @@
 	--neutro-texto: #44505c;
 	--destaque-fundo: #ece6f7;
 	--destaque-texto: #4b2a85;
+	--prioridade-alta-fundo: #fde2c8;
+	--prioridade-alta-texto: #8a3a00;
 
 	/* Escala de espaçamento: todo margin, padding e gap usa um destes valores. */
 	--e-1: 0.25rem;
@@ -573,9 +575,31 @@ tr.inativo td {
 
 .etiqueta-inativo,
 .etiqueta-encerrada,
-.etiqueta-nao-compareceu {
+.etiqueta-nao-compareceu,
+.etiqueta-sem-prioridade {
 	background: var(--neutro-fundo);
 	color: var(--neutro-texto);
+}
+
+/* Prioridade de emergência: uma cor por nível, da menos para a mais grave. */
+.etiqueta-prioridade-baixa {
+	background: var(--sucesso-fundo);
+	color: var(--sucesso-texto);
+}
+
+.etiqueta-prioridade-moderada {
+	background: var(--alerta-fundo);
+	color: var(--alerta-texto);
+}
+
+.etiqueta-prioridade-alta {
+	background: var(--prioridade-alta-fundo);
+	color: var(--prioridade-alta-texto);
+}
+
+.etiqueta-prioridade-critica {
+	background: var(--perigo-texto);
+	color: var(--cor-superficie);
 }
 
 /* ==========================================================================
