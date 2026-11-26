@@ -9,8 +9,8 @@ export const aqui = path.dirname(fileURLToPath(import.meta.url));
 const docs = path.join(aqui, '..', '..');
 export const padrao = {
   fonte: path.join(docs, 'diagrama-de-classes-completo.mmd'),
-  svg: path.join(docs, 'diagrama-de-classes-sprint2.svg'),
-  png: path.join(docs, 'diagrama-de-classes-sprint2.png'),
+  svg: path.join(docs, 'diagrama-de-classes-sprint3.svg'),
+  png: path.join(docs, 'diagrama-de-classes-sprint3.png'),
 };
 
 const CHROME_WINDOWS = 'C:/Program Files/Google/Chrome/Application/chrome.exe';

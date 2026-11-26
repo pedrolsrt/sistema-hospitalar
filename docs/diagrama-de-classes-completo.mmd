@@ -1,5 +1,5 @@
 ---
-title: Diagrama de Classes - Sistema de Informação Hospitalar (Sprint 2)
+title: Diagrama de Classes - Sistema de Informação Hospitalar (Sprint 3)
 ---
 classDiagram
     direction TB
@@ -104,6 +104,8 @@ classDiagram
         +registrarObservacoes(String) void
         +getDataHoraReferencia()* LocalDateTime
         +getModalidade()* ModalidadeAtendimento
+        +getSituacao()* SituacaoAtendimento
+        +getPrioridade() PrioridadeEmergencia
         +aceitar(VisitanteAtendimento~R~)* R
     }
 
@@ -140,6 +142,7 @@ classDiagram
         +permiteEncaminhar() boolean
         +getAreaAtuacao() AreaAtuacao
         +getAreaEncaminhamento() AreaAtuacao
+        +getPeriodoPrevisto(Duration) Periodo
     }
 
     class ConsultaRotina {
@@ -174,6 +177,8 @@ classDiagram
         +permiteIniciar() boolean
         +iniciar() void
         +concluir() void
+        +registrarObservacoes(String) void
+        +getPrioridade() PrioridadeEmergencia
     }
 
     class PrioridadeEmergencia {
@@ -196,10 +201,13 @@ classDiagram
     }
 
     class ProcedimentoCirurgico {
+        +int DURACAO_MINIMA_MINUTOS$
+        +int DURACAO_MAXIMA_MINUTOS$
         -String descricao
         -String observacoesPreOperatorias
         -String observacoesPosOperatorias
         -LocalDateTime dataHoraPrevista
+        -int duracaoPrevistaMinutos
         -LocalDateTime dataHoraInicio
         -LocalDateTime dataHoraFim
         +iniciar(LocalDateTime) void
@@ -207,6 +215,7 @@ classDiagram
         +cancelar() void
         +registrarObservacoesPreOperatorias(String) void
         +registrarObservacoesPosOperatorias(String) void
+        +getPeriodoPrevisto() Periodo
     }
 
     class TipoCirurgia {
@@ -228,12 +237,28 @@ classDiagram
         +permiteObservacoesPosOperatorias() boolean
     }
 
+    class SalaCirurgica {
+        -Long id
+        -String identificacao
+        -boolean ativa
+        +inativar() void
+        +reativar() void
+    }
+
     class Internacao {
         -LocalDate dataEntrada
         -LocalDate dataPrevistaAlta
         -LocalDate dataEfetivaAlta
         +darAlta(LocalDate) void
         +isAtiva() boolean
+        +getSituacao() SituacaoInternacao
+    }
+
+    class SituacaoInternacao {
+        <<enumeration>>
+        ATIVA
+        ENCERRADA
+        -String descricao
     }
 
     class Quarto {
@@ -266,6 +291,43 @@ classDiagram
         OCUPADO
     }
 
+    class Periodo {
+        <<record>>
+        -LocalDateTime inicio
+        -LocalDateTime fim
+        +de(LocalDateTime, Duration)$ Periodo
+        +sobrepoe(Periodo) boolean
+        +descricao() String
+    }
+
+    class FiltroAtendimentos {
+        <<record>>
+        -Long pacienteId
+        -Long profissionalId
+        -String situacao
+        -LocalDate inicio
+        -LocalDate fim
+        +situacoesReconhecidas()$ Set~String~
+        +comoPredicado() Predicate~Atendimento~
+        +doPaciente(Long)$ Predicate~Atendimento~
+        +doProfissional(Long)$ Predicate~Atendimento~
+        +naSituacao(String)$ Predicate~Atendimento~
+        +daModalidade(ModalidadeAtendimento)$ Predicate~Atendimento~
+        +aPartirDe(LocalDate)$ Predicate~Atendimento~
+        +ate(LocalDate)$ Predicate~Atendimento~
+    }
+
+    class OrdenacaoAtendimentos {
+        <<enumeration>>
+        DATA
+        DATA_DECRESCENTE
+        PACIENTE
+        PRIORIDADE
+        -String descricao
+        -Comparator~Atendimento~ comparador
+        +comparador() Comparator~Atendimento~
+    }
+
     class Descritivel {
         <<interface>>
         +name()* String
@@ -278,6 +340,38 @@ classDiagram
         +podeMudarPara(S) boolean
         +isFinal() boolean
         +ativas(Class~S~)$ Set~S~
+    }
+
+    class RegraNegocioException {
+        <<exception>>
+    }
+
+    class RecursoNaoEncontradoException {
+        <<exception>>
+    }
+
+    class DadoJaCadastradoException {
+        <<exception>>
+    }
+
+    class TransicaoSituacaoInvalidaException {
+        <<exception>>
+    }
+
+    class DataInvalidaException {
+        <<exception>>
+    }
+
+    class QuartoSemVagasException {
+        <<exception>>
+    }
+
+    class AtendimentoIndisponivelException {
+        <<exception>>
+    }
+
+    class ProfissionalIncompativelException {
+        <<exception>>
     }
 
     Pessoa <|-- Paciente
@@ -294,6 +388,8 @@ classDiagram
     Paciente "1" <-- "0..*" Atendimento : paciente
     ProfissionalSaude "1" <-- "0..*" Atendimento : profissionalResponsavel
     Atendimento ..> ModalidadeAtendimento : getModalidade()
+    Atendimento ..> SituacaoAtendimento : getSituacao()
+    Atendimento ..> PrioridadeEmergencia : getPrioridade()
     Atendimento ..> VisitanteAtendimento : aceitar()
     Atendimento <|-- Consulta
     Atendimento <|-- AtendimentoEmergencia
@@ -302,19 +398,27 @@ classDiagram
     Consulta <|-- ConsultaRotina
     Consulta <|-- ConsultaEspecializada
     Consulta "0..*" --> "1" SituacaoConsulta : situacao
+    Consulta ..> Periodo : getPeriodoPrevisto()
     ConsultaRotina "0..*" --> "0..1" AreaAtuacao : areaEncaminhamento
     ConsultaEspecializada "0..*" --> "1" AreaAtuacao : areaAtuacao
     AtendimentoEmergencia "0..*" --> "0..1" PrioridadeEmergencia : prioridade
     AtendimentoEmergencia "0..*" --> "1" SituacaoEmergencia : situacao
     ProcedimentoCirurgico "0..*" --> "1" TipoCirurgia : tipoCirurgia
     ProcedimentoCirurgico "0..*" --> "1" SituacaoProcedimento : situacao
+    ProcedimentoCirurgico "0..*" --> "1" SalaCirurgica : salaCirurgica
+    ProcedimentoCirurgico ..> Periodo : getPeriodoPrevisto()
     Internacao "0..*" --o "1" Quarto : quarto
+    Internacao ..> SituacaoInternacao : getSituacao()
     Quarto "0..*" --> "1" TipoQuarto : tipo
     Quarto ..> SituacaoQuarto : getSituacao()
+    FiltroAtendimentos "0..*" --> "0..1" ModalidadeAtendimento : modalidade
+    FiltroAtendimentos ..> Atendimento : comoPredicado()
+    OrdenacaoAtendimentos ..> Atendimento : comparador()
 
     SituacaoConsulta ..|> SituacaoAtendimento
     SituacaoEmergencia ..|> SituacaoAtendimento
     SituacaoProcedimento ..|> SituacaoAtendimento
+    SituacaoInternacao ..|> SituacaoAtendimento
     SituacaoAtendimento --|> Descritivel
     CategoriaProfissional ..|> Descritivel
     AreaAtuacao ..|> Descritivel
@@ -322,3 +426,12 @@ classDiagram
     PrioridadeEmergencia ..|> Descritivel
     TipoCirurgia ..|> Descritivel
     TipoQuarto ..|> Descritivel
+    OrdenacaoAtendimentos ..|> Descritivel
+
+    RegraNegocioException <|-- RecursoNaoEncontradoException
+    RegraNegocioException <|-- DadoJaCadastradoException
+    RegraNegocioException <|-- TransicaoSituacaoInvalidaException
+    RegraNegocioException <|-- DataInvalidaException
+    RegraNegocioException <|-- QuartoSemVagasException
+    RegraNegocioException <|-- AtendimentoIndisponivelException
+    RegraNegocioException <|-- ProfissionalIncompativelException
